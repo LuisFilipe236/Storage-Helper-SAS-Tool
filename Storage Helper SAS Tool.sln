@@ -7,7 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Storage Helper SAS Tool", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6ED92D99-36BF-4943-83A9-907DFDDF0B04}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\..\Desktop\DOWNLOAD MSI INSTALLER.md = ..\..\..\Desktop\DOWNLOAD MSI INSTALLER.md
 		LICENSE.md = LICENSE.md
 		README.md = README.md
 	EndProjectSection
