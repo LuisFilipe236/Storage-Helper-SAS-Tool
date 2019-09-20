@@ -25,8 +25,8 @@
 		<a href="./"><img alt="GitHub Releases (by Asset)" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.2/total?label=downloads"></a>
 		<a href="1.txt"><img alt="GitHub Releases (by Asset)" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.2/1.txt?label=downloads"></a>
 //-->
-		<a href="Storage.Helper.SAS.Tool.Installer.msi"><img alt="GitHub Releases (by Asset)" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.2/total?label=downloads"></a>
-		<a href="Storage.Helper.SAS.Tool.Installer.msi"><img alt="GitHub Releases (by Asset)" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.2/Storage.Helper.SAS.Tool.Installer.msi?label=downloads"></a>
+		<a href="Storage.Helper.SAS.Tool.Installer.msi"><img alt="GitHub Releases (by Asset)" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.2/total?label=downloads_total"></a>
+		<a href="Storage.Helper.SAS.Tool.Installer.msi"><img alt="GitHub Releases (by Asset)" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.2/Storage.Helper.SAS.Tool.Installer.msi?label=downloads_latest_msi"></a>
     </td>
   </tr>
 </table>
@@ -64,19 +64,5 @@ Developed by Azure Storage Support Team to test proposes only.
 
 Click on the MSI last version counter above to download the MSI installer for Windows.
 
-[![analytics](http://www.google-analytics.com/collect?v=1&t=pageview&_s=1&dl=https%3A%2F%2Fgithub.com%2FLuisFilipe236%2FStorage-Helper-SAS-Tool&_u=MAC~&cid=1757014354.1393964045&tid=UA-148384630-1)]()
 
-
-https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.2/1.txt
-
-
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-148384630-1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'UA-148384630-1');
-</script>
 
