@@ -471,12 +471,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_3C86C4D977834E48860253124F0C7618"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_3CC78882B93987FF750E03C64479645B"
         "OwnerKey" = "8:_FAC7641E3BCFD19132EE9C5F7E919429"
         "MsmSig" = "8:_UNDEFINED"
@@ -1457,6 +1451,12 @@
         {
         "MsmKey" = "8:_77CC8F351AF32E180A14E7BC0FDDA09A"
         "OwnerKey" = "8:_7AB94536F4064E6AB2F9C31B4096DD55"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_780C9CB670714D949F7A641424CB3A9F"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -3116,6 +3116,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.6.1"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.6.1 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.6.1"
+                    }
+                }
             }
         }
         "Release"
@@ -4428,26 +4436,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_3C86C4D977834E48860253124F0C7618"
-            {
-            "SourcePath" = "8:DOWNLOAD MSI INSTALLER.md"
-            "TargetName" = "8:DOWNLOAD MSI INSTALLER.md"
-            "Tag" = "8:"
-            "Folder" = "8:_06F2B83434CA43678065566792A3D270"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_3CC78882B93987FF750E03C64479645B"
@@ -5998,6 +5986,26 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_780C9CB670714D949F7A641424CB3A9F"
+            {
+            "SourcePath" = "8:_DOWNLOAD MSI INSTALLER.md"
+            "TargetName" = "8:_DOWNLOAD MSI INSTALLER.md"
+            "Tag" = "8:"
+            "Folder" = "8:_06F2B83434CA43678065566792A3D270"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_787502957896A8EF13833878340F4668"
@@ -8962,7 +8970,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Storage Helper SAS Tool"
         "ProductCode" = "8:{BFE36CC2-3F57-42F7-96D1-6F6B01812091}"
-        "PackageCode" = "8:{6C3982FF-7658-4E60-88E3-B15FB5376316}"
+        "PackageCode" = "8:{8B2374B0-5282-48BC-8658-A814C862B2A2}"
         "UpgradeCode" = "8:{969F440E-6AA5-4FF7-A354-8C02A48C2261}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
