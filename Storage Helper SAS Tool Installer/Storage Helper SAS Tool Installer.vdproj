@@ -9092,7 +9092,7 @@
         {
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_7C5698846ED445F19E1B8BCE8C1373F6"
             {
-            "Name" = "8:Storage Helper SAS Tools"
+            "Name" = "8:Storage Helper SAS Tool"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
@@ -9106,7 +9106,7 @@
             }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_AB2E8E72ED5B453EAD11A4A7D5E94FEF"
             {
-            "Name" = "8:Storage Helper SAS Tools"
+            "Name" = "8:Storage Helper SAS Tool"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
