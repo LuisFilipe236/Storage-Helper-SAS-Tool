@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Text;
 
+// Storage SDK v11.x.x
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.Storage.File;
 using Microsoft.Azure.Storage.Queue;
-//using Microsoft.Azure.Cosmos.Table;    // Used with full path library - many Storage definitions ambiguos with Cosmos - 
+
 
 namespace Storage_Helper_SAS_Tool
 {
@@ -14,6 +16,7 @@ namespace Storage_Helper_SAS_Tool
     /// You can sign a SAS in one of two ways:
     ///   - With a key created using Azure Active Directory(Azure AD) credentials. A SAS signed with Azure AD credentials is a user delegation SAS.
     ///   - With the storage account key. Both a service SAS and an account SAS are signed with the storage account key.
+    /// Create a user delegation SAS
     /// https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-user-delegation-sas-create-dotnet#example-get-a-user-delegation-sas
     /// 
     /// Create an account SAS
@@ -24,12 +27,9 @@ namespace Storage_Helper_SAS_Tool
     ///    SharedAccessBlobPolicy
     ///    SharedAccessFilePolicy 
     ///    SharedAccessQueuePolicy
-    ///    SharedAccessTablePolicy  // Microsoft.Azure.CosmosDB.Table
+    ///    SharedAccessTablePolicy  // Microsoft.Azure.Cosmos.Table
     /// https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-service-sas-create-dotnet#create-a-service-sas-for-a-blob-container
-    /// 
-    /// Create a user delegation SAS 
-    /// https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-user-delegation-sas-create-dotnet#example-get-a-user-delegation-sas
-    /// 
+    ///  
     /// Storage Accounts - List Account SAS
     /// https://docs.microsoft.com/en-us/rest/api/storagerp/storageaccounts/listaccountsas
     /// 
@@ -37,16 +37,20 @@ namespace Storage_Helper_SAS_Tool
 
     class SAS_Create_v11
     {
+
+        //---------------------------------------------------------------------------------------------------------------------
+        //-------------------- Account SAS methods
+        //---------------------------------------------------------------------------------------------------------------------
         /// <summary>
         /// 
         /// </summary>
         /// <param name="textBoxAccountName"></param>
         /// <param name="textBoxAccountKey1"></param>
         /// <param name="BoxAuthResults"></param>
-        public static void Regenerate_AccountSAS(TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox BoxAuthResults, string ss)
+        public static bool Regenerate_AccountSAS(TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox BoxAuthResults, string ss)
         {
             string sas = Get_AccountSAS(textBoxAccountName.Text, textBoxAccountKey1.Text);
-            if (sas == "") return;
+            if (sas == "") return false;
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Account SAS token:\n";
@@ -69,13 +73,15 @@ namespace Storage_Helper_SAS_Tool
                 BoxAuthResults.Text += "Table URI:\n" + "https://" + textBoxAccountName.Text + ".table.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
+
+            return true;
         }
 
 
 
-        public static void Regenerate_ServiceSAS_Container(Label labelContainerName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxContainerName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
+        public static bool Regenerate_ServiceSAS_Container(Label labelContainerName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxContainerName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
         {
-            if (Utils.StringEmpty(labelContainerName, textBoxContainerName.Text, "Missing Container Name", "Error")) { SAS_Utils.SAS.storageAccountName.s = false; return; }
+            if (Utils.StringEmpty(labelContainerName, textBoxContainerName.Text, "Missing Container Name", "Error")) { SAS_Utils.SAS.storageAccountName.s = false; return false; }
 
             string sas = Get_ServiceSAS_Container(textBoxAccountName.Text, textBoxAccountKey1.Text, textBoxContainerName.Text, textBoxPolicyName.Text);
 
@@ -90,14 +96,16 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Container URI:\n" + "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + Uri.UnescapeDataString(sas) + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
+
+            return true;
         }
 
 
 
-        public static void Regenerate_ServiceSAS_Blob(Label labelContainerName, Label labelBlobName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxContainerName, TextBox textBoxBlobName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
+        public static bool Regenerate_ServiceSAS_Blob(Label labelContainerName, Label labelBlobName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxContainerName, TextBox textBoxBlobName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
         {
-            if (Utils.StringEmpty(labelContainerName, textBoxContainerName.Text, "Missing Container Name", "Error")) { SAS_Utils.SAS.containerName.s = false; return; }
-            if (Utils.StringEmpty(labelBlobName, textBoxBlobName.Text, "Missing Blob Name", "Error")) { SAS_Utils.SAS.blobName.s = false; return; }
+            if (Utils.StringEmpty(labelContainerName, textBoxContainerName.Text, "Missing Container Name", "Error")) { SAS_Utils.SAS.containerName.s = false; return false; }
+            if (Utils.StringEmpty(labelBlobName, textBoxBlobName.Text, "Missing Blob Name", "Error")) { SAS_Utils.SAS.blobName.s = false; return false; }
 
             string sas = Get_ServiceSAS_Blob(textBoxAccountName.Text, textBoxAccountKey1.Text, textBoxContainerName.Text, textBoxBlobName.Text, textBoxPolicyName.Text);
 
@@ -112,12 +120,15 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Blob URI:\n" + "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + "/" + textBoxBlobName.Text + Uri.UnescapeDataString(sas) + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
+
+            return true;
         }
 
 
-        public static void Regenerate_ServiceSAS_Queue(Label labelQueueName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxQueueName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
+
+        public static bool Regenerate_ServiceSAS_Queue(Label labelQueueName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxQueueName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
         {
-            if (Utils.StringEmpty(labelQueueName, textBoxQueueName.Text, "Missing Queue Name", "Error")) { SAS_Utils.SAS.queueName.s = false; return; }
+            if (Utils.StringEmpty(labelQueueName, textBoxQueueName.Text, "Missing Queue Name", "Error")) { SAS_Utils.SAS.queueName.s = false; return false; }
 
             string sas = Get_ServiceSAS_Queue(textBoxAccountName.Text, textBoxAccountKey1.Text, textBoxQueueName.Text, textBoxPolicyName.Text);
 
@@ -132,13 +143,16 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Queue URI:\n" + "https://" + textBoxAccountName.Text + ".queue.core.windows.net/" + textBoxQueueName.Text + Uri.UnescapeDataString(sas) + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
+
+            return true;
         }
 
 
-        public static void Regenerate_ServiceSAS_File(Label labelShareName, Label labelFileName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxShareName, TextBox textBoxFileName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
+
+        public static bool Regenerate_ServiceSAS_File(Label labelShareName, Label labelFileName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxShareName, TextBox textBoxFileName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
         {
-            if (Utils.StringEmpty(labelShareName, textBoxShareName.Text, "Missing Share Name", "Error")) { SAS_Utils.SAS.shareName.s = false; return; }
-            if (Utils.StringEmpty(labelFileName, textBoxFileName.Text, "Missing File Name", "Error")) { SAS_Utils.SAS.fileName.s = false; return; }
+            if (Utils.StringEmpty(labelShareName, textBoxShareName.Text, "Missing Share Name", "Error")) { SAS_Utils.SAS.shareName.s = false; return false; }
+            if (Utils.StringEmpty(labelFileName, textBoxFileName.Text, "Missing File Name", "Error")) { SAS_Utils.SAS.fileName.s = false; return false; }
 
             string sas = Get_ServiceSAS_File(textBoxAccountName.Text, textBoxAccountKey1.Text, textBoxShareName.Text, textBoxFileName.Text, textBoxPolicyName.Text);
 
@@ -154,13 +168,15 @@ namespace Storage_Helper_SAS_Tool
 
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
+
+            return true;
         }
 
 
 
-        public static void Regenerate_ServiceSAS_Share(Label labelShareName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxShareName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
+        public static bool Regenerate_ServiceSAS_Share(Label labelShareName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxShareName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
         {
-            if (Utils.StringEmpty(labelShareName, textBoxShareName.Text, "Missing Share Name", "Error")) { SAS_Utils.SAS.shareName.s = false; return; }
+            if (Utils.StringEmpty(labelShareName, textBoxShareName.Text, "Missing Share Name", "Error")) { SAS_Utils.SAS.shareName.s = false; return false; }
 
             string sas = Get_ServiceSAS_Share(textBoxAccountName.Text, textBoxAccountKey1.Text, textBoxShareName.Text, textBoxPolicyName.Text);
 
@@ -175,48 +191,30 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Share URI:\n" + "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + textBoxShareName.Text + Uri.UnescapeDataString(sas) + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
-        }
 
-
-
-        public static void Regenerate_ServiceSAS_Table(Label labelTableName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxTableName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
-        {
-            if (Utils.StringEmpty(labelTableName, textBoxTableName.Text, "Missing Table Name", "Error")) return;
-
-            string sas = Get_ServiceSAS_Table(textBoxAccountName.Text, textBoxAccountKey1.Text, textBoxTableName.Text, textBoxPolicyName.Text);
-
-            BoxAuthResults.Text = "\n\n";
-            BoxAuthResults.Text = "Regenerated Service SAS - Table:\n";
-            BoxAuthResults.Text += sas + "\n\n";
-
-            BoxAuthResults.Text += "Regenerated Service SAS URI - Table (Unescaped):\n";
-            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n\n\n";
-
-
-            BoxAuthResults.Text += "Table URI:\n" + "https://" + textBoxAccountName.Text + ".table.core.windows.net/" + textBoxTableName.Text + Uri.UnescapeDataString(sas) + "\n\n";
-
-
-            SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
+            return true;
         }
 
 
 
 
 
-        public static void Regenerate_ServiceSAS_BlobSnapshot(TextBox BoxAuthResults)
+
+        public static bool Regenerate_ServiceSAS_BlobSnapshot(TextBox BoxAuthResults)
         {
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Service SAS URI - Blob Snapshot\n";
             BoxAuthResults.Text += "  --> TODO - Not implemeted for Blob Snapshots <--\n";
+
+            return true;
         }
 
 
 
 
         //---------------------------------------------------------------------------------------------------------------------
+        //-------------------- Set Permissions methods
         //---------------------------------------------------------------------------------------------------------------------
-        //---------------------------------------------------------------------------------------------------------------------
-
 
         /// <summary>
         /// Set Permissions From String, for Account SAS
@@ -240,6 +238,113 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
+
+        /// <summary>
+        /// Set Permissions From String, for Service SAS - Containers
+        ///      'rwdacl'
+        /// </summary>
+        /// <returns></returns>
+        private static SharedAccessBlobPermissions Set_PermissionsFromStr_ServiceSAS_Container()
+        {
+            string sp = SAS_Utils.SAS.sp.v;
+            SharedAccessBlobPermissions Permissions = 0;
+            Permissions |= (sp.IndexOf("r") != -1) ? SharedAccessBlobPermissions.Read : 0;
+            Permissions |= (sp.IndexOf("w") != -1) ? SharedAccessBlobPermissions.Write : 0;
+            Permissions |= (sp.IndexOf("d") != -1) ? SharedAccessBlobPermissions.Delete : 0;
+            Permissions |= (sp.IndexOf("a") != -1) ? SharedAccessBlobPermissions.Add : 0;
+            Permissions |= (sp.IndexOf("c") != -1) ? SharedAccessBlobPermissions.Create : 0;
+            Permissions |= (sp.IndexOf("l") != -1) ? SharedAccessBlobPermissions.List : 0;
+
+            return Permissions;
+        }
+
+
+
+        /// <summary>
+        /// Set Permissions From String, for Service SAS - Blobs
+        ///      'rwdac'
+        /// </summary>
+        /// <returns></returns>
+        private static SharedAccessBlobPermissions Set_PermissionsFromStr_ServiceSAS_Blob()
+        {
+            string sp = SAS_Utils.SAS.sp.v;
+            SharedAccessBlobPermissions Permissions = 0;
+            Permissions |= (sp.IndexOf("r") != -1) ? SharedAccessBlobPermissions.Read : 0;
+            Permissions |= (sp.IndexOf("w") != -1) ? SharedAccessBlobPermissions.Write : 0;
+            Permissions |= (sp.IndexOf("d") != -1) ? SharedAccessBlobPermissions.Delete : 0;
+            Permissions |= (sp.IndexOf("a") != -1) ? SharedAccessBlobPermissions.Add : 0;
+            Permissions |= (sp.IndexOf("c") != -1) ? SharedAccessBlobPermissions.Create : 0;
+
+            return Permissions;
+        }
+
+
+
+        /// <summary>
+        /// Set Permissions From String, for Service SAS - Files
+        ///      'rwdc'
+        /// </summary>
+        /// <returns></returns>
+        private static SharedAccessFilePermissions Set_PermissionsFromStr_ServiceSAS_Files()
+        {
+            string sp = SAS_Utils.SAS.sp.v;
+            SharedAccessFilePermissions Permissions = 0;
+            Permissions |= (sp.IndexOf("r") != -1) ? SharedAccessFilePermissions.Read : 0;
+            Permissions |= (sp.IndexOf("w") != -1) ? SharedAccessFilePermissions.Write : 0;
+            Permissions |= (sp.IndexOf("d") != -1) ? SharedAccessFilePermissions.Delete : 0;
+            Permissions |= (sp.IndexOf("c") != -1) ? SharedAccessFilePermissions.Create : 0;
+
+            return Permissions;
+        }
+
+
+
+        /// <summary>
+        /// Set Permissions From String, for Service SAS - Shares
+        ///      'rwdcl'
+        /// </summary>
+        /// <returns></returns>
+        private static SharedAccessFilePermissions Set_PermissionsFromStr_ServiceSAS_Shares()
+        {
+            string sp = SAS_Utils.SAS.sp.v;
+            SharedAccessFilePermissions Permissions = 0;
+            Permissions |= (sp.IndexOf("r") != -1) ? SharedAccessFilePermissions.Read : 0;
+            Permissions |= (sp.IndexOf("w") != -1) ? SharedAccessFilePermissions.Write : 0;
+            Permissions |= (sp.IndexOf("d") != -1) ? SharedAccessFilePermissions.Delete : 0;
+            Permissions |= (sp.IndexOf("c") != -1) ? SharedAccessFilePermissions.Create : 0;
+            Permissions |= (sp.IndexOf("l") != -1) ? SharedAccessFilePermissions.List : 0;
+
+            return Permissions;
+        }
+
+
+
+        /// <summary>
+        /// Set Permissions From String, for Service SAS - Queues
+        ///      'arup'
+        /// </summary>
+        /// <returns></returns>
+        private static SharedAccessQueuePermissions Set_PermissionsFromStr_ServiceSAS_Queues()
+        {
+            string sp = SAS_Utils.SAS.sp.v;
+            SharedAccessQueuePermissions Permissions = 0;
+            Permissions |= (sp.IndexOf("r") != -1) ? SharedAccessQueuePermissions.Read : 0;
+            Permissions |= (sp.IndexOf("a") != -1) ? SharedAccessQueuePermissions.Add : 0;
+            Permissions |= (sp.IndexOf("u") != -1) ? SharedAccessQueuePermissions.Update : 0;
+            Permissions |= (sp.IndexOf("p") != -1) ? SharedAccessQueuePermissions.ProcessMessages : 0;
+
+            return Permissions;
+        }
+
+
+
+
+
+
+        //---------------------------------------------------------------------------------------------------------------------
+        //-------------------- Other Set methods
+        //---------------------------------------------------------------------------------------------------------------------
+
         /// <summary>
         /// Set Services From String, for Account SAS
         ///      b,f,t,q
@@ -258,6 +363,7 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
+
         /// <summary>
         /// Set Resource Type From String, for Account SAS
         ///      s,c,o
@@ -273,6 +379,7 @@ namespace Storage_Helper_SAS_Tool
 
             return ResourceTypes;
         }
+
 
 
         /// <summary>
@@ -320,6 +427,95 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
+
+
+        //---------------------------------------------------------------------------------------------------------------------
+        //-------------------- Other Set methods
+        //---------------------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Converts the permissions specified for the shared access policy to a string.
+        /// Same permissions for Policy and 'sr' (Service SAS) parameter 
+        /// 
+        /// SharedAccessBlobPermissions: Add	16	
+        ///                              Create	32	
+        ///                              Delete	4	
+        ///                              List	8	
+        ///                              None	0	
+        ///                              Read	1	
+        ///                              Write	2
+        /// </summary>
+        /// <param name="permissions">The shared access permissions.</param>
+        /// <returns>The shared access permissions in string format.</returns>
+        public static string Get_PermissionsToString_Blob(SharedAccessBlobPermissions permissions)
+        {
+            // The service supports a fixed order => rwdl
+            StringBuilder builder = new StringBuilder();
+            if ((permissions & SharedAccessBlobPermissions.Read) == SharedAccessBlobPermissions.Read) builder.Append("r");
+            if ((permissions & SharedAccessBlobPermissions.Write) == SharedAccessBlobPermissions.Write) builder.Append("w");
+            if ((permissions & SharedAccessBlobPermissions.Delete) == SharedAccessBlobPermissions.Delete) builder.Append("d");
+            if ((permissions & SharedAccessBlobPermissions.List) == SharedAccessBlobPermissions.List) builder.Append("l");
+            if ((permissions & SharedAccessBlobPermissions.Add) == SharedAccessBlobPermissions.Add) builder.Append("a");
+            if ((permissions & SharedAccessBlobPermissions.Create) == SharedAccessBlobPermissions.Create) builder.Append("c");
+            return builder.ToString();
+        }
+
+
+
+        /// <summary>
+        /// Converts the permissions specified for the shared access policy to a string.
+        /// Same permissions for Policy and 'sr' (Service SAS) parameter 
+        /// 
+        /// SharedAccessQueuePermissions:   Add	            2	
+        ///                                 None	        0	
+        ///                                 ProcessMessages	8	
+        ///                                 Read	        1	
+        ///                                 Update	        4
+        /// </summary>
+        /// <param name="permissions">The shared access permissions.</param>
+        /// <returns>The shared access permissions in string format.</returns>
+        public static string Get_PermissionsToString_Queue(SharedAccessQueuePermissions permissions)
+        {
+            // The service supports a fixed order => rwdl
+            StringBuilder builder = new StringBuilder();
+            if ((permissions & SharedAccessQueuePermissions.Read) == SharedAccessQueuePermissions.Read) builder.Append("r");
+            if ((permissions & SharedAccessQueuePermissions.Add) == SharedAccessQueuePermissions.Add) builder.Append("a");
+            if ((permissions & SharedAccessQueuePermissions.Update) == SharedAccessQueuePermissions.Update) builder.Append("u");
+            if ((permissions & SharedAccessQueuePermissions.ProcessMessages) == SharedAccessQueuePermissions.ProcessMessages) builder.Append("p");
+            return builder.ToString();
+        }
+
+
+
+        /// <summary>
+        /// Converts the permissions specified for the shared access policy to a string.
+        /// Same permissions for Policy and 'sr' (Service SAS) parameter 
+        /// 
+        /// SharedAccessFilePermissions:  - TODO - not supported by API ???
+        /// </summary>
+        /// <param name="permissions">The shared access permissions.</param>
+        /// <returns>The shared access permissions in string format.</returns>
+        public static string Get_PermissionsToString_File(SharedAccessFilePermissions permissions)
+        {
+            // The service supports a fixed order => rwdl
+            StringBuilder builder = new StringBuilder();
+            if ((permissions & SharedAccessFilePermissions.Read) == SharedAccessFilePermissions.Read) builder.Append("r");
+            if ((permissions & SharedAccessFilePermissions.Write) == SharedAccessFilePermissions.Write) builder.Append("w");
+            if ((permissions & SharedAccessFilePermissions.Delete) == SharedAccessFilePermissions.Delete) builder.Append("d");
+            if ((permissions & SharedAccessFilePermissions.List) == SharedAccessFilePermissions.List) builder.Append("l");
+            if ((permissions & SharedAccessFilePermissions.Create) == SharedAccessFilePermissions.Create) builder.Append("c");
+            return builder.ToString();
+        }
+
+
+
+
+
+
+        //---------------------------------------------------------------------------------------------------------------------
+        //-------------------- Get SAS methods
+        //---------------------------------------------------------------------------------------------------------------------
+
         /// <summary>
         /// Create an account SAS - SharedAccessAccountPolicy
         /// https://docs.microsoft.com/en-us/azure/storage/common/storage-account-sas-create-dotnet#create-an-account-sas 
@@ -341,8 +537,8 @@ namespace Storage_Helper_SAS_Tool
             {
                 accountPolicy = new SharedAccessAccountPolicy()
                 {
-                    Permissions =   Set_PermissionsFromStr_AccountSAS(),
-                    Services =      Set_ServicesFromStr_AccountSAS(),
+                    Permissions = Set_PermissionsFromStr_AccountSAS(),
+                    Services = Set_ServicesFromStr_AccountSAS(),
                     ResourceTypes = Set_ResourceTypesFromStr_AccountSAS(),
                     // SharedAccessStartTime = 
                     SharedAccessExpiryTime = SAS_Utils.SAS.seDateTime,
@@ -363,7 +559,7 @@ namespace Storage_Helper_SAS_Tool
                 //-----------------------------------------------------------
             }
             catch (Exception ex)
-            { 
+            {
                 MessageBox.Show("Error on generating the Account SAS\n" + ex, "Account SAS error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return "";
             }
@@ -372,24 +568,6 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
-        /// <summary>
-        /// Set Permissions From String, for Service SAS - Containers
-        ///      'rwdacl'
-        /// </summary>
-        /// <returns></returns>
-        private static SharedAccessBlobPermissions Set_PermissionsFromStr_ServiceSAS_Container()
-        {
-            string sp = SAS_Utils.SAS.sp.v;
-            SharedAccessBlobPermissions Permissions = 0;
-            Permissions |= (sp.IndexOf("r") != -1) ? SharedAccessBlobPermissions.Read : 0;
-            Permissions |= (sp.IndexOf("w") != -1) ? SharedAccessBlobPermissions.Write : 0;
-            Permissions |= (sp.IndexOf("d") != -1) ? SharedAccessBlobPermissions.Delete : 0;
-            Permissions |= (sp.IndexOf("a") != -1) ? SharedAccessBlobPermissions.Add : 0;
-            Permissions |= (sp.IndexOf("c") != -1) ? SharedAccessBlobPermissions.Create : 0;
-            Permissions |= (sp.IndexOf("l") != -1) ? SharedAccessBlobPermissions.List : 0;
-
-            return Permissions;
-        }
 
 
         /// <summary>
@@ -455,26 +633,6 @@ namespace Storage_Helper_SAS_Tool
             }
         }
 
-
-
-
-        /// <summary>
-        /// Set Permissions From String, for Service SAS - Blobs
-        ///      'rwdac'
-        /// </summary>
-        /// <returns></returns>
-        private static SharedAccessBlobPermissions Set_PermissionsFromStr_ServiceSAS_Blob()
-        {
-            string sp = SAS_Utils.SAS.sp.v;
-            SharedAccessBlobPermissions Permissions = 0;
-            Permissions |= (sp.IndexOf("r") != -1) ? SharedAccessBlobPermissions.Read : 0;
-            Permissions |= (sp.IndexOf("w") != -1) ? SharedAccessBlobPermissions.Write : 0;
-            Permissions |= (sp.IndexOf("d") != -1) ? SharedAccessBlobPermissions.Delete : 0;
-            Permissions |= (sp.IndexOf("a") != -1) ? SharedAccessBlobPermissions.Add : 0;
-            Permissions |= (sp.IndexOf("c") != -1) ? SharedAccessBlobPermissions.Create : 0;
-
-            return Permissions;
-        }
 
 
 
@@ -545,24 +703,6 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
-
-
-        /// <summary>
-        /// Set Permissions From String, for Service SAS - Files
-        ///      'rwdc'
-        /// </summary>
-        /// <returns></returns>
-        private static SharedAccessFilePermissions Set_PermissionsFromStr_ServiceSAS_Files()
-        {
-            string sp = SAS_Utils.SAS.sp.v;
-            SharedAccessFilePermissions Permissions = 0;
-            Permissions |= (sp.IndexOf("r") != -1) ? SharedAccessFilePermissions.Read : 0;
-            Permissions |= (sp.IndexOf("w") != -1) ? SharedAccessFilePermissions.Write : 0;
-            Permissions |= (sp.IndexOf("d") != -1) ? SharedAccessFilePermissions.Delete : 0;
-            Permissions |= (sp.IndexOf("c") != -1) ? SharedAccessFilePermissions.Create : 0;
-
-            return Permissions;
-        }
 
 
 
@@ -637,23 +777,6 @@ namespace Storage_Helper_SAS_Tool
 
 
 
-        /// <summary>
-        /// Set Permissions From String, for Service SAS - Shares
-        ///      'rwdcl'
-        /// </summary>
-        /// <returns></returns>
-        private static SharedAccessFilePermissions Set_PermissionsFromStr_ServiceSAS_Shares()
-        {
-            string sp = SAS_Utils.SAS.sp.v;
-            SharedAccessFilePermissions Permissions = 0;
-            Permissions |= (sp.IndexOf("r") != -1) ? SharedAccessFilePermissions.Read : 0;
-            Permissions |= (sp.IndexOf("w") != -1) ? SharedAccessFilePermissions.Write : 0;
-            Permissions |= (sp.IndexOf("d") != -1) ? SharedAccessFilePermissions.Delete : 0;
-            Permissions |= (sp.IndexOf("c") != -1) ? SharedAccessFilePermissions.Create : 0;
-            Permissions |= (sp.IndexOf("l") != -1) ? SharedAccessFilePermissions.List : 0;
-
-            return Permissions;
-        }
 
 
         /// <summary>
@@ -722,23 +845,6 @@ namespace Storage_Helper_SAS_Tool
 
 
 
-        /// <summary>
-        /// Set Permissions From String, for Service SAS - Queues
-        ///      'arup'
-        /// </summary>
-        /// <returns></returns>
-        private static SharedAccessQueuePermissions Set_PermissionsFromStr_ServiceSAS_Queues()
-        {
-            string sp = SAS_Utils.SAS.sp.v;
-            SharedAccessQueuePermissions Permissions = 0;
-            Permissions |= (sp.IndexOf("r") != -1) ? SharedAccessQueuePermissions.Read : 0;
-            Permissions |= (sp.IndexOf("a") != -1) ? SharedAccessQueuePermissions.Add : 0;
-            Permissions |= (sp.IndexOf("u") != -1) ? SharedAccessQueuePermissions.Update : 0;
-            Permissions |= (sp.IndexOf("p") != -1) ? SharedAccessQueuePermissions.ProcessMessages : 0;
-
-            return Permissions;
-        }
-
 
         /// <summary>
         /// Create a service SAS for a Queue - SharedAccessQueuePolicy
@@ -801,94 +907,11 @@ namespace Storage_Helper_SAS_Tool
             }
         }
 
-
-
-
-
-        /// <summary>
-        /// Set Permissions From String, for Service SAS - Tables
-        /// ---> Using the 'Microsoft.Azure.Cosmos.Table' library <---
-        ///      "raud"
-        /// </summary>
-        /// <returns></returns>
-        private static Microsoft.Azure.Cosmos.Table.SharedAccessTablePermissions Set_PermissionsFromStr_ServiceSAS_Tables()
-        {
-            string sp = SAS_Utils.SAS.sp.v;
-            Microsoft.Azure.Cosmos.Table.SharedAccessTablePermissions Permissions = 0;
-            Permissions |= (sp.IndexOf("r") != -1) ? Microsoft.Azure.Cosmos.Table.SharedAccessTablePermissions.Query : 0;
-            Permissions |= (sp.IndexOf("a") != -1) ? Microsoft.Azure.Cosmos.Table.SharedAccessTablePermissions.Add : 0;
-            Permissions |= (sp.IndexOf("u") != -1) ? Microsoft.Azure.Cosmos.Table.SharedAccessTablePermissions.Update : 0;
-            Permissions |= (sp.IndexOf("d") != -1) ? Microsoft.Azure.Cosmos.Table.SharedAccessTablePermissions.Delete : 0;
-
-            return Permissions;
-        }
-
-
-        /// <summary>
-        /// Create a service SAS for a Table - SharedAccessTablePolicy - Microsoft.Azure.Cosmos.Table
-        /// ---> Using the 'Microsoft.Azure.Cosmos.Table' library <---
-        /// SharedAccessTablePolicy: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.cosmos.table.sharedaccesstablepolicy?view=azure-dotnet
-        /// </summary>
-        /// <param name="accountName"></param>
-        /// <param name="accountKey"></param>
-        /// <param name="tableName"></param>
-        /// <param name="policyName"></param>
-        /// <returns> queue.Uri + SAS Token</returns>
-        public static string Get_ServiceSAS_Table(string accountName, string accountKey, string tableName, string policyName = null)
-        {
-            //--------------------------------------------------
-            // Creating StorageCredentials and table references using the 'Microsoft.Azure.Cosmos.Table' library
-            string tableUri = string.Format("https://{0}.table.core.windows.net", accountName);
-            Microsoft.Azure.Cosmos.Table.StorageCredentials storageCredentials = new Microsoft.Azure.Cosmos.Table.StorageCredentials(accountName, accountKey);
-            Microsoft.Azure.Cosmos.Table.StorageUri uri = new Microsoft.Azure.Cosmos.Table.StorageUri(new Uri(tableUri));
-            Microsoft.Azure.Cosmos.Table.CloudTableClient tableClient = new Microsoft.Azure.Cosmos.Table.CloudTableClient(uri, storageCredentials);
-            Microsoft.Azure.Cosmos.Table.CloudTable table = tableClient.GetTableReference(tableName);
-            //--------------------------------------------------
-
-            // Create a new access policy and define its constraints, using the 'Microsoft.Azure.Cosmos.Table' library.
-            // Note that the SharedAccessTablePolicy class is used both to define the parameters of an ad hoc SAS, and
-            // to construct a shared access policy that is saved to the container's shared access policies.
-            Microsoft.Azure.Cosmos.Table.SharedAccessTablePolicy tablePolicy;
-            try
-            {
-                tablePolicy = new Microsoft.Azure.Cosmos.Table.SharedAccessTablePolicy()
-                {
-                    Permissions = Set_PermissionsFromStr_ServiceSAS_Tables(),
-                    // SharedAccessStartTime = 
-                    SharedAccessExpiryTime = SAS_Utils.SAS.seDateTime
-                };
-
-                // Adding the optional fields commented out above
-                //-----------------------------------------------------------
-                if (!String.IsNullOrEmpty(SAS_Utils.SAS.st.v))
-                    tablePolicy.SharedAccessStartTime = SAS_Utils.SAS.stDateTime;
-                //-----------------------------------------------------------
-            }
-            catch (Exception ex)
-            { 
-                MessageBox.Show("Error on generating the Table Service SAS\n" + ex, "Invalid SAS parameters", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return "";
-            }
-  
-            if (String.IsNullOrEmpty(policyName))
-            {
-                // Generate the shared access signature on the table, setting the constraints directly on the signature.
-                //return tableUri + table.GetSharedAccessSignature(blobPolicy);
-                return table.GetSharedAccessSignature(tablePolicy);
-            }
-            else
-            {
-                // Generate the shared access signature on the table. In this case, all of the constraints for the
-                // shared access signature are specified on the container's stored access policy.
-                return table.GetSharedAccessSignature(tablePolicy, policyName);
-            }
-        }
-
+        //--------------------------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------
 
 
     }
 }
 
 
-//--------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------

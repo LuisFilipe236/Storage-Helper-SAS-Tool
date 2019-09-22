@@ -4,6 +4,7 @@ using System.Windows;
 
 
 
+
 namespace Storage_Helper_SAS_Tool
 {
     /// <summary>
@@ -32,12 +33,14 @@ namespace Storage_Helper_SAS_Tool
         /// <summary>
         /// Valid Storage Service Versions for Account SAS >= 2015-04-05 (if using srt)
         /// </summary>
-        private static string[] validSV_AccountSAS_ARR = { "2019-02-02", "2018-11-09", "2018-03-28", "2017-11-09", "2017-07-29", "2017-04-17", "2016-05-31", "2015-12-11", "2015-07-08", "2015-04-05" };
+        public static string[] validSV_AccountSAS_ARR = { "2019-02-02", "2018-11-09", "2018-03-28", "2017-11-09", "2017-07-29", "2017-04-17", "2016-05-31", "2015-12-11", "2015-07-08", "2015-04-05" };
 
         /// <summary>
-        /// Valid Storage Service Versions for Service SAS  >= 2012-02-12 (if using sr, tn, queue ??)
+        /// Valid Storage Service Versions for Service SAS  >= 2012-02-12 
+        /// 
+        /// In Service Versions before 2012-02-12, the duration between signedstart and signedexpiry cannot exceed one hour
         /// </summary>
-        private static string[] validSV_ServiceSas_ARR_addon = { "2015-02-21", "2014-02-14", "2013-08-15", "2012-02-12" };
+        public static string[] validSV_ServiceSas_ARR_addon = { "2015-02-21", "2014-02-14", "2013-08-15", "2012-02-12" };
 
         //----------------------------------------------------------------------------
 
@@ -59,7 +62,7 @@ namespace Storage_Helper_SAS_Tool
         /// </summary>
         public struct SasParameters
         {
-            public string sharedAccessSignature; // complete SAS without the endpoints
+            public StrParameter sharedAccessSignature; // complete SAS without the endpoints
 
             public string blobEndpoint;
             public string fileEndpoint;
@@ -95,7 +98,7 @@ namespace Storage_Helper_SAS_Tool
             public string epk;          //   endpk;
             public string srk;          //   startrk;
             public string erk;          //   endrk;
-            public string si;           // Policy Name
+            public StrParameter si;           // Policy Name
 
             public DateTime stDateTime; // used to test the valid Date format
             public DateTime seDateTime; 
@@ -110,17 +113,17 @@ namespace Storage_Helper_SAS_Tool
         /// <param name="e"></param>
         public void SAS_Validate(string InputBoxSASvalue, TextBox BoxAuthResults)
         {
-            // initialization of SAS Struct and cleas the "BoxAuthResults"
+            // clear the left "BoxAuthResults"
             BoxAuthResults.Text = "";
+
+            // initialization of SAS Struct 
             init_SASstruct();
 
             // Validate and save SAS parameter values on SAS struct
+            // return false if SAS String is invalid, and not show any results on left "BoxAuthResults"
             if (!SAS_GetParameters(InputBoxSASvalue)) return;
 
-            // Some of endpoints (Blob, File, Table, Queue) can be "not found"
-            Check_SASServiceEndpoints();
-
-            // Show SAS parameters results on BoxAuthResults
+            // Show SAS parameters results on "BoxAuthResults"
             SAS_ShowResults(BoxAuthResults);
         }
 
@@ -130,40 +133,36 @@ namespace Storage_Helper_SAS_Tool
         /// <summary>
         /// Test parameters on provided Account/Service SAS
         /// https://docs.microsoft.com/en-us/rest/api/storageservices/Constructing-an-Account-SAS?redirectedfrom=MSDN#constructing-the-account-sas-uri
+        /// 
+        /// return false if SAS String is invalid, and not show any results on left TextBox
         /// </summary>
         /// <param name="InputBoxSAS"></param>
         private bool SAS_GetParameters(string InputBoxSASvalue)
         {
-
-            //---------------------------------------------------------------------
-            // Check for some spaces or newlines on the string
-            //---------------------------------------------------------------------
-            string space = SAS_Utils.Get_SASSpace(InputBoxSASvalue.Trim());
-            if (space != "")
-            {
-                MessageBox.Show("Invalid string - " + space + " found on SAS", "Invalid SAS", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return false;     // invalid string with spaces or new lines in the middle
-            }
-
             // testing other parameters: (SharedAccessSignature, ;SharedAccessSignature?, BlobEndpoint=, FileEndpoint=, TableEndpoint=, QueueEndpoint= )
-            if (!Test_OtherParameters(InputBoxSASvalue))
+            // return if SAS String is invalid
+            if (!Check_SASString(InputBoxSASvalue))
                 return false;
 
             //---------------------------------------------------------------------
             // Retrieving values from Service endpoints
             //---------------------------------------------------------------------
-            SAS.blobEndpoint = SAS_Utils.Get_SASValue(InputBoxSASvalue, "BlobEndpoint=", ";");
-            SAS.fileEndpoint = SAS_Utils.Get_SASValue(InputBoxSASvalue, "FileEndpoint=", ";");
-            SAS.tableEndpoint = SAS_Utils.Get_SASValue(InputBoxSASvalue, "TableEndpoint=", ";");
-            SAS.queueEndpoint = SAS_Utils.Get_SASValue(InputBoxSASvalue, "QueueEndpoint=", ";");
+            SAS.blobEndpoint = Get_SASValue(InputBoxSASvalue, "BlobEndpoint=", ";");
+            SAS.fileEndpoint = Get_SASValue(InputBoxSASvalue, "FileEndpoint=", ";");
+            SAS.tableEndpoint = Get_SASValue(InputBoxSASvalue, "TableEndpoint=", ";");
+            SAS.queueEndpoint = Get_SASValue(InputBoxSASvalue, "QueueEndpoint=", ";");
 
-
-            // If none Endpoint found, check if only URI (starting with http(s)://) was provided on InputBoxSAS
+            // If Endpoints not found, check if only URI (starting with http(s)://) was provided on InputBoxSAS
             // This is the case of the Service SAS
-            //---------------------------------------------------------------------
-            CheckURI_IfEndpointNotFound(InputBoxSASvalue);
+            Get_Endpoint_FromServiceSASURI(InputBoxSASvalue);
 
-            Get_StorageAccountNameFromEndpoint();
+            // If endpoint Found
+            // Search on endpoints strings, for values to SAS struct: 
+            // containerName, blobName, shareName, fileName, queueName, tableName
+            Get_ResourceNames_FromEndpoints();
+
+            // Try to Get the Storage Account Name from any Endpoint, if provided
+            Get_StorageAccountName_FromEndpoint();
 
 
             //---------------------------------------------------------------------
@@ -171,15 +170,18 @@ namespace Storage_Helper_SAS_Tool
             //---------------------------------------------------------------------
             // Connection string was provided
             SAS.onlySASprovided = false;
-            SAS.sharedAccessSignature = SAS_Utils.Get_SASValue(InputBoxSASvalue, "SharedAccessSignature=", ";");
+            SAS.sharedAccessSignature.v = Get_SASValue(InputBoxSASvalue, "SharedAccessSignature=", ";");
 
             // only SAS token was provided
-            if (SAS.sharedAccessSignature == "not found")
+            if (SAS.sharedAccessSignature.v == "not found")
             {
-                SAS.sharedAccessSignature = SAS_Utils.Get_SASValue(InputBoxSASvalue, "?");
+                SAS.sharedAccessSignature.v = Get_SASValue(InputBoxSASvalue, "?");
 
-                if (Found(SAS.sharedAccessSignature, "not found="))
+                if (Found(SAS.sharedAccessSignature.v, "not found="))
+                {
+                    SAS.sharedAccessSignature.s = false; 
                     return Utils.WithMessage("Missing the '?' at the begin of SAS token, or the term 'SharedAccessSignature=' on a Connection String", "Invalid SAS");
+                }
                 else
                     SAS.onlySASprovided = true;
             }
@@ -194,17 +196,17 @@ namespace Storage_Helper_SAS_Tool
             // Service SAS: https://docs.microsoft.com/en-us/rest/api/storageservices/constructing-a-service-sas
             //---------------------------------------------------------------------
             //---------------------------------------------------------------------
-            SAS.apiVersion.v = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "api-version=", "&"); // Optional
-            SAS.sv.v = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "sv=", "&");                  // Required (>=2015-04-05)
-            SAS.ss.v = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "ss=", "&");
-            SAS.srt.v = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "srt=", "&");
-            SAS.sp.v = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "sp=", "&");
-            SAS.se.v = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "se=", "&");
-            SAS.st.v = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "st=", "&");
-            SAS.sip.v = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "sip=", "&");
-            SAS.spr.v = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "spr=", "&");
+            SAS.apiVersion.v =  Get_SASValue(SAS.sharedAccessSignature.v, "api-version=", "&"); // Optional
+            SAS.sv.v =          Get_SASValue(SAS.sharedAccessSignature.v, "sv=", "&");                  // Required (>=2015-04-05)
+            SAS.ss.v =          Get_SASValue(SAS.sharedAccessSignature.v, "ss=", "&");
+            SAS.srt.v =         Get_SASValue(SAS.sharedAccessSignature.v, "srt=", "&");
+            SAS.sp.v =          Get_SASValue(SAS.sharedAccessSignature.v, "sp=", "&");
+            SAS.se.v =          Get_SASValue(SAS.sharedAccessSignature.v, "se=", "&");
+            SAS.st.v =          Get_SASValue(SAS.sharedAccessSignature.v, "st=", "&");
+            SAS.sip.v =         Get_SASValue(SAS.sharedAccessSignature.v, "sip=", "&");
+            SAS.spr.v =         Get_SASValue(SAS.sharedAccessSignature.v, "spr=", "&");
 
-            SAS.sig = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "sig=", "&");
+            SAS.sig =           Get_SASValue(SAS.sharedAccessSignature.v, "sig=", "&");
 
 
 
@@ -218,14 +220,14 @@ namespace Storage_Helper_SAS_Tool
             // sr: signedresource - Required { b,c }   // blob, container - for blobs
             //                               { s,f }   // share, file     - for files
             //---------------------------------------------------------------------
-            SAS.sr.v = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "sr=", "&");
+            SAS.sr.v = Get_SASValue(SAS.sharedAccessSignature.v, "sr=", "&");
 
 
             //---------------------------------------------------------------------
             // tn: tablename - Required. 
             // The name of the table to share.
             //---------------------------------------------------------------------
-            SAS.tn.v = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "tn=", "&");
+            SAS.tn.v = Get_SASValue(SAS.sharedAccessSignature.v, "tn=", "&");
 
 
             //---------------------------------------------------------------------
@@ -247,19 +249,147 @@ namespace Storage_Helper_SAS_Tool
             // erk: endrk - Optional, but endpk must accompany endrk. The maximum partition and row keys accessible with this shared access signature. 
             //              Key values are inclusive. If omitted, there is no upper bound on the table entities that can be accessed.
             //---------------------------------------------------------------------
-            SAS.spk = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "spk=", "&");
-            SAS.epk = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "epk=", "&");
-            SAS.srk = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "srk=", "&");
-            SAS.erk = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "erk=", "&");
+            SAS.spk = Get_SASValue(SAS.sharedAccessSignature.v, "spk=", "&");
+            SAS.epk = Get_SASValue(SAS.sharedAccessSignature.v, "epk=", "&");
+            SAS.srk = Get_SASValue(SAS.sharedAccessSignature.v, "srk=", "&");
+            SAS.erk = Get_SASValue(SAS.sharedAccessSignature.v, "erk=", "&");
 
             //---------------------------------------------------------------------
             // si: signedidentifier - Optional.
             // A unique value up to 64 characters in length that correlates to an access policy specified for the container, queue, or table.
             //---------------------------------------------------------------------
-            SAS.si = SAS_Utils.Get_SASValue(SAS.sharedAccessSignature, "si=", "&");
+            SAS.si.v = Get_SASValue(SAS.sharedAccessSignature.v, "si=", "&");
 
             return true;
         }
+
+
+
+        /// <summary>
+        /// Show SAS parameters results on BoxAuthResults
+        /// </summary>
+        /// <param name="BoxAuthResults"></param>
+        private static void SAS_ShowResults(TextBox BoxAuthResults)
+        {
+            //---------------------------------------------------------------------
+            //---------------------------------------------------------------------
+            // Showing the results
+            //---------------------------------------------------------------------
+            //---------------------------------------------------------------------
+            BoxAuthResults.Text += Show_SASType();
+
+            BoxAuthResults.Text += "SAS Token (Unescaped): \n?" + SAS.sharedAccessSignature.v + "\n";
+            BoxAuthResults.Text += "\n";
+
+            // Verify if Services on URI are the same as on Service SAS permissions (Service SAS) 
+            BoxAuthResults.Text += Show_Services();
+
+            // api-version: (optional) {storage service version to use to execute the request made using the account SAS URI}
+            BoxAuthResults.Text += Show_ApiVersion(SAS.apiVersion.v);
+
+            // ss: {bqtf} - Required 
+            // Service endpoints: (optional)
+            BoxAuthResults.Text += Show_ss(SAS.ss.v, SAS.blobEndpoint, SAS.fileEndpoint, SAS.tableEndpoint, SAS.queueEndpoint, SAS.spr.v, SAS.onlySASprovided, SAS.srt.v);
+
+            // spr: {https,http} - Optional (default both)
+            BoxAuthResults.Text += Show_spr(SAS.spr.v, SAS.sr.v, SAS.tn.v, SAS.sv.v);
+
+            // sv: Service Versions - Required (>=2015-04-05) - TODO more recent versions
+            BoxAuthResults.Text += Show_sv(SAS.sv.v, SAS.sr.v, SAS.srt.v, SAS.tn.v);
+
+            //---------------------------------------------------------------------
+            // srt: Signed Resource Types {s,c,o} {Service, Container, Object} - Required
+            // Specific for Service SAS: https://docs.microsoft.com/en-us/rest/api/storageservices/constructing-a-service-sas
+            // sr: signedresource - Required { b,c }   // blob, container - for blobs
+            //                               { s,f }   // share, file     - for files, version 2015-02-21 and later
+            //                               {bs}      // blob snapshot,               version 2018-11-09 and later
+            // tn: tablename - Required - The name of the table to share.
+            //---------------------------------------------------------------------
+            string s = SAS_ValidateParam.Sr_srt_tn(SAS.sr.v, SAS.srt.v, SAS.tn.v);
+            switch (s)
+            {
+                // No srt, sr or tn provided - Required
+                //---------------------------------------------------------------------
+                case "":
+                    BoxAuthResults.Text += Show_EmptyOrAll_srt_sr_tn("");
+                    break;
+
+                // More than one srt, sr or tn provided - Only one Required
+                //---------------------------------------------------------------------
+                case "all":
+                    BoxAuthResults.Text += Show_EmptyOrAll_srt_sr_tn("all");
+                    break;
+
+                //---------------- Account SAS ----------------------------------------
+                // srt: Signed Resource Types {s,c,o} {Service, Container, Object} - Required
+                //---------------------------------------------------------------------
+                case "srt":
+                    BoxAuthResults.Text += Show_srt(SAS.srt.v);
+                    break;
+
+                //---------------- Service SAS ----------------------------------------
+                // sr: signedresource - Required { b,c }   // blob, container - for blobs
+                //                               { s,f }   // share, file     - for files, version 2015-02-21 and later
+                //                               {bs}      // blob snapshot,               version 2018-11-09 and later
+                //---------------------------------------------------------------------
+                case "sr":
+                    BoxAuthResults.Text += Show_sr(SAS.sr.v, SAS.sv.v);
+                    break;
+
+                //---------------- Service SAS ----------------------------------------
+                // tn: tablename - Required - The name of the table to share.
+                //---------------------------------------------------------------------
+                case "tn":
+                    BoxAuthResults.Text += Show_tn(SAS.tn.v);
+                    break;
+            }
+            //---------------------------------------------------------------------
+
+
+            // sp: SignedPermissions {r,w,d,l,a,c,u,p}  - Required
+            // This field must be omitted if it has been specified in an associated stored access policy.  - TODO (Service SAS)
+            BoxAuthResults.Text += Show_sp(SAS.sp.v, SAS.srt.v, SAS.sr.v, SAS.tn.v, SAS.sv.v);
+
+            // st (SignedStart) - optional
+            // se (SignedExpiry) - Required
+            BoxAuthResults.Text += Show_st_se(SAS.st.v, SAS.se.v);
+
+            // sip: Allowed IP's (optional)
+            BoxAuthResults.Text += Show_sip(SAS.sip.v);
+
+            // sig: Enchripted Signature - Required
+            BoxAuthResults.Text += Show_sig(SAS.sig);
+
+
+
+            //---------------------------------------------------------------------
+            // The startpk, startrk, endpk, and endrk fields define a range of table entities associated with a shared access signature. 
+            // Table queries will only return results that are within the range, and attempts to use the shared access signature to add, update, or delete entities outside this range will fail.
+            // If startpk equals endpk, the shared access signature only authorizes access to entities in one partition in the table. 
+            // If startpk equals endpk and startrk equals endrk, the shared access signature can only access one entity in one partition. 
+            // Use the following table to understand how these fields constrain access to entities in a table.
+            // startpk partitionKey >= startpk
+            // endpk partitionKey <= endpk
+            // startpk, startrk(partitionKey > startpk) || (partitionKey == startpk && rowKey >= startrk)
+            // endpk, endrk(partitionKey < endpk) || (partitionKey == endpk && rowKey <= endrk)
+            // https://docs.microsoft.com/en-us/rest/api/storageservices/Constructing-a-Service-SAS?redirectedfrom=MSDN#specifying-table-access-ranges
+            //---------------------------------------------------------------------
+            // spk: startpk - Table service only.
+            // srk: startrk - Optional, but startpk must accompany startrk. The minimum partition and row keys accessible with this shared access signature. 
+            //                Key values are inclusive. If omitted, there is no lower bound on the table entities that can be accessed.
+            // epk: endpk - Table service only.
+            // erk: endrk - Optional, but endpk must accompany endrk. The maximum partition and row keys accessible with this shared access signature. 
+            //              Key values are inclusive. If omitted, there is no upper bound on the table entities that can be accessed.
+            //---------------------------------------------------------------------
+            BoxAuthResults.Text += Show_pk_rk(SAS.tn.v, SAS.spk, SAS.epk, SAS.srk, SAS.erk);
+
+            //---------------------------------------------------------------------
+            // si: signedidentifier - Optional.
+            // A unique value up to 64 characters in length that correlates to an access policy specified for the container, queue, or table.
+            //---------------------------------------------------------------------
+            BoxAuthResults.Text += Show_si(SAS.si.v, SAS.srt.v);
+        }
+
 
 
 
@@ -274,8 +404,20 @@ namespace Storage_Helper_SAS_Tool
         /// </summary>
         /// <param name="InputBoxSAS"></param>
         /// <returns></returns>
-        private bool Test_OtherParameters(string InputBoxSASvalue)
+        private bool Check_SASString(string InputBoxSASvalue)
         {
+            // Assuming some error will be found
+            SAS.sharedAccessSignature.s = false;
+
+            // Check for empty string
+            if (InputBoxSASvalue == "")
+                return Utils.WithMessage("Empty SAS or Connection String", "Invalid SAS");
+
+            // Check for some spaces or newlines on the string
+            string space = Get_SpaceNL(InputBoxSASvalue.Trim());
+            if (space != "")
+                return Utils.WithMessage("Invalid string - " + space + " found on SAS", "Invalid SAS");
+
             // test 'SharedAccessSignature' (connection string) or '?' SAS
             if (InputBoxSASvalue.IndexOf("?") != -1 && Found(InputBoxSASvalue, "SharedAccessSignature"))
                 return Utils.WithMessage("Only one 'SharedAccessSignature' or '?' should be provided on SAS", "Invalid SAS");
@@ -288,11 +430,12 @@ namespace Storage_Helper_SAS_Tool
             if (Found(InputBoxSASvalue, "SharedAccessSignature?=") || Found(InputBoxSASvalue, "SharedAccessSignature=?"))
                 return Utils.WithMessage("Invalid characters found after 'SharedAccessSignature',\n on the provided SAS", "Invalid SAS");
 
-
+            // Connection string found, but no Endpoints found
             if (Found(InputBoxSASvalue, "SharedAccessSignature=") && !EndpointsExists(InputBoxSASvalue))
                 return Utils.WithMessage("Connection string found, but no Endpoints found.\nWithout endpoints, the SAS token should start with '?' instead of using 'SharedAccessSignature'", "Invalid SAS");
 
-            if (InputBoxSASvalue.IndexOf("srt") == -1 && (InputBoxSASvalue.IndexOf("sr") != -1 || InputBoxSASvalue.IndexOf("tn") != -1)) // sr ot tn (Account SAS) found
+            //
+            if (InputBoxSASvalue.IndexOf("srt") == -1 && (InputBoxSASvalue.IndexOf("sr") != -1 || InputBoxSASvalue.IndexOf("tn") != -1)) // sr or tn (Service SAS) found
             {
                 // Endpoints found
                 if (!EndpointFound(InputBoxSASvalue, "BlobEndpoint")) return false;
@@ -301,9 +444,12 @@ namespace Storage_Helper_SAS_Tool
                 if (!EndpointFound(InputBoxSASvalue, "QueueEndpoint")) return false;
             }
 
+            //
             if (InputBoxSASvalue.IndexOf("?") != -1 && EndpointsExists(InputBoxSASvalue))
                 return Utils.WithMessage("Connection strings should be removed from the SAS token.\nOnly allowed on Connection string", "Invalid SAS");
 
+            // No error found - restoring the .s value to true, before return
+            SAS.sharedAccessSignature.s = true;
             return true;
         }
 
@@ -349,7 +495,7 @@ namespace Storage_Helper_SAS_Tool
         /// If none Endpoint found, check if only URI (starting with http(s)://) was provided on InputBoxSAS
         /// This is the case of the Service SAS
         /// </summary>
-        private void CheckURI_IfEndpointNotFound(string inputBoxSAS)
+        private void Get_Endpoint_FromServiceSASURI(string inputBoxSAS)
         {
             if (SAS.blobEndpoint == "not found" && SAS.fileEndpoint == "not found" && SAS.tableEndpoint == "not found" && SAS.queueEndpoint == "not found")
             {
@@ -360,7 +506,7 @@ namespace Storage_Helper_SAS_Tool
                 if (i != -1)
                     newEndpoint = inputBoxSAS.Substring(0, i);
 
-                service = SAS_Utils.Get_SASValue(newEndpoint, ".", ".core");
+                service = Get_SASValue(newEndpoint, ".", ".core");
 
                 switch (service)
                 {
@@ -383,38 +529,22 @@ namespace Storage_Helper_SAS_Tool
 
 
 
-        /// <summary>
-        /// Try to Get the Storage Account Name from any Endpoint, if provided
-        /// </summary>
-        private void Get_StorageAccountNameFromEndpoint()
-        {
-            SAS.storageAccountName.v = SAS_Utils.Get_SASValue(SAS.blobEndpoint, "://", ".");
-
-            if (SAS.storageAccountName.v == "")
-                SAS.storageAccountName.v = SAS_Utils.Get_SASValue(SAS.fileEndpoint, "://", ".");
-
-            if (SAS.storageAccountName.v == "")
-                SAS.storageAccountName.v = SAS_Utils.Get_SASValue(SAS.tableEndpoint, "://", ".");
-
-            if (SAS.storageAccountName.v == "")
-                SAS.storageAccountName.v = SAS_Utils.Get_SASValue(SAS.queueEndpoint, "://", ".");
-        }
-
-
 
 
 
 
         /// <summary>
-        /// Look on endpoints SAS struct strings, for values to SAS struct:
+        /// Search on endpoints strings, for values to:
         ///    SAS.containerName 
         ///    SAS.blobName 
         ///    SAS.shareName 
         ///    SAS.fileName 
         ///    SAS.queueName 
         ///    SAS.tableName 
+        ///    
+        ///    Some of endpoints (Blob, File, Table, Queue) can be "not found"
         /// </summary>
-        private void Check_SASServiceEndpoints()
+        private void Get_ResourceNames_FromEndpoints()
         {
             if (SAS.blobEndpoint != "not found")
             {
@@ -426,7 +556,7 @@ namespace Storage_Helper_SAS_Tool
                 // Format, if exists: https://<storage>.blob.core.windows.net/container/blob
                 if (SAS.containerName.v != "")
                 {
-                    string s2 = Get_SASValue(SAS.blobEndpoint, ".blob.core.windows.net/" + SAS.containerName + "/");
+                    string s2 = Get_SASValue(SAS.blobEndpoint, ".blob.core.windows.net/" + SAS.containerName.v + "/");
                     if (s2 != "not found")
                     {
                         // remove subfolders
@@ -452,7 +582,7 @@ namespace Storage_Helper_SAS_Tool
                 // Format, if exists: https://<storage>.file.core.windows.net/share/file
                 if (SAS.shareName.v != "")
                 {
-                    string s2 = Get_SASValue(SAS.fileEndpoint, ".file.core.windows.net/" + SAS.shareName + "/");
+                    string s2 = Get_SASValue(SAS.fileEndpoint, ".file.core.windows.net/" + SAS.shareName.v + "/");
                     if (s2 != "not found")
                     {
                         // remove subfolders
@@ -505,128 +635,6 @@ namespace Storage_Helper_SAS_Tool
 
 
 
-        /// <summary>
-        /// Show SAS parameters results on BoxAuthResults
-        /// </summary>
-        /// <param name="BoxAuthResults"></param>
-        private static void SAS_ShowResults(TextBox BoxAuthResults)
-        {
-            //---------------------------------------------------------------------
-            //---------------------------------------------------------------------
-            // Showing the results
-            //---------------------------------------------------------------------
-            //---------------------------------------------------------------------
-            BoxAuthResults.Text += Show_SASType();
-
-            BoxAuthResults.Text += "SAS Token (Unescaped): \n?" + SAS.sharedAccessSignature + "\n";
-            BoxAuthResults.Text += "\n";
-
-            // Verify if Services on URI are the same as on Service SAS permissions (Service SAS) 
-            BoxAuthResults.Text += SAS_Utils.Show_Services();
-
-            // api-version: (optional) {storage service version to use to execute the request made using the account SAS URI}
-            BoxAuthResults.Text += SAS_Utils.Show_ApiVersion(SAS.apiVersion.v);
-
-            // ss: {bqtf} - Required 
-            // Service endpoints: (optional)
-            BoxAuthResults.Text += SAS_Utils.Show_ss(SAS.ss.v, SAS.blobEndpoint, SAS.fileEndpoint, SAS.tableEndpoint, SAS.queueEndpoint, SAS.spr.v, SAS.onlySASprovided, SAS.srt.v);
-
-            // spr: {https,http} - Optional (default both)
-            BoxAuthResults.Text += SAS_Utils.Show_spr(SAS.spr.v, SAS.sr.v, SAS.tn.v, SAS.sv.v);
-
-            // sv: Service Versions - Required (>=2015-04-05) - TODO more recent versions
-            BoxAuthResults.Text += SAS_Utils.Show_sv(SAS.sv.v, SAS.sr.v, SAS.srt.v, SAS.tn.v);
-
-            //---------------------------------------------------------------------
-            // srt: Signed Resource Types {s,c,o} {Service, Container, Object} - Required
-            // Specific for Service SAS: https://docs.microsoft.com/en-us/rest/api/storageservices/constructing-a-service-sas
-            // sr: signedresource - Required { b,c }   // blob, container - for blobs
-            //                               { s,f }   // share, file     - for files, version 2015-02-21 and later
-            //                               {bs}      // blob snapshot,               version 2018-11-09 and later
-            // tn: tablename - Required - The name of the table to share.
-            //---------------------------------------------------------------------
-            string s = SAS_Utils.Testing_sr_srt_tn(SAS.sr.v, SAS.srt.v, SAS.tn.v);
-            switch (s)
-            {
-                case "":
-                    BoxAuthResults.Text += "  --> No 'sr', 'srt' or 'tr' provided\n\n";
-                    break;
-                case "all":
-                    BoxAuthResults.Text += "  --> Only one 'sr', 'srt' or 'tr' can be provided\n\n";
-                    break;
-
-                //---------------- Account SAS ----------------------------------------
-                // srt: Signed Resource Types {s,c,o} {Service, Container, Object} - Required
-                //---------------------------------------------------------------------
-                case "srt":
-                    BoxAuthResults.Text += SAS_Utils.Show_srt(SAS.srt.v);
-                    break;
-
-                //---------------- Service SAS ----------------------------------------
-                // sr: signedresource - Required { b,c }   // blob, container - for blobs
-                //                               { s,f }   // share, file     - for files, version 2015-02-21 and later
-                //                               {bs}      // blob snapshot,               version 2018-11-09 and later
-                //---------------------------------------------------------------------
-                case "sr":
-                    BoxAuthResults.Text += SAS_Utils.Show_sr(SAS.sr.v, SAS.sv.v);
-                    break;
-
-                //---------------- Service SAS ----------------------------------------
-                // tn: tablename - Required - The name of the table to share.
-                //---------------------------------------------------------------------
-                case "tn":
-                    BoxAuthResults.Text += SAS_Utils.Show_tn(SAS.tn.v);
-                    break;
-            }
-            //---------------------------------------------------------------------
-
-
-            // sp: SignedPermissions {r,w,d,l,a,c,u,p}  - Required
-            // This field must be omitted if it has been specified in an associated stored access policy.  - TODO (Service SAS)
-            BoxAuthResults.Text += SAS_Utils.Show_sp(SAS.sp.v, SAS.srt.v, SAS.sr.v, SAS.tn.v, SAS.sv.v);
-
-            // st (SignedStart) - optional
-            // se (SignedExpiry) - Required
-            BoxAuthResults.Text += SAS_Utils.Show_st_se(SAS.st.v, SAS.se.v);
-
-            // sip: Allowed IP's (optional)
-            BoxAuthResults.Text += SAS_Utils.Show_sip(SAS.sip.v);
-
-            // sig: Enchripted Signature - Required
-            BoxAuthResults.Text += SAS_Utils.Show_sig(SAS.sig);
-
-
-
-            //---------------------------------------------------------------------
-            // The startpk, startrk, endpk, and endrk fields define a range of table entities associated with a shared access signature. 
-            // Table queries will only return results that are within the range, and attempts to use the shared access signature to add, update, or delete entities outside this range will fail.
-            // If startpk equals endpk, the shared access signature only authorizes access to entities in one partition in the table. 
-            // If startpk equals endpk and startrk equals endrk, the shared access signature can only access one entity in one partition. 
-            // Use the following table to understand how these fields constrain access to entities in a table.
-            // startpk partitionKey >= startpk
-            // endpk partitionKey <= endpk
-            // startpk, startrk(partitionKey > startpk) || (partitionKey == startpk && rowKey >= startrk)
-            // endpk, endrk(partitionKey < endpk) || (partitionKey == endpk && rowKey <= endrk)
-            // https://docs.microsoft.com/en-us/rest/api/storageservices/Constructing-a-Service-SAS?redirectedfrom=MSDN#specifying-table-access-ranges
-            //---------------------------------------------------------------------
-            // spk: startpk - Table service only.
-            // srk: startrk - Optional, but startpk must accompany startrk. The minimum partition and row keys accessible with this shared access signature. 
-            //                Key values are inclusive. If omitted, there is no lower bound on the table entities that can be accessed.
-            // epk: endpk - Table service only.
-            // erk: endrk - Optional, but endpk must accompany endrk. The maximum partition and row keys accessible with this shared access signature. 
-            //              Key values are inclusive. If omitted, there is no upper bound on the table entities that can be accessed.
-            //---------------------------------------------------------------------
-            BoxAuthResults.Text += SAS_Utils.Show_pk_rk(SAS.tn.v, SAS.spk, SAS.epk, SAS.srk, SAS.erk);
-
-            //---------------------------------------------------------------------
-            // si: signedidentifier - Optional.
-            // A unique value up to 64 characters in length that correlates to an access policy specified for the container, queue, or table.
-            //---------------------------------------------------------------------
-            BoxAuthResults.Text += SAS_Utils.Show_si(SAS.si, SAS.srt.v);
-
-
-        }
-
 
 
 
@@ -646,7 +654,7 @@ namespace Storage_Helper_SAS_Tool
             if (SAS.tn.v != "not found")
             {
                 if (SAS.tableEndpoint == "not found")
-                    return "  --> Table name 'tn' provided on SAS parameter, but a different or no service was provided on URI.\n\n";
+                    return "  --> Table name 'tn' provided on SAS parameter, but a different or no URI was provided to the service.\n\n";
 
                 if (!(SAS.tableEndpoint.EndsWith(".net") || SAS.tableEndpoint.EndsWith(".net/")))
                     return "  --> Incorrect Table Endpoint format.\nTable Endpoint should not mention the table name on URI.\n\n";
@@ -656,23 +664,23 @@ namespace Storage_Helper_SAS_Tool
             if (SAS.sr.v == "b")
             {
                 if (SAS.blobEndpoint == "not found")
-                    return "  --> Blob was provided on 'sr' SAS parameter, but a different or no service was provided on URI.\n\n";
+                    return "  --> Blob was provided on 'sr' SAS parameter, but a different or no URI was provided to the service.\n\n";
                 if (SAS.blobName.v == "")
-                    return "  --> Blob was provided on 'sr' SAS parameter, but no Blob file was provided on URI.\n\n";
+                    return "  --> Blob was provided on 'sr' SAS parameter, but no Blob name was provided on URI.\n\n";
             }
             if (SAS.sr.v == "c")
             {
                 if (SAS.blobEndpoint == "not found")
-                    return "  --> Container was provided on 'sr' SAS parameter, but a different or no service was provided on URI.\n\n";
+                    return "  --> Container was provided on 'sr' SAS parameter, but a different or no URI was provided to the service.\n\n";
                 if (SAS.containerName.v == "")
                     return "  --> Container was provided on 'sr' SAS parameter, but no Container name was provided on URI.\n\n";
                 if (SAS.blobName.v != "")
-                    return "  --> Container was provided on 'sr' SAS parameter, but the Blob file should be removed from URI.\n\n";
+                    return "  --> Container was provided on 'sr' SAS parameter, but the Blob name should be removed from URI.\n\n";
             }
             if (SAS.sr.v == "bs")
             {
                 if (SAS.blobEndpoint == "not found")
-                    return "  --> Blob Snapshot was provided on 'sr' SAS parameter, but a different or no service was provided on URI.\n\n";
+                    return "  --> Blob Snapshot was provided on 'sr' SAS parameter, but a different or no URI was provided to the service.\n\n";
                 if (SAS.blobName.v == "")
                     return "  --> Blob Snapshot was provided on 'sr' SAS parameter, but no Snapshot name was provided on URI.\n\n";
             }
@@ -682,14 +690,14 @@ namespace Storage_Helper_SAS_Tool
             if (SAS.sr.v == "f")
             {
                 if (SAS.fileEndpoint == "not found")
-                    return "  --> File was provided on 'sr' SAS parameter, but a different or no service was provided on URI.\n\n";
+                    return "  --> File was provided on 'sr' SAS parameter, but a different or no URI was provided to the service.\n\n";
                 if (SAS.fileName.v == "")
                     return "  --> File was provided on 'sr' SAS parameter, but no File name was provided on URI.\n\n";
             }
             if (SAS.sr.v == "s")
             {
                 if (SAS.fileEndpoint == "not found")
-                    return "  --> Share was provided on 'sr' SAS parameter, but a different or no service was provided on URI.\n\n";
+                    return "  --> Share was provided on 'sr' SAS parameter, but a different or no URI was provided to the service.\n\n";
                 if (SAS.shareName.v == "")
                     return "  --> Share was provided on 'sr' SAS parameter, but no Share name was provided on URI.\n\n";
                 if (SAS.fileName.v != "")
@@ -706,68 +714,6 @@ namespace Storage_Helper_SAS_Tool
 
 
 
-        /// <summary>
-        /// Search on source and returns the string value between SASHeader and delimiter, or the end of the string if delimiter not found
-        /// debug=true : adds additional information
-        /// </summary>
-        public static string Get_SASValue(string source, string SASHeader, string delimiter, bool debug = false)
-        {
-            string s2 = "not found";
-            int i = source.IndexOf(SASHeader);
-            int lenght = 0;
-            if (i >= 0)
-            {
-                i += SASHeader.Length;
-                lenght = source.IndexOf(delimiter, i) - i;
-                if (lenght >= 0)
-                    s2 = source.Substring(i, lenght);
-
-                if (lenght < 0) // delimeter not found - end of the string
-                    s2 = source.Substring(i);
-            }
-
-            if (debug)
-                return "SASHeader:" + SASHeader + "  i:" + i.ToString() + "  lenght:" + lenght.ToString() + "  s2:" + s2;
-            return s2;
-        }
-
-
-
-        /// <summary>
-        /// Search on source and returns the string value between SASHeader and the end on the source.
-        /// debug=true : adds additional information
-        /// </summary>
-        public static string Get_SASValue(string source, string SASHeader, bool debug = false)
-        {
-            string s2 = "not found";
-            int i = source.IndexOf(SASHeader);
-            if (i >= 0)
-                s2 = source.Substring(i + SASHeader.Length);
-
-            if (debug)
-                return "SASHeader:" + SASHeader + "  i:" + i.ToString() + "  s2:" + s2;
-            return s2;
-        }
-
-
-        /// <summary>
-        /// Search on source to seach any space or new line in the source.
-        /// </summary>
-        public static string Get_SASSpace(string source)
-        {
-            int i = -1;
-
-            i = source.IndexOf(" ");   // space
-            if (i != -1)
-                return "Space";
-            else
-                i = source.IndexOf("\r\n");
-            if (i == -1) i = source.IndexOf("\r");
-            if (i == -1) i = source.IndexOf("\n");
-            if (i != -1)
-                return "New Line";
-            return "";
-        }
 
 
 
@@ -787,31 +733,18 @@ namespace Storage_Helper_SAS_Tool
         /// </summary>
         public static string Show_ApiVersion(string apiVersion)
         {
-            // no api-version (optional) provided - exit without any information
-            if (apiVersion == "not found")
-                return "";
-
             string s = "'api-version' parameter (Storage Service Version):\n";
 
-            // api-version without any value
-            if (String.IsNullOrEmpty(apiVersion))
-                return andSetState("apiVersion", false, s += "  --> 'api-version' provided without any value (api-version=" + apiVersion + ")\n\n");
+            string res = SAS_ValidateParam.Api_Version(apiVersion);
 
-            // api-version length and format - yyyy-mm-dd
-            if (apiVersion.Length != 10 || apiVersion.Substring(4, 1) != "-" || apiVersion.Substring(7, 1) != "-")
-                return andSetState("apiVersion", false, s += "-- > Invalid format on 'api-version' provided (api-version=" + apiVersion + ")\n\n");
+            if (SAS.apiVersion.s == false)           // error on value                    
+                return s + "  --> " + res + "\n\n";
 
-            // api-version date validation - TODO - validate the storage service versions
-            try
-            {
-                DateTime d = Convert.ToDateTime(apiVersion);
-            }
-            catch (Exception ex)
-            {
-                return andSetState("apiVersion", false, s += "-- > Invalid date on 'api-version' provided (api-version=" + apiVersion + "): " + ex.Message + "\n\n");
-            }
+            if (res == "")
+                return ""; // silent return ("not found")
 
-            return andSetState("apiVersion", true, s += "  API Version used: " + apiVersion + "\n\n");
+            // value validated
+            return s + "  API Version used: " + apiVersion + "\n\n";
         }
 
 
@@ -825,20 +758,17 @@ namespace Storage_Helper_SAS_Tool
         {
             string s = "'ss' parameter (Signed Services):\n";
 
-            if (srt == "not found")     // Service SAS - ss não requerido
-                if (ss == "not found")
-                    return "";
-                else
-                    return andSetState("ss", false, s += "-- > 'ss' Not required on Service SAS, but provided)\n\n");
+            string res = SAS_ValidateParam.Ss(ss, spr, srt);
 
-            // no (required) sp provided
-            if (ss == "not found")
-                return andSetState("ss", false, s += "  --> 'ss' Required but not provided)\n\n");
+            if (SAS.ss.s == false)           // error on value                    
+                return s + "  --> " + res + "\n\n";
 
-            // found chars not supported by ss paramenter
-            if (!Utils.ValidateString(ss, "bfqt"))
-                return andSetState("ss", false, s += "  --> Invalid 'ss' parameter provided: (ss=" + ss + ")\n\n");
+            if (res == "")
+                return ""; // silent return ("not found")
 
+
+            // value validated - add the endpoint
+            //------------------------------------------------------------------
             if (onlySASprovided)     // only SAS token was provided
             {
                 s += "  Blob Service " + (ss.IndexOf("b") == -1 ? "NOT " : "") + "allowed\n";
@@ -848,10 +778,10 @@ namespace Storage_Helper_SAS_Tool
             }
             else                    // Connection string was provided
             {
-                s += "  Blob Service " + (ss.IndexOf("b") == -1 ? "NOT allowed" : "allowed " + (blobEndpoint == "not found" ? "--> but Blob Endpoint NOT provided." : Test_EndpointFormat(blobEndpoint, "Blob", spr))) + "\n";
-                s += "  File Service " + (ss.IndexOf("f") == -1 ? "NOT allowed" : "allowed " + (fileEndpoint == "not found" ? "--> but File Endpoint NOT provided." : Test_EndpointFormat(fileEndpoint, "File", spr))) + "\n";
-                s += "  Table Service " + (ss.IndexOf("t") == -1 ? "NOT allowed" : "allowed " + (tableEndpoint == "not found" ? "--> but Table Endpoint NOT provided." : Test_EndpointFormat(tableEndpoint, "Table", spr))) + "\n";
-                s += "  Queue Service " + (ss.IndexOf("q") == -1 ? "NOT allowed" : "allowed " + (queueEndpoint == "not found" ? "--> but Queue Endpoint NOT provided." : Test_EndpointFormat(queueEndpoint, "Queue", spr))) + "\n";
+                s += "  Blob Service " + (ss.IndexOf("b") == -1 ? "NOT allowed" : "allowed " + (blobEndpoint == "not found" ? "--> but Blob Endpoint NOT provided." : SAS_ValidateParam.EndpointFormat(blobEndpoint, "Blob", spr))) + "\n";
+                s += "  File Service " + (ss.IndexOf("f") == -1 ? "NOT allowed" : "allowed " + (fileEndpoint == "not found" ? "--> but File Endpoint NOT provided." : SAS_ValidateParam.EndpointFormat(fileEndpoint, "File", spr))) + "\n";
+                s += "  Table Service " + (ss.IndexOf("t") == -1 ? "NOT allowed" : "allowed " + (tableEndpoint == "not found" ? "--> but Table Endpoint NOT provided." : SAS_ValidateParam.EndpointFormat(tableEndpoint, "Table", spr))) + "\n";
+                s += "  Queue Service " + (ss.IndexOf("q") == -1 ? "NOT allowed" : "allowed " + (queueEndpoint == "not found" ? "--> but Queue Endpoint NOT provided." : SAS_ValidateParam.EndpointFormat(queueEndpoint, "Queue", spr))) + "\n";
             }
 
             return andSetState("ss", true, s + "\n");
@@ -859,42 +789,6 @@ namespace Storage_Helper_SAS_Tool
 
 
 
-        /// <summary>
-        /// Format the output string for Endpoints provided on connection string
-        /// </summary>
-        public static string Test_EndpointFormat(string endpoint, string service, string spr)
-        {
-            // checking spr and protocol endpoint
-            switch (spr)
-            {
-                case "http":
-                    if (endpoint.IndexOf("http://") == -1)
-                        return "  --> http protocol provided on 'spr' parameter, but missing/wrong protocol provided on " + service + " Endpoint " + "  (" + endpoint + ")";
-                    break;
-                case "https":
-                    if (endpoint.IndexOf("https://") == -1)
-                        return "  --> https protocol provided on 'spr' parameter, but missing/wrong protocol provided on " + service + " Endpoint " + "  (" + endpoint + ")";
-                    break;
-                default:
-                    if (endpoint.IndexOf("http://") == -1 && endpoint.IndexOf("https://") == -1)
-                        return "  --> but missing/wrong protocol provided on " + service + " Endpoint " + "  (" + endpoint + ")";
-                    break;
-            }
-
-            // checking the '.core.windows.net' part on the endpoint URI 
-            if (endpoint.IndexOf(".core.windows.net") == -1)
-                return "  --> but wrong " + service + " Endpoint URI provided " + "  (" + endpoint + ")";
-
-            // checking for some storage account name on the endpoint URI      TODO - check the storage account name used
-            if (endpoint.IndexOf("http://.") != -1 || endpoint.IndexOf("https://.") != -1)
-                return "  --> but missing the Storage Account name on " + service + " Endpoint " + "  (" + endpoint + ")";
-
-            // checking the service on the endpoint URI (blob, queue, table, file) 
-            if (endpoint.IndexOf(service.ToLower()) == -1)
-                return " --> but wrong service provided on " + service + " Endpoint URI " + "  (" + endpoint + ")";
-
-            return " - " + service + " Endpoint: " + endpoint;
-        }
 
 
 
@@ -907,35 +801,12 @@ namespace Storage_Helper_SAS_Tool
         {
             string s = "'spr' parameter (Allowed Protocols):\n";
 
-            // no (optional) spr provided
-            if (spr == "not found")
-                return andSetState("spr", true, s += "  HTTPS, HTTP protocols allowed (spr optional not provided)\n\n");
+            string res = SAS_ValidateParam.Spr(spr, sr, tn, sv);
 
-            // spr empty
-            if (spr.Length == 0)
-                return andSetState("spr", false, s += "  --> Empty optional Allowed Protocols value (spr=" + spr + ")\n\n");
-
-            // on Service SAS the 'spr' (protocol) is only supported on Service Version >= 2015-04-05
-            if ((sr != "not found" || tn != "not found") && sv.CompareTo("2015-04-05") < 0)
-                return andSetState("spr", false, s += "  --> 'spr' parameter only supported on Service Version ('sv') 2015-04-05 or later (sv=" + sv + ")\n\n");
-
-            // found chars not supported by spr paramenter
-            if (!Utils.ValidateString(spr, "https,"))
-                return andSetState("spr", false, s += "  --> Invalid protocol provided on 'spr' parameter  (spr=" + spr + ")\n\n");
-
-            // both protocols provided on spr 
-            if (spr.IndexOf("http,https") != -1 || spr.IndexOf("https,http") != -1)
-                return andSetState("spr", true, s += "  HTTPS, HTTP protocols allowed.\n\n");
-
-            // https protocol provided on spr
-            if (spr == "https")
-                return andSetState("spr", true, s += "  HTTPS protocol only allowed.\n\n");
-
-            // http protocol provided on spr (needed to prevent find http in https or httpxxx)
-            if (spr == "http")
-                return andSetState("spr", false, s += "  --> HTTP protocol only is not a allowed.\n\n");
-
-            return andSetState("spr", false, s += "  --> wrong protocol provided on 'spr' parameter  (spr=" + spr + ")\n\n");
+            if (SAS.spr.s == true)           // value validated     
+                return s + "  " + res + "\n\n";
+            else                            // error on value 
+                return s + "  --> " + res + "\n\n";
         }
 
 
@@ -973,62 +844,33 @@ namespace Storage_Helper_SAS_Tool
         {
             string s = "'sv' parameter (Storage Service Version):\n";
 
-            // no (required) sv provided
-            if (sv == "not found")
-                return andSetState("sv", false, s += "  --> 'sv' Required but not provided)\n\n");
+            string res = SAS_ValidateParam.Sv(sv, sr, srt, tn);
 
-            // sv empty
-            if (sv.Length == 0)
-                return andSetState("sv", false, s += "  --> Empty Storage Version value (sv=" + sv + ")\n\n");
-
-
-            // Check Account SAS
-            for (int i = 0; i < validSV_AccountSAS_ARR.Length; i++)
-                if (validSV_AccountSAS_ARR[i] == sv)
-                    return andSetState("sv", true, s += "  Valid Storage Service Version for Account SAS  (sv=" + sv + ")\n\n");
-
-            // Check Service SAS
-            if (sr!="" || tn!="")
-                for (int i = 0; i < validSV_ServiceSas_ARR_addon.Length; i++)
-                    if (validSV_ServiceSas_ARR_addon[i] == sv)
-                        return andSetState("sv", true, s += "  Valid Storage Service Version for Service SAS (sv=" + sv + ")\n\n");
-
-      
-            return andSetState("sv", false, s += "  --> Invalid Storage Service Version  (sv=" + sv + ")\n" +
-                        "      Please visit the link below to check for new versions that may not yet be supported by this Storage Helper SAS Tool:\n" +
-                        "      https://docs.microsoft.com/en-us/rest/api/storageservices/previous-azure-storage-service-versions \n\n");
+            if (SAS.sv.s == true)           // value validated    
+                return s + "  " + res + "\n\n";
+            else                            // error on value 
+                return s + "  --> " + res + "\n\n";
         }
 
-   
+
 
         /// <summary>
-        /// 
+        /// Format the output string in case of none srt, st or tn parameter provided, or more than one provided
         /// </summary>
-        /// <param name="sr"></param>
-        /// <param name="srt"></param>
-        /// <param name="tn"></param>
+        /// <param name="s"></param>
         /// <returns></returns>
-        public static string Testing_sr_srt_tn(string sr, string srt, string tn)
+        public static string Show_EmptyOrAll_srt_sr_tn(string str)
         {
-            // no (required) srt provided
-            if (sr == "not found" && srt == "not found" && tn == "not found")
-                return "";
+            string s = "'srt', 'sr', 'tn' parameters (Account / Service SAS):\n";
 
-            // Two or more srt, sr or tn provided
-            if ((sr != "not found" && srt != "not found") || (sr != "not found" && tn != "not found") || (srt != "not found" && tn != "not found"))
-                return "all";
+            string res = SAS_ValidateParam.Srt_sr_tn(str);
 
-            if (sr != "not found")
-                return "sr";
-
-            if(srt != "not found")
-                return "srt";
-
-            if (tn != "not found")
-                return "tn";
-
-            return "";
+            if (SAS.srt.s == true && SAS.sr.s == true && SAS.tn.s == true)            // value validated
+                return s + "  " + res + "\n\n";
+            else                            // error on value 
+                return s + "  --> " + res + "\n\n";
         }
+
 
 
         /// <summary>
@@ -1043,16 +885,17 @@ namespace Storage_Helper_SAS_Tool
 
             // no (required) srt provided
             if (srt == "not found")
-                return andSetState("srt", false, s += "  --> 'srt' Required but not provided\n\n");
+                return andSetState("srt", false, s + "  --> 'srt' Required but not provided\n\n");
 
             // srt empty
             if (srt.Length == 0)
-                return andSetState("srt", false, s += "  --> Empty Signed Resource Type value (srt=" + srt + ")\n\n");
+                return andSetState("srt", false, s + "  --> Empty Signed Resource Type value (srt=" + srt + ")\n\n");
 
             // found chars not supported by srt paramenter
             if (!Utils.ValidateString(srt, "sco"))
-                return andSetState("srt", false, s += "  --> Invalid Signed Resource Types  (srt=" + srt + ")\n\n");
+                return andSetState("srt", false, s + "  --> Invalid Signed Resource Types  (srt=" + srt + ")\n\n");
 
+            // srt OK
             if (srt.Length <= 3)
             {
                 if (srt.IndexOf("s") != -1)
@@ -1065,7 +908,7 @@ namespace Storage_Helper_SAS_Tool
                     s += "  Access to Object-level APIs (Put Blob, Query Entity, Get Messages, Create File, etc.)\n";
             }
             else
-                return andSetState("srt", false, s += "  --> Invalid Signed Resource Types  (srt=" + srt + ")\n\n");
+                return andSetState("srt", false, s + "  --> Invalid Signed Resource Types  (srt=" + srt + ")\n\n");
 
             return andSetState("srt", true, s + "\n");
         }
@@ -1085,55 +928,12 @@ namespace Storage_Helper_SAS_Tool
         {
             string s = "'sr' parameter (Signed Resource):\n";
 
-            // no (required) sr provided
-            if (sr == "not found")
-                return andSetState("sr", false, s += "  --> 'sr' Required but not provided\n\n");
+            string res = SAS_ValidateParam.Sr(sr, sv);
 
-            if(sr.Length >1 && sr!="bs")
-                return andSetState("sr", false, s += "  --> Only one signed resource (b,c,s,f,bs) can be provided  (sr=" + sr + ")\n\n");
-
-            // found chars not supported by sr paramenter
-            if (!Utils.ValidateString(sr, "bcsf"))
-                return andSetState("sr", false, s += "  --> Invalid Signed Resource  (sr=" + sr + ")\n\n");
-
-            // Verifying the Service Version for Files
-            if((sr=="s" || sr =="f") && sv.CompareTo("2015-02-21")<0)
-                return andSetState("sr", false, s += "  --> The File and Share resouces (s,f) are only supported on version 2015-02-21 and later (sr=" + sr + ", sv=" + sv + ")\n\n");
-
-            // Verifying the Service Version for Blob Snapshots
-            if (sr == "bs" && sv.CompareTo("2018-11-09") < 0)
-                return andSetState("sr", false, s += "  --> The Blob Snapshot resouce (bs) are only supported on version 2018-11-09 and later (sr=" + sr + ", sv=" + sv + ")\n\n");
-
-            bool state=true;
-            switch (sr)
-            {
-                case "b":
-                    s += "  Access to Blob (grants access to the content and metadata of the blob)\n";
-                    break;
-
-                case "c":
-                    s += "  Access to Container (grants access to the content and metadata of any blob in the container, and to the list of blobs in the container)\n";
-                    break;
-
-                case "s":
-                    s += "  Access to File Share (grants access to the content and metadata of any file in the share, and to the list of directories and files in the share)\n";
-                    break;
-
-                case "f":
-                    s += "  Access to File (grants access to the content and metadata of the file.)\n";
-                    break;
-
-                case "bs":
-                    s += "  Access to Blob Snapshot (grants access to the content and metadata of the specific snapshot, but not the corresponding root blob)\n";
-                    break;
-
-                default:
-                    s += "  --> Invalid Signed Resource Types  (sr=" + sr + ")\n";
-                    state = false;
-                    break;
-            }
-
-            return andSetState("sr", state, s + "\n");
+            if(SAS.sr.s == true)            // value validated
+                return s + "  " + res + "\n\n";
+            else                            // error on value 
+                return s + "  --> " + res + "\n\n";
         }
 
 
@@ -1148,13 +948,12 @@ namespace Storage_Helper_SAS_Tool
         {
             string s = "'tn' parameter (Table Name):\n";
 
-            // no (required) tn provided
-            if (tn == "not found")
-                return andSetState("tn", false, s += "  --> 'tn' Required but not provided\n\n");
+            string res = SAS_ValidateParam.Tn(tn);
 
-            s += "  Access to Table '"+ tn + "'\n";
-
-            return andSetState("tn", true, s + "\n");
+            if (SAS.tn.s == true)           // value validated
+                return s + "  " + res + "\n\n";
+            else                            // error on value 
+                return s + "  --> " + res + "\n\n";
         }
 
 
@@ -1230,21 +1029,16 @@ namespace Storage_Helper_SAS_Tool
         {
             string s = "'si' parameter (Signed Identifier - Policy):\n";
 
-            // no si provided (optional)
-            if (si == "not found")
-                return "";
+            string res = SAS_ValidateParam.Si(si, srt);
 
-            if (si.Length > 64)
-                return s += "  --> Invalid Access Policy Name - Max 64 chars supported (si=" + si + " - current "+ si.Length.ToString() + " chars)\n\n";
+            if (SAS.si.s == false)           // error on value                    
+                return s + "  --> " + res + "\n\n";
 
-            if (srt != "not found")
-                return s += "  --> Policy Name ('si') not supported on Account SAS (srt=" + srt + ", si=" + si + ")\n\n";
+            if (res == "")
+                return ""; // silent return ("not found")
 
-            s += "  Access Policy Name used: '" + si + "'\n";
-
-            s += "  Policy Permissions: TODO " ;
-
-            return s + "\n";
+            // value validated
+            return s + "  " + res + "\n\n";
         }
 
 
@@ -1263,353 +1057,17 @@ namespace Storage_Helper_SAS_Tool
         {
             string s = "'sp' parameter (Signed Permissions):\n";
 
-            // no (required) sp provided
-            if (sp == "not found")
-                return andSetState("sp", false, s += "  --> 'sp' Required but not provided\n\n");
+            string res = SAS_ValidateParam.Sp(sp, srt, sr, tn, sv);
 
-            if (sp.Length == 0)
-                return andSetState("sp", false, s += "  --> Empty Signed Permissions (sp=" + sp + ")\n\n");
+            if (SAS.sp.s == false)           // error on value                    
+                return s + "  --> " + res + "\n\n";
 
-            //---------------------------------------------
-            // State (true/false) defined inside Show_sp_srt()
-            if (srt != "not found")
-                return s += Show_sp_srt(sp, srt, sv) + "\n";
-
-            if (sr != "not found")
-                return s += Show_sp_sr(sp, sr, sv) + "\n";
-
-            if (tn!= "not found")
-                return s += Show_sp_tn(sp, tn, sv) + "\n";
-
-            // How define Queue ???? - TODO
-            //if (sr != "not found")
-            //    return s += Show_sp_queue(sp, sv) + "\n";
-
-            return s + "\n";
-        }
-
-        /// <summary>
-        /// Account SAS for Service, Object, Containers
-        /// https://docs.microsoft.com/pt-pt/rest/api/storageservices/create-account-sas#specifying-account-sas-parameters
-        /// </summary>
-        /// <param name="sp"></param>
-        /// <param name="srt"></param>
-        /// <param name="sv"></param>
-        /// <returns></returns>
-        public static string Show_sp_srt(string sp, string srt, string sv)
-        {
-            string s = "";
-            string v = "Valid permissions for Blobs: 'rwdlacup'";
-            bool state = true;
-
-            // found chars not supported by sp paramenter
-            if (!Utils.ValidateString(sp, "rwdlacup") || sp.Length > 8)
-                return andSetState("sp", false, s += "  --> Invalid Signed Permissions for Account SAS (sp=" + sp + ", srt=" + srt + "). " + v + "\n");
-
-            // Permissions by Service
-            if (srt.IndexOf("o") != -1)
-            { 
-                s += "  Permissions for Objects (Account SAS) (o in 'srt'):\n";
-                if (sp.IndexOf("r") != -1)
-                    s += "    Read Objects\n";
-                if (sp.IndexOf("w") != -1)
-                    s += "    Write Objects\n";
-                if (sp.IndexOf("d") != -1)
-                    s += "    Delete Objects, except for Queue messages\n";
-                // 'l' - List Not supported
-                if (sp.IndexOf("a") != -1)
-                    s += "    Add queue messages, table entities, and append blobs only\n";
-                if (sp.IndexOf("c") != -1)
-                    s += "    Create new blobs or files, but not overwrite existing blobs or files\n";
-                if (sp.IndexOf("u") != -1)
-                    s += "    Update queue messages and table entities only\n";
-                if (sp.IndexOf("p") != -1)
-                    s += "    Process queue messages only\n";
-    
-                if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("a") == -1 && sp.IndexOf("c") == -1 && sp.IndexOf("u") == -1 && sp.IndexOf("p") == -1)
-                { 
-                    s += "    --> No Permissions for Objects (sp=" + sp + ")\n";
-                    state = false;
-                }
-            }
-
-            if (srt.IndexOf("s") != -1)
-            {
-                s += "  Permissions for Services (Account SAS) (s in 'srt'):\n";
-                if (sp.IndexOf("r") != -1)
-                    s += "    Read Services\n";
-                if (sp.IndexOf("w") != -1)
-                    s += "    Write Services\n";
-                // 'd' - Delete not supported
-                if (sp.IndexOf("l") != -1)
-                    s += "    List Services\n";
-                // 'a' - Add Not supported
-                // 'c' - Create Not supported
-                // 'u' - Update Not supported
-                // 'p' - Process Not supported
-
-                if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("l") == -1)
-                { 
-                    s += "    --> No Permissions for Services (sp=" + sp + ")\n";
-                    state = false;
-                }
-        }
-
-            if (srt.IndexOf("c") != -1)
-            {
-                s += "  Permissions for Containers (Account SAS) (c in 'srt'):\n";
-                if (sp.IndexOf("r") != -1)
-                    s += "    Read Containers\n";
-                if (sp.IndexOf("w") != -1)
-                    s += "    Write Containers\n";
-                if (sp.IndexOf("d") != -1)
-                    s += "    Delete Containers\n";
-                if (sp.IndexOf("l") != -1)
-                    s += "    List Containers\n";
-                // 'a' - Add Not supported
-                // 'c' - Create Not supported
-                // 'u' - Update Not supported
-                // 'p' - Process Not supported
-
-                if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("l") == -1)
-                { 
-                    s += "    --> No Permissions for Containers (sp=" + sp + ")\n";
-                    state = false;
-                }
-            }
-
-            SAS.sp.s = state;
-            return s;
+            // value validated
+            return s + "  " + res + "\n";
         }
 
 
 
-        /// <summary>
-        /// Service SAS for Blob, Container, File, Share
-        /// Same permissions for Policy and 'sr' (Service SAS) parameter
-        /// https://docs.microsoft.com/pt-pt/rest/api/storageservices/create-service-sas?redirectedfrom=MSDN#permissions-for-a-blob
-        /// </summary>
-        /// <param name="sp"></param>
-        /// <param name="sr">
-        /// signedresource - Required { b,c }   // blob, container - for blobs
-        //                            { s,f }   // share, file     - for files, version 2015-02-21 and later
-        //                            {bs}      // blob snapshot,               version 2018-11-09 and later</param>
-        /// <param name="sv"></param>
-        /// <returns></returns>
-        public static string Show_sp_sr(string sp, string sr, string sv)
-        {
-            string s = "";
-            string v = "";
-
-            switch (sr)
-            {
-                case "b":
-                    v = "Valid permissions for Blobs: 'rwdac'";
-
-                    // found chars not supported by sp paramenter
-                    if (!Utils.ValidateString(sp, "rwdac") || sp.Length > 5)
-                        return andSetState("sp", false, s += "  --> Invalid Signed Permissions for Blobs (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v + "\n");
-
-                    //----------------------------------------------
-                    s += "  Permissions for Blob (Service SAS) ('sr'=b):\n";
-                    if (sp.IndexOf("r") != -1)
-                        s += "    Read the content, properties, metadata and block list. Use the blob as the source of a copy operation.\n";
-
-                    if (sp.IndexOf("w") != -1)
-                        s += "    Create or write content, properties, metadata, or block list. Snapshot or lease the blob. Resize the blob (page blob only). Use the blob as the destination of a copy operation.\n";
-
-                    if (sp.IndexOf("d") != -1)
-                        if (sv.CompareTo("2017-07-29") < 0)
-                            s += "    Delete the blob\n";
-                        else
-                            s += "    Delete the blob and breaking a lease on a blob\n";
-
-                    if (sp.IndexOf("a") != -1)
-                        s += "    Add a block to an append blob.\n";
-
-                    if (sp.IndexOf("c") != -1)
-                        s += "    Write a new blob, snapshot a blob, or copy a blob to a new blob\n";
-
-
-                    if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("a") == -1 && sp.IndexOf("c") == -1)
-                    {
-                        s += "    --> No Permissions for Blobs (sp=" + sp + ")\n";
-                        SAS.sp.s = false;
-                    }
-                    //----------------------------------------------
-
-                    break;
-
-                case "c":
-                    v = "Valid permissions for Containers: 'rwdacl'";
-
-                    // found chars not supported by sp paramenter
-                    if (!Utils.ValidateString(sp, "rwdacl") || sp.Length > 6)
-                        return andSetState("sp", false, s += "  --> Invalid Signed Permissions for Containers (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v + "\n");
-
-                    //----------------------------------------------
-                    s += "  Permissions for Containers (Service SAS) ('sr'=c):\n";
-                    if (sp.IndexOf("r") != -1)
-                        s += "    Read the content, properties, metadata or block list of any blob in the container. Use any blob in the container as the source of a copy operation.\n";
-
-                    if (sp.IndexOf("w") != -1)
-                        s += "    For any blob in the container, create or write content, properties, metadata, or block list. Snapshot or lease the blob. Resize the blob (page blob only). Use the blob as the destination of a copy operation.\n";
-
-                    if (sp.IndexOf("d") != -1)
-                        if (sv.CompareTo("2017-07-29") < 0)
-                            s += "    Delete the blob in the container.\n";
-                        else
-                            s += "    Delete any blob in the container, breaking a lease on a container.\n";
-
-                    if (sp.IndexOf("a") != -1)
-                        s += "    Add a block to any append blob in the container.\n";
-
-                    if (sp.IndexOf("c") != -1)
-                        s += "    Write a new blob to the container, snapshot any blob in the container, or copy a blob to a new blob in the container.\n";
-
-                    if (sp.IndexOf("l") != -1)
-                        s += "    List blobs in the container.\n";
-
-                    if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("a") == -1 && sp.IndexOf("c") == -1 && sp.IndexOf("l") == -1)
-                    {
-                        s += "    --> No Permissions for Containers (sp=" + sp + ")\n";
-                        SAS.sp.s = false;
-                    }
-                    //----------------------------------------------
-
-                    break;
-
-                case "s":
-                    v = "Valid permissions for File Share: 'rwdlc'";
-
-                    // found chars not supported by sp paramenter
-                    if (!Utils.ValidateString(sp, "rwdlc") || sp.Length > 5)
-                        return andSetState("sp", false, s += "  --> Invalid Signed Permissions to File Share (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v + "\n");
-
-                    if (sv.CompareTo("2015-02-21") < 0)
-                        return andSetState("sp", false, s += "  --> Invalid Service Version to use File Share permissions on SAS. Needed sv=2015-02-21 or later (sr=" + sr + ", sv=" + sv + ")\n");
-
-                    //----------------------------------------------
-                    s += "  Permissions for File Share (Service SAS) ('sr'=s):\n";
-                    if (sp.IndexOf("r") != -1)
-                        s += "    Read the content, properties or metadata of any file in the share. Use any file in the share as the source of a copy operation.\n";
-
-                    if (sp.IndexOf("w") != -1)
-                        s += "    For any file in the share, create or write content, properties or metadata.Resize the file.Use the file as the destination of a copy operation.\n";
-
-                    if (sp.IndexOf("d") != -1)
-                        s += "    Delete any file in the share.\n";
-
-                    if (sp.IndexOf("l") != -1)
-                        s += "    List files and directories in the share.\n";
-
-                    if (sp.IndexOf("c") != -1)
-                        s += "    Create a new file in the share, or copy a file to a new file in the share.\n";
-
-                    if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("l") == -1 && sp.IndexOf("c") == -1)
-                    {
-                        s += "    --> No Permissions for File Share (sp=" + sp + ")\n";
-                        SAS.sp.s = false;
-                    }
-                    //----------------------------------------------
-
-                    break;
-
-                case "f":
-                    v = "Valid permissions for Files: 'rwdc'";
-
-                    // found chars not supported by sp paramenter
-                    if (!Utils.ValidateString(sp, "rwdc") || sp.Length > 4)
-                        return andSetState("sp", false, s += "  --> Invalid Signed Permissions for File (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v + "\n");
-
-                    if (sv.CompareTo("2015-02-21") < 0)
-                        return andSetState("sp", false, s += "  --> Invalid Service Version to File permissions on SAS. Needed sv=2015-02-21 or later (sr=" + sr + ", sv=" + sv + ")\n");
-
-                    //----------------------------------------------
-                    s += "  Permissions for File (Service SAS) ('sr'=f):\n";
-                    if (sp.IndexOf("r") != -1)
-                        s += "    Read the content, properties, metadata.Use the file as the source of a copy operation.\n";
-
-                    if (sp.IndexOf("w") != -1)
-                        s += "    Create or write content, properties, metadata.Resize the file.Use the file as the destination of a copy operation.\n";
-
-                    if (sp.IndexOf("d") != -1)
-                        s += "    Delete the file.\n";
-
-                    if (sp.IndexOf("c") != -1)
-                        s += "    Create a new file or copy a file to a new file.\n";
-
-                    if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("c") == -1)
-                    { 
-                        s += "    --> No Permissions for Files (sp=" + sp + ")\n";
-                        SAS.sp.s = false;
-                    }
-                    //----------------------------------------------
-
-                    break;
-
-                case "bs":
-                    // Valid permissions ??? - TODO
-                    //----------------------------------------------
-                    v = "Valid permissions for Blob Shapshots: 'rwdlacup' - TODO ???? ";
-
-                    s += "  Permissions for Blob Shapshots (Service SAS) ('sr'=bs):\n";
-                    
-                    if (sv.CompareTo("2018-11-09") < 0)
-                        return andSetState("sp", false, s += "  --> Invalid Service Version to use Blob Shapshots (Service SAS). Needed sv=2018-11-09 or later (sr=" + sr + ", sv=" + sv + ")\n");
-
-                    if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("a") == -1 && sp.IndexOf("c") == -1 && sp.IndexOf("u") == -1 && sp.IndexOf("p") == -1)
-                    { 
-                        s += "    --> No Permissions for Blob Shapshots (sp=" + sp + "). " + v + "\n";
-                        SAS.sp.s = false;
-                    }
-                    return s += "    Valid Permissions sp=" + sp + ", for Blob Shapshots\n";
-            }
-
-            return s;
-        }
-
-
-
-        /// <summary>
-        /// Service SAS for Table
-        /// Same permissions for Policy and 'tn' (Service SAS) parameter 
-        /// </summary>
-        /// <param name="sp"></param>
-        /// <param name="sv"></param>
-        /// <returns></returns>
-        public static string Show_sp_tn(string sp, string tn, string sv)
-        {
-            string s = "";
-            string v = "Valid permissions for Table Service: 'raud'";
-
-            // found chars not supported by sp paramenter
-            if (!Utils.ValidateString(sp, "raud") || sp.Length > 4)
-                return andSetState("sp", false, s += "  --> Invalid Signed Permissions for Table (Service SAS) (sp=" + sp + "). " + v + "\n");
-
-            //----------------------------------------------
-            s += "  Permissions for Table (Service SAS) (Table name 'tn'=" + tn + "):\n";
-            if (sp.IndexOf("r") != -1)
-                s += "    Get entities and query entities.\n";
-
-            if (sp.IndexOf("a") != -1)
-                s += "    Add entities. Note: Add and Update permissions are required for upsert operations.\n";
-
-            if (sp.IndexOf("u") != -1)
-                s += "    Update entities. Note: Add and Update permissions are required for upsert operations.\n";
-
-            if (sp.IndexOf("d") != -1)
-                s += "    Delete entities.\n";
-
-            if (sp.IndexOf("r") == -1 && sp.IndexOf("a") == -1 && sp.IndexOf("u") == -1 && sp.IndexOf("d") == -1)
-            {
-                s += "    --> No Permissions for Tables (sp=" + sp + ")\n";
-                SAS.sp.s = false;
-            }
-            //----------------------------------------------
-
-            return s;
-        }
 
 
 
@@ -1625,35 +1083,15 @@ namespace Storage_Helper_SAS_Tool
         /// <returns></returns>
         public static string Show_sp_queue(string sp, string sv)
         {
-            string s = "";
-            string v = "Valid permissions for Queue: 'raup'";
+            string s = "  Permissions for Queue (Service SAS)  ('???'=??):\n";
 
-            // found chars not supported by sp paramenter
-            if (!Utils.ValidateString(sp, "raup") || sp.Length > 4)
-                return andSetState("sp", false, s += "  --> Invalid Signed Permissions for Queue (Service SAS) (sp=" + sp + "). " + v + "\n");
+            string res = SAS_ValidateParam.Sp_queue(sp, sv);
 
-            //----------------------------------------------
-            s += "  Permissions for Queue (Service SAS)  ('???'=??):\n";
-            if (sp.IndexOf("r") != -1)
-                s += "    Read metadata and properties, including message count. Peek at messages.\n";
+            if (SAS.sp.s == false)           // error on value                    
+                return s + "  --> " + res + "\n\n";
 
-            if (sp.IndexOf("a") != -1)
-                s += "    Add messages to the queue.\n";
-
-            if (sp.IndexOf("u") != -1)
-                s += "    Update messages in the queue. Note: Use the Process permission with Update so you can first get the message you want to update.\n";
-
-            if (sp.IndexOf("p") != -1)
-                s += "    Get and delete messages from the queue.\n";
-
-            if (sp.IndexOf("r") == -1 && sp.IndexOf("a") == -1 && sp.IndexOf("u") == -1 && sp.IndexOf("p") == -1)
-            {
-                s += "    --> No Permissions for Queues (sp=" + sp + ")\n";
-                SAS.sp.s = false;
-            }
-            //----------------------------------------------
-
-            return s;
+            // value validated
+            return s + "  " + res + "\n\n";
         }
 
 
@@ -1678,123 +1116,13 @@ namespace Storage_Helper_SAS_Tool
         {
             string s = "'st','se' parameters (Signed Start & Signed End Date/Time):\n";
 
-            DateTime testDate;
-            DateTime seDate;
-            DateTime stDate;
+            string res = SAS_ValidateParam.St_se(st, se);
 
-            if (se == "not found")  // se Required
-                return andSetState("se", false, s += "  --> Required Signed Expiry Date/Time 'se' value is missing\n\n");
+            if (SAS.st.s == false || SAS.se.s == false)           // error on value                    
+                return s + "  --> " + res + "\n\n";
 
-            if (se.Length == 0)  // se Required
-                return andSetState("se", false, s += "  --> Empty required Signed Expiry Date/Time value (se=" + se + ")\n\n");
-
-            // Invalid format on Expiry Datime (by lenght)
-            if (se.Length != 20 && se.Length != 17 && se.Length != 10)
-                return andSetState("se", false, s += "  --> Incorrect format on Signed Expiry Date/Time (se=" + se + ")\n\n");
-
-            // Testing valid 'se' date
-            try
-            {
-                seDate = Convert.ToDateTime(se).ToUniversalTime();        // Convert.ToDateTime(se) -> convert to local time - > need to convert again to in UTC time
-            }
-            catch(Exception ex)
-            {
-                return andSetState("se", false, s += "  --> Invalid End date (se=" + se + "): " + ex.Message + "\n\n");
-            }
-
-            if (seDate.CompareTo(DateTime.Now.ToUniversalTime()) < 0)      // Test ending date in UTC
-                return andSetState("se", false, s += "  --> Already Expired - End date (se=" + seDate.ToString().Replace("/", "-") + ", current UTC time=" + DateTime.Now.ToUniversalTime().ToString().Replace("/", "-") + ", current local time=" + DateTime.Now.ToString().Replace("/", "-") + ")\n\n");
-
-
-
-            //-------------------------------------------------------------------------------------
-            // st tests
-            //-------------------------------------------------------------------------------------
-            if (st.Length == 0)  // se Optional
-                return andSetState("st", false, s += "  --> Empty optional Signed Start Date/Time value (st=" + st + ")\n\n");
-
-            string s2 = "";
-            if (st != "not found")
-            {
-                // Invalid Start Datime format (by lenght), if provided
-                if (st.Length != 20 && st.Length != 17 && st.Length != 10)
-                    return andSetState("st", false, s += "  --> Incorrect format on Signed Start Date/Time (st=" + st + ")\n\n");
-
-                // Testing valid 'st' date
-                try
-                {
-                    stDate = Convert.ToDateTime(st).ToUniversalTime();        // Convert.ToDateTime(se) -> convert to local time - > need to convert again to in UTC time
-                }
-                catch (Exception ex)
-                {
-                    return andSetState("st", false, s += "  --> Invalid Start date (st=" + st + "): " + ex.Message + "\n\n");
-                }
-
-                // Test starting date in UTC
-                if (stDate.CompareTo(DateTime.Now.ToUniversalTime()) > 0)      
-                    return andSetState("st", false, s += "  --> SAS not valid yet, at the current date/time (st=" + stDate.ToString().Replace("/", "-") + ", current UTC time=" + DateTime.Now.ToUniversalTime().ToString().Replace("/", "-") + ", current local time=" + DateTime.Now.ToString().Replace("/", "-") + ")\n\n");
-
-                // Test Starting date after Ending date
-                if (stDate.CompareTo(seDate) > 0)
-                    return andSetState("st", false, s += "  --> Signed Start date/time after Signed Expiry Date/Time (st=" + st + ", se=" + se + ")\n\n");
-
-
-                // testing Length st (SignedStart) - optional
-                try
-                {
-                    switch (st.Length)
-                    {
-                        case 20:    // YYYY-MM-DDThh:mm:ssZ 
-                            testDate = DateTimeUtils.FromIso8601Date(st);   // testDate used only to firing the exception if incorrect format found
-                            s2 = s + "  Valid from " + st;
-                            break;
-                        case 17:    // YYYY-MM-DDThh:mmZ 
-                            testDate = Convert.ToDateTime(st);
-                            s2 = s + "  Valid from " + st;
-                            break;
-                        case 10:    // YYYY-MM-DD
-                            testDate = Convert.ToDateTime(st);
-                            s2 = s + "  Valid from " + st;
-                            break;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    return andSetState("st", false, s += "  --> Invalid Start date (st=" + st + "): " + ex.Message + "\n\n");
-                }
-            }
-            //-------------------------------------------------------------------------------------
-
-
-
-            // testing Length se (SignedExpiry) - Required
-            try
-            {
-                switch (se.Length)
-                {
-                    case 20:    // YYYY-MM-DDThh:mm:ssZ 
-                        testDate = DateTimeUtils.FromIso8601Date(se);   // testDate used only to firing the exception if incorrect format found
-                        break;
-                    case 17:    // YYYY-MM-DDThh:mmZ 
-                        testDate = Convert.ToDateTime(se);
-                        break;
-                    case 10:    // YYYY-MM-DD
-                        testDate = Convert.ToDateTime(se);
-                        break;
-                }
-
-                if (st == "not found")  // SignedStart not provided
-                    s += "  Valid up to " + se + "\n";
-                else                    // SignedStart provided and valid
-                    s = s2 + " to " + se + "\n";
-            }
-            catch (Exception ex)
-            {
-                return andSetState("se", false, s += "  --> Invalid End date (se=" + se + "): " + ex.Message + "\n\n");
-            }
-
-
-            return andSetState("se", true, s + "\n");
+            // value validated
+            return s + "  " + res + "\n\n";
         }
 
 
@@ -1811,135 +1139,18 @@ namespace Storage_Helper_SAS_Tool
         {
             string s = "'sip' parameter (Signed IP):\n";
 
-            if (sip == "not found")     return andSetState("sip", true, s + "  All client IP addresses allowed (sip optional not provided)\n\n");
+            string res = SAS_ValidateParam.Sip(sip);
 
-            // sip empty
-            if (sip.Length == 0)        return andSetState("sip", false, s += "  --> Empty optional Signed IP value (sip=" + sip + ")\n\n");
+            if (SAS.sip.s == false)           // error on value                    
+                return s + "  --> " + res + "\n\n";
 
-            // '-' found at the end
-            int i = sip.IndexOf("-");
-            int p = sip.IndexOf(".");
-            if (i == sip.Length - 1 || p == sip.Length - 1 )  
-                                        return andSetState("sip", false, s += "  --> Invalid IP address range - IP address could not end with '-' or '.'  (sip=" + sip + ")\n\n");
-
-            // '-' found at the begin 
-            if (i == 0 || p == 0)       return andSetState("sip", false, s += "  --> Invalid IP address range - IP address could not start with '-' or '.' (sip=" + sip + ")\n\n");
-
-            // Two or more '-' found
-            i = sip.IndexOf("--");
-            i = sip.IndexOf("..");
-            if (i != -1 || p != -1)    return andSetState("sip", false, s += "  --> Invalid IP address range - Two or more '-' or '.' found (sip=" + sip + ")\n\n");
-
-
-            // -------- IP Bytes validation --------------------
-            string s2 = Validate_Sip(sip);
-            if (s2 != "")  // error found on IP
-                return andSetState("sip", false, s + "  --> " + s2);
-
-
-            //------------- Ok, IP validated -----------------
-            if (toIP[0] == 0)      // toIP empty - not used
-                return andSetState("sip", true, s + "  IP address: " + fromIP[0] + "." + fromIP[1] + "." + fromIP[2] + "." + fromIP[3] + "\n\n");
-            else
-                return andSetState("sip", true, s + "  IP address range from: " + fromIP[0] + "." + fromIP[1] + "." + fromIP[2] + "." + fromIP[3] + " to " + toIP[0] + "." + toIP[1] + "." + toIP[2] + "." + toIP[3] + " \n\n");
+            // value validated
+            return s + "  " + res + "\n\n";
         }
 
 
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public static string Validate_Sip()
-        { 
-            string s = Validate_Sip(SAS.sip.v);
-            if (s != "")  // error found on IP
-                return andSetState("sip", false, s);
-
-            return ""; // empty means IPs validated - no error found
-        }
-
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="sip"></param>
-        /// <returns></returns>
-        public static string Validate_Sip(string sip)
-        {
-            string[] IP = { "", "" };                // Array with 2 IP's - string format
-            int[,] IPbyte = { { 0, 0, 0, 0 }, { 0, 0, 0, 0 } };    // Array with 2 IP's - byte format
-
-            int i = sip.IndexOf("-");
-            int j2 = 0;
-
-            // Validate different IP's on sip
-            if (i != -1)   // Range specified - sip=168.1.5.60-168.1.5.70
-            {
-                IP[0] = sip.Substring(0, i);
-                IP[1] = sip.Substring(i + 1);
-            }
-            else           // only one ip specified - sip=168.1.5.65 
-            {
-                IP[0] = sip;
-            }
-
-            // Validate bytes on each IP address
-            string strByte = "";
-            string sip2 = "";
-            for (int myIP = 0; myIP < IP.Length; myIP++)
-            {
-                if (!String.IsNullOrEmpty(IP[myIP]))
-                {
-                    sip2 = IP[myIP];
-                    for (int myByte = 0; myByte < 4; myByte++)
-                    {
-                        if (myByte != 3) // last byte dont have "."
-                        {
-                            j2 = sip2.IndexOf(".");
-                            if (j2 == -1)
-                                return "Invalid IP address (sip=" + sip + ")\n\n";
-                            strByte = sip2.Substring(0, j2);    // b - one byte from IP
-                            sip2 = sip2.Substring(j2 + 1);      // remove the readed byte
-                        }
-                        else // last byte
-                            strByte = sip2;    // b - last byte from IP
-
-                        try
-                        {
-                            IPbyte[myIP, myByte] = Int32.Parse(strByte);
-                            if (((myByte == 0 && IPbyte[myIP, myByte] == 0) || (myByte > 0 && IPbyte[myIP, myByte] < 0)) || IPbyte[myIP, myByte] > 255) // p=0 - 1st byte could not be 0
-                                return "Invalid IP address (sip=" + sip + ")\n\n";
-                        }
-                        catch (Exception ex)
-                        {
-                            return "Invalid IP address (sip=" + sip + "): " + ex.Message + "\n\n";
-                        }
-                    }
-                }
-            }
-
-            // Start IP greater than End IP
-            if (!String.IsNullOrEmpty(IP[1]))
-                if (IPbyte[0, 0] > IPbyte[1, 0])
-                    return "Invalid IP address range - Start IP greater than End IP (sip=" + sip + ")\n\n";
-
-
-            // v12.0.0.0_preview
-            //------------------------------------------
-            // copy IP Bytes to fromIP[]
-            for (int bf = 0; bf < 4; bf++)
-                fromIP[bf] = (byte)IPbyte[0, bf];
-
-            // copy IP Bytes to toIP[] 
-            for (int bf = 0; bf < 4; bf++)
-                toIP[bf] = (byte)IPbyte[1, bf];
-            //------------------------------------------
-
-            return "";  // empty means IPs validated - no error found
-        }
 
 
 
@@ -1969,12 +1180,117 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
+
+
+
+        /// <summary>
+        /// Try to Get the Storage Account Name from any Endpoint, if provided
+        /// </summary>
+        private void Get_StorageAccountName_FromEndpoint()
+        {
+            SAS.storageAccountName.v = Get_SASValue(SAS.blobEndpoint, "://", ".");
+
+            if (SAS.storageAccountName.v == "")
+                SAS.storageAccountName.v = Get_SASValue(SAS.fileEndpoint, "://", ".");
+
+            if (SAS.storageAccountName.v == "")
+                SAS.storageAccountName.v = Get_SASValue(SAS.tableEndpoint, "://", ".");
+
+            if (SAS.storageAccountName.v == "")
+                SAS.storageAccountName.v = Get_SASValue(SAS.queueEndpoint, "://", ".");
+        }
+
+
+
+
+        /// <summary>
+        /// Search on source and returns the string value between SASHeader and delimiter, or the end of the string if delimiter not found
+        /// debug=true : adds additional information
+        /// </summary>
+        public static string Get_SASValue(string source, string SASHeader, string delimiter, bool debug = false)
+        {
+            string s2 = "not found";
+            int i = source.IndexOf(SASHeader);
+            int lenght = 0;
+            if (i >= 0)
+            {
+                i += SASHeader.Length;
+                lenght = source.IndexOf(delimiter, i) - i;
+                if (lenght >= 0)
+                    s2 = source.Substring(i, lenght);
+
+                if (lenght < 0) // delimeter not found - end of the string
+                    s2 = source.Substring(i);
+            }
+
+            if (debug)
+                return "SASHeader:" + SASHeader + "  i:" + i.ToString() + "  lenght:" + lenght.ToString() + "  s2:" + s2;
+            return s2;
+        }
+
+
+
+        /// <summary>
+        /// Search on source and returns the string value between SASHeader and the end on the source.
+        /// debug=true : adds additional information
+        /// </summary>
+        public static string Get_SASValue(string source, string SASHeader, bool debug = false)
+        {
+            string s2 = "not found";
+            int i = source.IndexOf(SASHeader);
+            if (i >= 0)
+                s2 = source.Substring(i + SASHeader.Length);
+
+            if (debug)
+                return "SASHeader:" + SASHeader + "  i:" + i.ToString() + "  s2:" + s2;
+            return s2;
+        }
+
+
+        /// <summary>
+        /// Search on source to seach any space or new line in the source.
+        /// return "" if ok
+        /// </summary>
+        public static string Get_SpaceNL(string source)
+        {
+            int i = -1;
+
+            i = source.IndexOf(" ");   // space
+            if (i != -1)
+                return "Space";
+            else
+                i = source.IndexOf("\r\n");
+            if (i == -1) i = source.IndexOf("\r");
+            if (i == -1) i = source.IndexOf("\n");
+            if (i != -1)
+                return "New Line";
+            return "";
+        }
+
+
+
+        /// <summary>
+        /// Return true if the str is found on ComboBox items list
+        /// </summary>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        private static bool ComboItemFound(ComboBox comboBox, string str)
+        {
+            for (int i = 0; i < comboBox.Items.Count; i++)
+                if (str == comboBox.Items[i].ToString())
+                    return true;
+            return false;
+        }
+
+
+
         /// <summary>
         /// Fill the sv ComboBox and the API_Version with the values of the array passed
         /// </summary>
         /// <param name="comboBox1"></param>
         public static void PopulateComboBox_sv(ComboBox comboBox1, string comboBox_sr_txt, string TextBox_tn_txt)
         {
+            string s = comboBox1.Text;
             comboBox1.Items.Clear();
 
             // Check Account SAS
@@ -1983,6 +1299,13 @@ namespace Storage_Helper_SAS_Tool
             // Check Service SAS 
             if (comboBox_sr_txt != "" || TextBox_tn_txt != "")
                 PopulateComboBox(comboBox1, comboBox_sr_txt, validSV_ServiceSas_ARR_addon);
+
+            
+            // Validate the old value of the combo box are in the new list, otherwise clean the value
+            if(ComboItemFound(comboBox1, s))
+                comboBox1.Text = s;
+            else
+                comboBox1.Text = "";
         }
 
 
@@ -2014,21 +1337,6 @@ namespace Storage_Helper_SAS_Tool
 
 
 
-
-        /// <summary>
-        /// Set the state on StrParameter param, and return the string
-        /// States: true - no error on parameter; false - Error found on paramenter
-        /// Used on Show_XXX functions
-        /// </summary>
-        private static string andSetState(string param, bool state, string s)
-        {
-            Set_StateParameter(param, state);
-            return s;
-        }
-
-
-
-
         /// <summary>
         /// true / false ig the 'findStr' found on 'source'
         /// </summary>
@@ -2046,11 +1354,26 @@ namespace Storage_Helper_SAS_Tool
 
 
         /// <summary>
+        /// Set the state on StrParameter param, and return the string
+        /// States: true - no error on parameter; false - Error found on paramenter
+        /// Used on Show_XXX functions
+        /// </summary>
+        public static string andSetState(string param, bool state, string s)
+        {
+            Set_StateParameter(param, state);
+            return s;
+        }
+
+
+
+
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="param"></param>
         /// <param name="state"></param>
-        private static void Set_StateParameter(string param, bool state)
+        public static void Set_StateParameter(string param, bool state)
         {
             switch (param)
             {
@@ -2087,6 +1410,9 @@ namespace Storage_Helper_SAS_Tool
                 case "tn":
                     SAS.tn.s = state;
                     break;
+                case "si":
+                    SAS.si.s = state;
+                    break;
             }
         }
         //--------------------------------------------------------------------------------------------------------
@@ -2096,7 +1422,7 @@ namespace Storage_Helper_SAS_Tool
 
         public static void init_SASstruct() 
         {
-            SAS.sharedAccessSignature = "";
+            SAS.sharedAccessSignature.v = ""; SAS.sharedAccessSignature.s = true;
 
             SAS.blobEndpoint = "";
             SAS.fileEndpoint = "";
@@ -2132,7 +1458,7 @@ namespace Storage_Helper_SAS_Tool
             SAS.epk = "";
             SAS.srk = "";
             SAS.erk = "";
-            SAS.si = "";
+            SAS.si.v = "";          SAS.si.s = true;
         }
 
     }

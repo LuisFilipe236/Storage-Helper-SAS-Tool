@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
+// Storage SDK v12.x.x
 using Azure.Storage;
 using Azure.Storage.Sas;
 using Azure.Storage.Blobs;
@@ -39,7 +40,9 @@ namespace Storage_Helper_SAS_Tool
         /// 
 
 
-
+        //---------------------------------------------------------------------------------------------------------------------
+        //-------------------- Account SAS methods
+        //---------------------------------------------------------------------------------------------------------------------
 
         /// <summary>
         /// returns SasProtocol value based on the string on paramenter.
@@ -61,10 +64,10 @@ namespace Storage_Helper_SAS_Tool
 
 
 
-        public static void Regenerate_AccountSAS(TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox BoxAuthResults, string ss)
+        public static bool Regenerate_AccountSAS(TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox BoxAuthResults, string ss)
         {
             string sas = "?" + AccountSasBuilder(textBoxAccountName.Text, textBoxAccountKey1.Text);
-            if (sas == "?") return;
+            if (sas == "?") return false;
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Account SAS token:\n";
@@ -87,7 +90,11 @@ namespace Storage_Helper_SAS_Tool
                 BoxAuthResults.Text += "Table URI:\n" + "https://" + textBoxAccountName.Text + ".table.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
+
+            return true;
         }
+
+
 
         /// <summary>
         /// AccountSasBuilder Struct
@@ -140,17 +147,19 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
-        
 
 
 
+        //---------------------------------------------------------------------------------------------------------------------
+        //-------------------- Blob Service SAS methods
+        //---------------------------------------------------------------------------------------------------------------------
 
-        public static void Regenerate_ServiceSAS_Container(Label labelContainerName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxContainerName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
+        public static bool Regenerate_ServiceSAS_Container(Label labelContainerName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxContainerName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
         {
-            if (Utils.StringEmpty(labelContainerName, textBoxContainerName.Text, "Missing Container Name", "Error")) { SAS_Utils.SAS.storageAccountName.s = false; return; }
+            if (Utils.StringEmpty(labelContainerName, textBoxContainerName.Text, "Missing Container Name", "Error")) { SAS_Utils.SAS.storageAccountName.s = false; return false; }
 
             string sas = "?" + BlobSasBuilder(textBoxAccountName.Text, textBoxAccountKey1.Text, textBoxContainerName.Text, "", "", textBoxPolicyName.Text);
-            if (sas == "?") return;
+            if (sas == "?") return false;
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Container:\n";
@@ -162,16 +171,19 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Container URI:\n" + "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + Uri.UnescapeDataString(sas) + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
+
+            return true;
         }
 
 
-        public static void Regenerate_ServiceSAS_Blob(Label labelContainerName, Label labelBlobName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxContainerName, TextBox textBoxBlobName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
+
+        public static bool Regenerate_ServiceSAS_Blob(Label labelContainerName, Label labelBlobName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxContainerName, TextBox textBoxBlobName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
         {
-            if (Utils.StringEmpty(labelContainerName, textBoxContainerName.Text, "Missing Container Name", "Error")) { SAS_Utils.SAS.containerName.s = false; return; }
-            if (Utils.StringEmpty(labelBlobName, textBoxBlobName.Text, "Missing Blob Name", "Error")) { SAS_Utils.SAS.blobName.s = false; return; }
+            if (Utils.StringEmpty(labelContainerName, textBoxContainerName.Text, "Missing Container Name", "Error")) { SAS_Utils.SAS.containerName.s = false; return false; }
+            if (Utils.StringEmpty(labelBlobName, textBoxBlobName.Text, "Missing Blob Name", "Error")) { SAS_Utils.SAS.blobName.s = false; return false; }
 
             string sas = "?" + BlobSasBuilder(textBoxAccountName.Text, textBoxAccountKey1.Text, textBoxContainerName.Text, textBoxBlobName.Text, "", textBoxPolicyName.Text);
-            if (sas == "?") return;
+            if (sas == "?") return false;
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Blob:\n";
@@ -183,16 +195,19 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Blob URI:\n" + "https://" + textBoxAccountName.Text + ".blob.core.windows.net/"+ textBoxContainerName.Text + "/"+ textBoxBlobName.Text + Uri.UnescapeDataString(sas) + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
+
+            return true;
         }
 
 
-        public static void Regenerate_ServiceSAS_BlobSnapshot(Label labelContainerName, Label labelBlobName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxContainerName, TextBox textBoxBlobSnapsotName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
+
+        public static bool Regenerate_ServiceSAS_BlobSnapshot(Label labelContainerName, Label labelBlobName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxContainerName, TextBox textBoxBlobSnapsotName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
         {
-            if (Utils.StringEmpty(labelContainerName, textBoxContainerName.Text, "Missing Container Name", "Error")) { SAS_Utils.SAS.containerName.s = false; return; }
-            if (Utils.StringEmpty(labelBlobName, textBoxBlobSnapsotName.Text, "Missing Blob Snapshot Name", "Error")) { SAS_Utils.SAS.blobSnapshotName.s = false; return; }
+            if (Utils.StringEmpty(labelContainerName, textBoxContainerName.Text, "Missing Container Name", "Error")) { SAS_Utils.SAS.containerName.s = false; return false; }
+            if (Utils.StringEmpty(labelBlobName, textBoxBlobSnapsotName.Text, "Missing Blob Snapshot Name", "Error")) { SAS_Utils.SAS.blobSnapshotName.s = false; return false; }
 
             string sas = "?" + BlobSasBuilder(textBoxAccountName.Text, textBoxAccountKey1.Text, textBoxContainerName.Text, textBoxBlobSnapsotName.Text, "", textBoxPolicyName.Text);
-            if (sas == "?") return;
+            if (sas == "?") return false;
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Blob Snapshot:\n";
@@ -204,6 +219,8 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Blob Snapshot URI:\n" + "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + "/" + textBoxBlobSnapsotName.Text + Uri.UnescapeDataString(sas) + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
+
+            return true;
         }
 
 
@@ -288,17 +305,16 @@ namespace Storage_Helper_SAS_Tool
 
 
 
+        //---------------------------------------------------------------------------------------------------------------------
+        //-------------------- File Service SAS methods
+        //---------------------------------------------------------------------------------------------------------------------
 
-
-
-
-
-        public static void Regenerate_ServiceSAS_Share(Label labelShareName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxShareName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
+        public static bool Regenerate_ServiceSAS_Share(Label labelShareName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxShareName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
         {
-            if (Utils.StringEmpty(labelShareName, textBoxShareName.Text, "Missing Share Name", "Error")) { SAS_Utils.SAS.shareName.s = false; return; }
+            if (Utils.StringEmpty(labelShareName, textBoxShareName.Text, "Missing Share Name", "Error")) { SAS_Utils.SAS.shareName.s = false; return false; }
 
             string sas = "?" + FileSasBuilder(textBoxAccountName.Text, textBoxAccountKey1.Text, textBoxShareName.Text, "", textBoxPolicyName.Text);
-            if (sas == "?") return;
+            if (sas == "?") return false;
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Share:\n";
@@ -310,16 +326,19 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Share URI:\n" + "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + textBoxShareName.Text + Uri.UnescapeDataString(sas) + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
+
+            return true;
         }
 
 
-        public static void Regenerate_ServiceSAS_File(Label labelShareName, Label labelFileName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxShareName, TextBox textBoxFileName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
+
+        public static bool Regenerate_ServiceSAS_File(Label labelShareName, Label labelFileName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxShareName, TextBox textBoxFileName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
         {
-            if (Utils.StringEmpty(labelShareName, textBoxShareName.Text, "Missing Share Name", "Error")) { SAS_Utils.SAS.shareName.s = false; return; }
-            if (Utils.StringEmpty(labelFileName, textBoxFileName.Text, "Missing File Name", "Error")) { SAS_Utils.SAS.fileName.s = false; return; }
+            if (Utils.StringEmpty(labelShareName, textBoxShareName.Text, "Missing Share Name", "Error")) { SAS_Utils.SAS.shareName.s = false; return false; }
+            if (Utils.StringEmpty(labelFileName, textBoxFileName.Text, "Missing File Name", "Error")) { SAS_Utils.SAS.fileName.s = false; return false; }
 
             string sas = "?" + FileSasBuilder(textBoxAccountName.Text, textBoxAccountKey1.Text, textBoxShareName.Text, textBoxFileName.Text, textBoxPolicyName.Text);
-            if (sas == "?") return;
+            if (sas == "?") return false;
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Service SAS - File:\n";
@@ -331,7 +350,10 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "File URI:\n" + "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + textBoxShareName.Text + "/" + textBoxFileName.Text + Uri.UnescapeDataString(sas) + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
+
+            return true;
         }
+
 
 
         /// <summary>
@@ -405,14 +427,16 @@ namespace Storage_Helper_SAS_Tool
 
 
 
+        //---------------------------------------------------------------------------------------------------------------------
+        //-------------------- Queue Service SAS methods
+        //---------------------------------------------------------------------------------------------------------------------
 
-
-        public static void Regenerate_ServiceSAS_Queue(Label labelQueueName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxQueueName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
+        public static bool Regenerate_ServiceSAS_Queue(Label labelQueueName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxQueueName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
         {
-            if (Utils.StringEmpty(labelQueueName, textBoxQueueName.Text, "Missing Queue Name", "Error")) { SAS_Utils.SAS.queueName.s = false; return; }
+            if (Utils.StringEmpty(labelQueueName, textBoxQueueName.Text, "Missing Queue Name", "Error")) { SAS_Utils.SAS.queueName.s = false; return false; }
 
             string sas = "?" + QueueSasBuilder(textBoxAccountName.Text, textBoxAccountKey1.Text, textBoxQueueName.Text, textBoxPolicyName.Text);
-            if (sas == "?") return;
+            if (sas == "?") return false;
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Queue:\n";
@@ -424,8 +448,12 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Queue URI:\n" + "https://" + textBoxAccountName.Text + ".queue.core.windows.net/" + textBoxQueueName.Text + Uri.UnescapeDataString(sas) + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
+
+            return true;
         }
            
+
+
         /// <summary>
         /// Queue SAS Builder
         /// https://docs.microsoft.com/en-us/dotnet/api/azure.storage.sas.queuesasbuilder?view=azure-dotnet-preview
@@ -482,6 +510,13 @@ namespace Storage_Helper_SAS_Tool
             return sasToken;
         }
 
+
+
+
+
+        //---------------------------------------------------------------------------------------------------------------------
+        //-------------------- Table Service SAS methods - TODO
+        //---------------------------------------------------------------------------------------------------------------------
 
         // TableSasBuilder - not supported by Storage SDK v12.0.0.0_preview
 

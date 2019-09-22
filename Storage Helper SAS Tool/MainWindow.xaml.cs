@@ -36,6 +36,7 @@ using System.Diagnostics;
 /// 
 /// Enable managed identities on a VM - TODO - why is working without VM ???
 /// https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-msi?toc=%2fazure%2fstorage%2fblobs%2ftoc.json#enable-managed-identities-on-a-vm
+/// 
 /// Authorize access to blobs and queues with Azure Active Directory and managed identities for Azure Resources
 /// https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-msi?toc=%2fazure%2fstorage%2fblobs%2ftoc.json#net-code-example-create-a-block-blob
 /// ---------------------------------------------------------------------------------------------------------------
@@ -70,13 +71,14 @@ namespace Storage_Helper_SAS_Tool
     public partial class MainWindow : Window
     {
         //----------------------------------------------------------------------------
-        private string StorageSDK_11_Version = "v11.0.0";
+        private string StorageSDK_11_Version = "v11.0.1";           // used to show the SDK version used after the SAS creation
         private string StorageSDK_12_Version = "v12.0.0-preview.3";
+        private string Cosmos_Version = "v2.0.0";
 
         public StorageCredentials storageCredentials;
-
-
         //----------------------------------------------------------------------------
+
+
 
         /// <summary>
         /// 
@@ -85,13 +87,12 @@ namespace Storage_Helper_SAS_Tool
         {
             InitializeComponent();
 
-            // Populate ComboBoxes with values of Service Version Arrays (defined on SAS_Utils)
+            // Populate ComboBoxes with values by default for Service Version Arrays (defined on SAS_Utils)
             SAS_Utils.PopulateComboBox_sv(ComboBox_sv, "", "");
 
             // Splash Info
             SplashInfo();
         }
-        
 
 
 
@@ -142,22 +143,24 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults_Right.Text += "\n";
 
             BoxAuthResults_Right.Text += "To see this help splash again you can click on the '?' at the top right.\n";
-            BoxAuthResults_Right.Text += "The source code are public available on GitHub at https://github.com/LuisFilipe236/Storage-Helper-SAS-Tool\n";
-            BoxAuthResults_Right.Text += "The .msi installer package is available on GitHub (use 'Download' button) at https://github.com/LuisFilipe236/Storage-Helper-SAS-Tool/raw/master/Storage%20Helper%20SAS%20Tool%20Installer/Debug/Storage%20Helper%20SAS%20Tool%20Installer.msi\n";
+            BoxAuthResults_Right.Text += "\n";
+            BoxAuthResults_Right.Text += "The source code are public available on GitHub at:  https://github.com/LuisFilipe236/Storage-Helper-SAS-Tool\n";
+            BoxAuthResults_Right.Text += "The .msi installer package is available on 'Download' button on the URL above.\n";
             BoxAuthResults_Right.Text += "\n";
 
             BoxAuthResults_Right.Text += "-------------------------------------------------------------------------------------------------\n";
-            BoxAuthResults_Right.Text += "==> TODO:";
-            BoxAuthResults_Right.Text += "     - Remove the optional not used paramenters from the SAS string, on SDK v11\n";
-            BoxAuthResults_Right.Text += "     - In Service Versions before 2012-02-12, the duration between signedstart and signedexpiry cannot exceed one hour\n";
-            BoxAuthResults_Right.Text += "     - Check the se alredy exired on regeneration time\n";
+            //BoxAuthResults_Right.Text += "==> TODO:";
+            BoxAuthResults_Right.Text += " \n";
+            BoxAuthResults_Right.Text += " \n";
+            BoxAuthResults_Right.Text += " \n";
+            BoxAuthResults_Right.Text += " \n";
         }
 
 
 
-
-
-
+        /// <summary>
+        /// 
+        /// </summary>
         private void RemoveSplash()
         {
             if (BoxAuthResults_Right.Text.StartsWith("x"))
@@ -165,8 +168,6 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
-
- 
 
         /// <summary>
         /// Test parameters on provided Account SAS
@@ -180,145 +181,38 @@ namespace Storage_Helper_SAS_Tool
 
             new SAS_Utils().SAS_Validate(System.Uri.UnescapeDataString(InputBoxSAS.Text.Trim()), BoxAuthResults);   // unscaped and removing leading and trailling whitespaces
 
-            if(InputBoxSAS.Text == "") labelInsertSAS.Foreground = Brushes.Red;
-
             Set_ValuesFromStruct_ToBoxes();
 
-            if (SAS_Utils.Show_Services() != "") return;
+            Set_LabelColors();
 
-            Set_Color_Signature();
+            // Restore ss state if Service SAS changed manually
+            ComboBox_ss.IsEnabled = true;
         }
 
 
 
-
-
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ButtonRegenerateSAS_Click(object sender, RoutedEventArgs e)
         {
             RemoveSplash();
             labelMessages.Content = ""; // Clean messages at bottom
 
-            if (Utils.StringEmpty(labelAccountKey, textBoxAccountKey1.Text, "Please provide the Storage Account Key to regenerate a SAS", "Error"))
+            // Verify all the values on the graphical interface to generate the new SAS 
+            if (!Verify_ValuesToGenerateSAS())
                 return;
-
-            if (Utils.StringEmpty(labelAccountName, textBoxAccountName.Text, "Missing Account Name", "Error"))
-            { SAS_Utils.SAS.containerName.s = false; return; }
-
-            if (textBoxAccountName.Text == "not found")
-            {
-                labelAccountName.Foreground = Brushes.Red;
-                MessageBox.Show("Missing Account Name", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                SAS_Utils.SAS.containerName.s = false;
-                return;
-            }
-
-
-            if (ComboBox_srt.Text == "" && ComboBox_sr.Text == "" && textBox_tn.Text == "")
-            {
-                label_srt.Foreground = Brushes.Red;
-                label_sr.Foreground = Brushes.Red;
-                label_tn.Foreground = Brushes.Red;
-                MessageBox.Show("Please provide the 'Signed Resource Type' for an account SAS, or 'Signed Resource' or 'Table Name' for a Service SAS", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return;
-            }
-
-
-            if ((ComboBox_sr.Text == "s" || ComboBox_sr.Text == "f") && ComboBox_sp.Text.IndexOf("l") == -1)
-            {
-                label_sp.Foreground = Brushes.Red;
-                MessageBox.Show("Please provide at least 'l' on Signed Permissions", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return;
-            }
-
-
-            if (ComboBox_ss.Text == "" && ComboBox_srt.Text != "")
-            {
-                label_ss.Foreground = Brushes.Red;
-                MessageBox.Show("Please provide the Signed Services to regenerate a Account SAS", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return;
-            }
-
-            if (Utils.StringEmpty(label_sp, ComboBox_sp.Text, "Please provide at least " + (ComboBox_sr.Text == "c" || ComboBox_sr.Text == "s" ? "'l'" : "'r'") + " Signed Permissions to regenerate a SAS", "Error"))
-                return;
-
-            if (Utils.StringEmpty(label_sv, ComboBox_sv.Text, "Please provide the Service Version to regenerate a SAS", "Error"))
-                return;
-
-            // -------------------------- Check start and Expiry date format ------------------------------
-            if (Utils.StringEmpty(label_se, textBox_se.Text, "Please provide the Signed Expiry Date/Time to regenerate a SAS", "Error"))
-                return;
-
-            if (textBox_se.Text.Length != 20 && textBox_se.Text.Length != 17 && textBox_se.Text.Length != 10)
-                label_se.Foreground = Brushes.Red;
-
-            if (textBox_st.Text != "" && textBox_st.Text.Length != 20 && textBox_st.Text.Length != 17 && textBox_st.Text.Length != 10)
-                label_st.Foreground = Brushes.Red;
-
-            if (label_se.Foreground == Brushes.Red && label_st.Foreground != Brushes.Red)
-            {
-                MessageBox.Show("Incorrect format on Signed Expiry Date/Time ", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return;
-            }
-
-            if (label_se.Foreground != Brushes.Red && label_st.Foreground == Brushes.Red)
-            {
-                MessageBox.Show("Incorrect format on Signed Start Date/Time ", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return;
-            }
-
-            if (label_se.Foreground == Brushes.Red && label_st.Foreground == Brushes.Red)
-            {
-                MessageBox.Show("Incorrect format on Signed Start and Signed Expiry Date/Time ", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return;
-            }
-
-
-            // Service SAS - In versions before 2012-02-12, the duration between signedstart and signedexpiry cannot exceed one hour unless a container policy is used.
-            if ((ComboBox_sr.Text != "" || textBox_tn.Text != "") && String.Compare(ComboBox_sv.Text, "2012-02-12") < 0)
-            {
-                DateTime st;
-                if (textBox_st.Text == "")
-                    st = DateTime.Now.ToUniversalTime();
-                else
-                    st = Convert.ToDateTime(textBox_st.Text).ToUniversalTime();
-
-                DateTime se = Convert.ToDateTime(textBox_se.Text).ToUniversalTime();
-                TimeSpan ts = (se - st);
-
-                if (ts.Hours>1 || (ts.Hours==1 && (ts.Minutes > 0 || ts.Seconds>0)))        // difference beetween se and st with more than 1 hour
-                {
-                    label_st.Foreground = Brushes.Red;
-                    MessageBox.Show("Service SAS - In Service Versions before 2012-02-12, the duration between signedstart and signedexpiry cannot exceed one hour unless a container policy is used.", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                    return;
-                }
-            }
-            
-
-
-            //-----------------------------------------------------------------------------------------------
-
-
-            //-----------------------------------------------------------------------------------------------
-            //-----------------------------------------------------------------------------------------------
 
             // Copy the values From Combo and Text Boxes To Struct, to be used to regenerate the SAS
             SAS_Utils.init_SASstruct();
             Get_ValuesFromBoxes_ToStruct();
 
-            // Validate dates
-            if (!DateTimeUtils.Validate_DateTimes(label_st, label_se))
-                return;
-
-            // Validate IPs
-            string s = SAS_Utils.Validate_Sip();
-            if (s != "")
-                MessageBox.Show(s, "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-
 
             // Choose between SDK v11 or v12_preview
             //------------------------------------------------
-            if (checkBoxPreRelease12.IsChecked==true)
+            if (checkBoxPreRelease12.IsChecked == true)
                 RegenerateSAS_SDKv12_preview();
             else
                 RegenerateSAS_SDKv11();
@@ -331,46 +225,94 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
+
         /// <summary>
         /// Regenerate SAS using Storage SDK v11.0.0
         /// </summary>
         private void RegenerateSAS_SDKv11()
         {
+            bool ret = true;
             // Regenerate Account SAS (srt) from SAS structure values
             if (SAS_Utils.SAS.srt.v != "not found" && SAS_Utils.SAS.srt.v != "")
-                SAS_Create_v11.Regenerate_AccountSAS(textBoxAccountName, textBoxAccountKey1, BoxAuthResults_Right, ComboBox_ss.Text);
+                ret = SAS_Create_v11.Regenerate_AccountSAS(textBoxAccountName, textBoxAccountKey1, BoxAuthResults_Right, ComboBox_ss.Text);
 
             // Regenerate Service SAS (sr) from SAS structure values (blob, container, file, share, blob Snapshot, Queue ??)
             if (SAS_Utils.SAS.sr.v != "not found" && SAS_Utils.SAS.sr.v != "")
                 switch (SAS_Utils.SAS.sr.v)   // service SAS
                 {
                     case "b":   // blob
-                        SAS_Create_v11.Regenerate_ServiceSAS_Blob(labelContainerName, labelBlobName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBoxBlobName, textBox_si, BoxAuthResults_Right);
+                        ret = SAS_Create_v11.Regenerate_ServiceSAS_Blob(labelContainerName, labelBlobName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBoxBlobName, textBox_si, BoxAuthResults_Right);
                         break;
                     case "c":   // container
-                        SAS_Create_v11.Regenerate_ServiceSAS_Container(labelContainerName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBox_si, BoxAuthResults_Right);
+                        ret = SAS_Create_v11.Regenerate_ServiceSAS_Container(labelContainerName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBox_si, BoxAuthResults_Right);
                         break;
                     case "f":   // file
-                        SAS_Create_v11.Regenerate_ServiceSAS_File(labelShareName, labelFileName, textBoxAccountName, textBoxAccountKey1, textBoxShareName, textBoxFileName, textBox_si, BoxAuthResults_Right);
+                        ret = SAS_Create_v11.Regenerate_ServiceSAS_File(labelShareName, labelFileName, textBoxAccountName, textBoxAccountKey1, textBoxShareName, textBoxFileName, textBox_si, BoxAuthResults_Right);
                         break;
                     case "s":   // share
-                        SAS_Create_v11.Regenerate_ServiceSAS_Share(labelShareName, textBoxAccountName, textBoxAccountKey1, textBoxShareName, textBox_si, BoxAuthResults_Right);
+                        ret = SAS_Create_v11.Regenerate_ServiceSAS_Share(labelShareName, textBoxAccountName, textBoxAccountKey1, textBoxShareName, textBox_si, BoxAuthResults_Right);
                         break;
                     case "bs":  // Blob Shapshot
-                        SAS_Create_v11.Regenerate_ServiceSAS_BlobSnapshot(BoxAuthResults_Right);   // <-- TODO - Not implemeted - lack on documentation
+                        ret = SAS_Create_v11.Regenerate_ServiceSAS_BlobSnapshot(BoxAuthResults_Right);   // <-- TODO - Not implemeted - lack on documentation
                         break;
                     case "??":  // Queue Shapshot               // <-- TODO - how identify Queue - not supported, but CloudQueue.GetSharedAccessSignature(policy) exists ??? - lack on documentation
-                        SAS_Create_v11.Regenerate_ServiceSAS_Queue(labelQueueName, textBoxAccountName, textBoxAccountKey1, textBoxQueueName, textBox_si, BoxAuthResults_Right);
+                        ret = SAS_Create_v11.Regenerate_ServiceSAS_Queue(labelQueueName, textBoxAccountName, textBoxAccountKey1, textBoxQueueName, textBox_si, BoxAuthResults_Right);
                         break;
                 }
 
+
             // Regenerate Service SAS (tn) from SAS structure values (table only) - uses Microsoft.Azure.Cosmos.Table library
             if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
-                SAS_Create_v11.Regenerate_ServiceSAS_Table(labelTableName, textBoxAccountName, textBoxAccountKey1, textBoxTableName, textBox_si, BoxAuthResults_Right);
+                ret = SAS_Create_CosmosDB.Regenerate_ServiceSAS_Table(labelTableName, textBoxAccountName, textBoxAccountKey1, textBoxTableName, textBox_si, BoxAuthResults_Right);
 
-            BoxAuthResults_Right.Text += "-------------------------------------------------\n";
-            BoxAuthResults_Right.Text += "Regenerated using Storage SDK " + StorageSDK_11_Version + "\n";
+            if (!ret) return;
+
+            BoxAuthResults_Right.Text += Limitations_v11_Info();
         }
+
+
+
+        /// <summary>
+        /// Return info about SDK v11 limitations, on generating SAS
+        /// </summary>
+        /// <returns></returns>
+        private string Limitations_v11_Info()
+        {
+            string s1 = "-------------------------------------------------\n";
+            string s2 = "Regenerated using Storage SDK " + StorageSDK_11_Version + "\n";
+
+            string s3 = "\n";
+            s3 += "Notes:\n";
+
+            // Regenerated Account SAS (srt) 
+            if (SAS_Utils.SAS.srt.v != "not found" && SAS_Utils.SAS.srt.v != "")
+                s3 += " - Storage SDK v11 only support 'Service Version' = 2019-02-02\n" +
+                      " - Optional 'Api Version' not supported on Storage SDK v11, and not used on Account SAS generation.\n";
+
+            // Regenerated Service SAS (sr) or (tn)
+            if (SAS_Utils.SAS.sr.v != "not found" && SAS_Utils.SAS.sr.v != "")
+                s3 += " - Storage SDK v11 only support 'Service Version' = 2019-02-02\n" +
+                      " - Optional parameters not supported on Storage SDK v11, and not used on Service SAS generation:\n" +
+                      "     Api Version\n" +
+                      "     Signed Protocol\n" +
+                      "     Signed IP\n";
+
+            // Regenerated Service SAS Table (tn)
+            if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
+            { 
+                s2 = "Regenerated using Cosmos Table SDK " + Cosmos_Version + "\n";
+                s3 += " - Cosmos Table SDK only support 'Service Version' = 2018-03-28\n" +
+                      " - Optional parameters not supported on Cosmos Table SDK, and not used on Service SAS generation:\n" +
+                      "     Api Version\n" +
+                      "     Signed Protocol\n" +
+                      "     Signed IP\n" +
+                      "     Table Name\n" +
+                      "     Start, End Row, Partition\n";
+            }
+
+            return s1 + s2 + s3;
+        }
+
 
 
         /// <summary>
@@ -378,76 +320,87 @@ namespace Storage_Helper_SAS_Tool
         /// </summary>
         private void RegenerateSAS_SDKv12_preview()
         {
+            // Save IP Bytes on structs fromIP[] and toIP[]
+            SAS_ValidateParam.Validate_Sip(textBox_sip.Text);
+
+            bool ret = true;
             // Regenerate Account SAS (srt) from SAS structure values
             if (SAS_Utils.SAS.srt.v != "not found" && SAS_Utils.SAS.srt.v != "")
-                SAS_Create_v12.Regenerate_AccountSAS(textBoxAccountName, textBoxAccountKey1, BoxAuthResults_Right, ComboBox_ss.Text);
+                ret = SAS_Create_v12.Regenerate_AccountSAS(textBoxAccountName, textBoxAccountKey1, BoxAuthResults_Right, ComboBox_ss.Text);
 
             // Regenerate Service SAS (sr) from SAS structure values (blob, container, file, share, blob Snapshot, Queue ??)
             if (SAS_Utils.SAS.sr.v != "not found" && SAS_Utils.SAS.sr.v != "")
                 switch (SAS_Utils.SAS.sr.v)   // service SAS
                 {
                     case "b":   // blob
-                        SAS_Create_v12.Regenerate_ServiceSAS_Blob(labelContainerName, labelBlobName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBoxBlobName, textBox_si, BoxAuthResults_Right);
+                        ret = SAS_Create_v12.Regenerate_ServiceSAS_Blob(labelContainerName, labelBlobName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBoxBlobName, textBox_si, BoxAuthResults_Right);
                         break;
                     case "c":   // container
-                        SAS_Create_v12.Regenerate_ServiceSAS_Container(labelContainerName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBox_si, BoxAuthResults_Right);
+                        ret = SAS_Create_v12.Regenerate_ServiceSAS_Container(labelContainerName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBox_si, BoxAuthResults_Right);
                         break;
                     case "bs":  // Blob Shapshot
-                        SAS_Create_v12.Regenerate_ServiceSAS_BlobSnapshot(labelContainerName, labelBlobSnapshotName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBoxBlobSnapshotName, textBox_si, BoxAuthResults_Right);   
+                        ret = SAS_Create_v12.Regenerate_ServiceSAS_BlobSnapshot(labelContainerName, labelBlobSnapshotName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBoxBlobSnapshotName, textBox_si, BoxAuthResults_Right);
                         break;
                     case "f":   // file
-                        SAS_Create_v12.Regenerate_ServiceSAS_File(labelShareName, labelFileName, textBoxAccountName, textBoxAccountKey1, textBoxShareName, textBoxFileName, textBox_si, BoxAuthResults_Right);
+                        ret = SAS_Create_v12.Regenerate_ServiceSAS_File(labelShareName, labelFileName, textBoxAccountName, textBoxAccountKey1, textBoxShareName, textBoxFileName, textBox_si, BoxAuthResults_Right);
                         break;
                     case "s":   // share
-                        SAS_Create_v12.Regenerate_ServiceSAS_Share(labelShareName, textBoxAccountName, textBoxAccountKey1, textBoxShareName, textBox_si, BoxAuthResults_Right);
+                        ret = SAS_Create_v12.Regenerate_ServiceSAS_Share(labelShareName, textBoxAccountName, textBoxAccountKey1, textBoxShareName, textBox_si, BoxAuthResults_Right);
                         break;
                     case "??":  // Queue Shapshot               // <-- TODO - how identify Queue - not supported, but CloudQueue.GetSharedAccessSignature(policy) exists ??? - lack on documentation
-                        SAS_Create_v12.Regenerate_ServiceSAS_Queue(labelQueueName, textBoxAccountName, textBoxAccountKey1, textBoxQueueName, textBox_si, BoxAuthResults_Right);
+                        ret = SAS_Create_v12.Regenerate_ServiceSAS_Queue(labelQueueName, textBoxAccountName, textBoxAccountKey1, textBoxQueueName, textBox_si, BoxAuthResults_Right);
                         break;
                 }
 
-            // Regenerate Table Service SAS not supported - uses Microsoft.Azure.Cosmos.Table library
+
+            // Regenerate Table Service SAS uses CosmoDB - Microsoft.Azure.Cosmos.Table library
             if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
-                MessageBox.Show("Regenerate Table Service SAS not supported on this SDK version (TODO)", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                ret = SAS_Create_CosmosDB.Regenerate_ServiceSAS_Table(labelTableName, textBoxAccountName, textBoxAccountKey1, textBoxTableName, textBox_si, BoxAuthResults_Right);
 
-            BoxAuthResults_Right.Text += "-------------------------------------------------\n";
-            BoxAuthResults_Right.Text += "Regenerated using Storage SDK "+StorageSDK_12_Version+"\n";
+            if (!ret) return;
 
+            BoxAuthResults_Right.Text += Limitations_v12_Info();                          
         }
+
+
 
         /// <summary>
-        /// null - change color on both TextBoxes
+        /// Return info about SDK v11 limitations, on generating SAS
         /// </summary>
-        private void Set_Color_Signature()
+        /// <returns></returns>
+        private string Limitations_v12_Info()
         {
-            if(textBox_sig_left.Text == "" || textBox_sig_right.Text == "")     
-            {
-                textBox_sig_right.Foreground = Brushes.Black;
-                textBox_sig_left.Foreground  = Brushes.Black;
-                return;
-            }
+            string s1 = "-------------------------------------------------\n";
+            string s2 = "Regenerated using Storage SDK " + StorageSDK_12_Version + "\n";
 
-            if (textBox_sig_right.Text == textBox_sig_left.Text)
+            string s3 = "\n";
+            s3 += "Notes:\n";
+
+            // Regenerated Account SAS (srt) 
+            if (SAS_Utils.SAS.srt.v != "not found" && SAS_Utils.SAS.srt.v != "")
+                s3 += " - Parameter 'Api Version' not defined on this SDK - uses the same as 'Service Version'\n";
+
+            // Regenerated Service SAS (sr) or (tn)
+            if (SAS_Utils.SAS.sr.v != "not found" && SAS_Utils.SAS.sr.v != "")
+                s3 += " - Parameter 'Api Version' not defined on this SDK - uses the same as 'Service Version'\n";
+
+            // Regenerated Service SAS Table (tn)
+            if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
             { 
-                textBox_sig_right.Foreground = Brushes.Green;
-                textBox_sig_left.Foreground  = Brushes.Green;
+                s2 = "Regenerated using Cosmos Table SDK " + Cosmos_Version + "\n";
+                s3 = " - Cosmos Table SDK only support 'Service Version' = 2018-03-28\n" +
+                      " - Optional parameters not supported on Cosmos Table SDK, and not used on Service SAS generation:\n" +
+                      "     Api Version\n" +
+                      "     Signed Protocol\n" +
+                      "     Signed IP\n" +
+                      "     Table Name\n" +
+                      "     Start, End Row, Partition\n";
             }
-            else
-            {
-                textBox_sig_right.Foreground = Brushes.Red;
-                textBox_sig_left.Foreground = Brushes.Red;
-            }
+
+            return s1 + s2 + s3;
         }
 
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
 
-        }
-
-        private void ComboBox_DropDownClosed(object sender, EventArgs e)
-        {
-
-        }
 
 
         /// <summary>
@@ -465,6 +418,402 @@ namespace Storage_Helper_SAS_Tool
                 return false;
         }
 
+
+
+        private void SetStatus_PartitionRowBoxes(bool status)
+        {
+            if (status == false)
+            {
+                textBox_erk.Text = "";         // clear erk
+                textBox_srk.Text = "";         // clear srk
+                textBox_epk.Text = "";         // clear epk
+                textBox_spk.Text = "";         // clear spk
+            }
+
+            textBox_erk.IsEnabled = status;
+            textBox_srk.IsEnabled = status;
+            textBox_epk.IsEnabled = status;
+            textBox_spk.IsEnabled = status;
+
+            label_erk.IsEnabled = status;
+            label_srk.IsEnabled = status;
+            label_epk.IsEnabled = status;
+            label_spk.IsEnabled = status;
+        }
+
+
+
+        /// <summary>
+        /// Show error message on MessageBox and set label red
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="title"></param>
+        /// <param name="lab"></param>
+        /// <returns></returns>
+        private bool ErrorMsg(Label lab, string msg, string title)
+        {
+            lab.Foreground = Brushes.Red;
+            MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            return false;
+        }
+
+
+
+        /// <summary>
+        /// Return false if spaces or Upersaces foung on tb.Text
+        /// </summary>
+        /// <param name="tb"></param>
+        /// <param name="lab"></param>
+        /// <param name="strServ"></param>
+        /// <returns></returns>
+        private bool Check_Space_Upercase(TextBox tb, Label lab, string strServ, bool checkUpercases = true)
+        {
+            if (!String.IsNullOrEmpty(tb.Text) && SAS_Utils.Get_SpaceNL(tb.Text) != "")        // Check for spaces / NewLines
+                return ErrorMsg(lab, strServ + " cannot contain spaces", "Error");
+
+            if(checkUpercases && String.Compare(tb.Text, tb.Text.ToLower()) != 0)
+                return ErrorMsg(lab, strServ + " cannot contain upercases", "Error");          // Check for uppercases
+
+            return true;
+        }
+
+
+
+        /// <summary>
+        /// Verify values to Generate a new SAS
+        /// </summary>
+        /// <returns></returns>
+        private bool Verify_ValuesToGenerateSAS()
+        {
+            // Account Key
+            //------------------------------------------------------------------------------
+            if (String.IsNullOrEmpty(textBoxAccountKey1.Text))              // Check is null
+                return ErrorMsg(labelAccountKey, "Please provide the Storage Account Key to regenerate a SAS", "Error");
+
+            if (!Check_Space_Upercase(textBoxAccountKey1, labelAccountKey, "Storage Account Key", false)) return false;
+
+
+            // Account Name
+            //------------------------------------------------------------------------------
+            if (String.IsNullOrEmpty(textBoxAccountName.Text))              // Check is null
+                return ErrorMsg(labelAccountName, "Missing Account Name", "Error");
+
+            if (textBoxAccountName.Text == "not found")                     // Check for 'not found'
+                return ErrorMsg(labelAccountName, "Missing Account Name", "Error");
+
+            if (!Check_Space_Upercase(textBoxAccountName, labelAccountName, "Account Name")) return false;
+
+
+            // ss - Signed Service
+            //------------------------------------------------------------------------------
+            if (String.IsNullOrEmpty(ComboBox_ss.Text) && !String.IsNullOrEmpty(ComboBox_srt.Text))
+                return ErrorMsg(label_ss, "Please provide the Signed Services to regenerate a Account SAS", "Error");
+
+
+            // srt, sr, tn - Signed Resource Type (account SAS), Signed Resource, Table Name (Service SAS)
+            //------------------------------------------------------------------------------
+            if (String.IsNullOrEmpty(ComboBox_srt.Text) && String.IsNullOrEmpty(ComboBox_sr.Text) && String.IsNullOrEmpty(textBox_tn.Text))     // No one provided
+            {
+                label_srt.Foreground = Brushes.Red;
+                label_sr.Foreground = Brushes.Red;
+                if(checkBoxPreRelease12.IsChecked == false) label_tn.Foreground = Brushes.Red;
+                return ErrorMsg(label_srt, "Please provide the 'Signed Resource Type' for an account SAS, or 'Signed Resource' "+ (checkBoxPreRelease12.IsChecked == false? "or 'Table Name' ":"") + "for a Service SAS", "Error");
+            }
+
+
+            // api-version
+            //------------------------------------------------------------------------------
+            if (!String.IsNullOrEmpty(ComboBox_apiVersion.Text) && checkBoxPreRelease12.IsChecked == true)     // Check is NOT null and sdk 12 selected
+                return ErrorMsg(label_apiVersion, "Api Version is not supported on Storage SDK v12", "Error");
+
+
+            // sv - Signed Version
+            //------------------------------------------------------------------------------
+            if (String.IsNullOrEmpty(ComboBox_sv.Text))              // Check is null
+                return ErrorMsg(label_sv, "Please provide the Service Version to regenerate a SAS", "Error");
+
+
+            // sp - signed permissions
+            //------------------------------------------------------------------------------
+            if (String.IsNullOrEmpty(ComboBox_sp.Text))              // Check is null
+                return ErrorMsg(label_sp, "Please provide at least " + (ComboBox_sr.Text == "c" || ComboBox_sr.Text == "s" ? "'l'" : "'r'") + " Signed Permissions to regenerate a SAS", "Error");
+
+            if ((ComboBox_sr.Text == "s" || ComboBox_sr.Text == "c") && ComboBox_sp.Text.IndexOf("l") == -1)        // 'l' needed for Container or share
+                return ErrorMsg(label_sp, "Please provide at least 'l' on Signed Permissions", "Error");
+
+
+            // st, se - Check Start and Expiry Date format
+            //------------------------------------------------------------------------------
+            if (String.IsNullOrEmpty(textBox_se.Text))              // Check is null
+                return ErrorMsg(label_se, "Please provide the Signed Expiry Date/Time to regenerate a SAS", "Error");
+
+            if (textBox_se.Text.Length != 20 && textBox_se.Text.Length != 17 && textBox_se.Text.Length != 10)
+                return ErrorMsg(label_se, "Incorrect format on Signed Expiry Date/Time", "Error");
+
+            if (!String.IsNullOrEmpty(textBox_st.Text) && textBox_st.Text.Length != 20 && textBox_st.Text.Length != 17 && textBox_st.Text.Length != 10)
+                return ErrorMsg(label_st, "Incorrect format on Signed Start Date/Time", "Error");
+
+            // Service SAS - In versions before 2012-02-12, the duration between signedstart and signedexpiry cannot exceed one hour unless a container policy is used.
+            if (String.IsNullOrEmpty(textBox_si.Text) && (!String.IsNullOrEmpty(ComboBox_sr.Text) || !String.IsNullOrEmpty(textBox_tn.Text)) && String.Compare(ComboBox_sv.Text, "2012-02-12") < 0)
+            {
+                DateTime st;
+                if (String.IsNullOrEmpty(textBox_st.Text))
+                    st = DateTime.Now.ToUniversalTime();
+                else
+                    st = Convert.ToDateTime(textBox_st.Text).ToUniversalTime();
+
+                DateTime se = Convert.ToDateTime(textBox_se.Text).ToUniversalTime();
+                TimeSpan ts = (se - st);
+
+                if (ts.Hours > 1 || (ts.Hours == 1 && (ts.Minutes > 0 || ts.Seconds > 0)))        // difference beetween se and st with more than 1 hour
+                    return ErrorMsg(label_st, "Generating Service SAS on Service Versions before 2012-02-12, the duration between signedstart and signedexpiry cannot exceed one hour, unless a container policy is used.", "Error");
+            }
+
+            // Validate dates
+            if (!DateTimeUtils.Validate_DateTimes(label_st, label_se, textBox_st.Text, textBox_se.Text))
+                return false;
+            // ------------------------------------------------------------------------------
+
+
+            // spr - protocol - nothing to check
+            //------------------------------------------------------------------------------
+
+
+            // sip - IP
+            //------------------------------------------------------------------------------
+            string s = SAS_ValidateParam.Validate_Sip(textBox_sip.Text);
+            if (!String.IsNullOrEmpty(s))
+                return ErrorMsg(label_sip, s, "Error");
+
+
+            // Others
+            //------------------------------------------------------------------------------
+            if (!Check_Space_Upercase(textBox_si, label_si, "Policy Name")) return false;
+            if (!Check_Space_Upercase(textBox_tn, label_tn, "Table Name")) return false;
+            if (!Check_Space_Upercase(textBoxContainerName, labelContainerName, "Container Name")) return false;
+            if (!Check_Space_Upercase(textBoxBlobName, labelBlobName, "Blob Name")) return false;
+            if (!Check_Space_Upercase(textBoxBlobSnapshotName, labelBlobSnapshotName, "Blob Snapshot Name")) return false;
+            if (!Check_Space_Upercase(textBoxShareName, labelShareName, "Share Name")) return false;
+            if (!Check_Space_Upercase(textBoxFileName, labelFileName, "File Name")) return false;
+            if (!Check_Space_Upercase(textBoxQueueName, labelQueueName, "Queue Name")) return false;
+            if (!Check_Space_Upercase(textBoxTableName, labelTableName, "Table Name")) return false;
+
+
+            // erk, srk, epk, spk - table Start/End Row/Partition
+            //------------------------------------------------------------------------------
+            if (!Check_Space_Upercase(textBox_srk, label_srk, "Start Table Row")) return false;
+            if (!Check_Space_Upercase(textBox_erk, label_erk, "End Table Row")) return false;
+            if (!Check_Space_Upercase(textBox_spk, label_spk, "Start Table Partition")) return false;
+            if (!Check_Space_Upercase(textBox_epk, label_epk, "End Table Partition")) return false;
+
+
+            // All parameters Ok
+            return true;
+        }
+
+
+
+        //-----------------------------------------------------------------------------------------------------------
+        //----------------------------- Label Color methods
+        //-----------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Set label colors based on .s on SAS struct
+        /// Set text Color signatures on the TextBoxes 
+        /// </summary>
+        private void Set_LabelColors()
+        {
+            labelInsertSAS.Foreground = (SAS_Utils.SAS.sharedAccessSignature.s ? Brushes.Black : Brushes.Red);
+
+            labelAccountName.Foreground = (SAS_Utils.SAS.storageAccountName.s ? Brushes.Black : Brushes.Red);
+
+            labelContainerName.Foreground = (SAS_Utils.SAS.containerName.s ? Brushes.Black : Brushes.Red);
+            labelBlobName.Foreground = (SAS_Utils.SAS.blobName.s ? Brushes.Black : Brushes.Red);
+            labelBlobSnapshotName.Foreground = (SAS_Utils.SAS.blobSnapshotName.s ? Brushes.Black : Brushes.Red);
+            labelShareName.Foreground = (SAS_Utils.SAS.shareName.s ? Brushes.Black : Brushes.Red);
+            labelFileName.Foreground = (SAS_Utils.SAS.fileName.s ? Brushes.Black : Brushes.Red);
+            labelQueueName.Foreground = (SAS_Utils.SAS.queueName.s ? Brushes.Black : Brushes.Red);
+            labelTableName.Foreground = (SAS_Utils.SAS.tableName.s ? Brushes.Black : Brushes.Red);
+
+            label_apiVersion.Foreground = (SAS_Utils.SAS.apiVersion.s ? Brushes.Black : Brushes.Red);
+            label_sv.Foreground = (SAS_Utils.SAS.sv.s ? Brushes.Black : Brushes.Red);
+            label_ss.Foreground = (SAS_Utils.SAS.ss.s ? Brushes.Black : Brushes.Red);
+            label_srt.Foreground = (SAS_Utils.SAS.srt.s ? Brushes.Black : Brushes.Red);
+            label_sp.Foreground = (SAS_Utils.SAS.sp.s ? Brushes.Black : Brushes.Red);
+            label_se.Foreground = (SAS_Utils.SAS.se.s ? Brushes.Black : Brushes.Red);
+            label_st.Foreground = (SAS_Utils.SAS.st.s ? Brushes.Black : Brushes.Red);
+            label_sip.Foreground = (SAS_Utils.SAS.sip.s ? Brushes.Black : Brushes.Red);
+            label_spr.Foreground = (SAS_Utils.SAS.spr.s ? Brushes.Black : Brushes.Red);
+
+            label_sr.Foreground = (SAS_Utils.SAS.sr.s ? Brushes.Black : Brushes.Red);
+            label_tn.Foreground = (SAS_Utils.SAS.tn.s ? Brushes.Black : Brushes.Red);
+            label_si.Foreground = (SAS_Utils.SAS.si.s ? Brushes.Black : Brushes.Red);
+
+            // Other labels
+            labelAccountKey.Foreground = Brushes.Black;
+
+            // Compare the two sginatures and se the text color
+            Set_Color_Signature();
+        }
+
+
+
+        /// <summary>
+        /// Compare the two signatures on the TextBoxes and set text Color accordantly
+        /// null - change color on both TextBoxes
+        /// </summary>
+        public void Set_Color_Signature()
+        {
+            if (textBox_sig_left.Text == "" || textBox_sig_right.Text == "")
+            {
+                textBox_sig_right.Foreground = Brushes.Black;
+                textBox_sig_left.Foreground = Brushes.Black;
+                return;
+            }
+
+            if (textBox_sig_right.Text == textBox_sig_left.Text)
+            {
+                textBox_sig_right.Foreground = Brushes.Green;
+                textBox_sig_left.Foreground = Brushes.Green;
+            }
+            else
+            {
+                textBox_sig_right.Foreground = Brushes.Red;
+                textBox_sig_left.Foreground = Brushes.Red;
+            }
+        }
+
+
+
+
+        //-----------------------------------------------------------------------------------------------------------
+        //----------------------------- STRUCT Operations methods
+        //-----------------------------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// Update SAS struct with values from graphic Combo and Text Boxes with values from the decoded SAS.
+        /// Only update the textBox's if no issue found on the specified service
+        /// Used after "Check SAS Parameters"
+        /// </summary>
+        public void Set_ValuesFromStruct_ToBoxes()
+        {
+            // sharedAccessSignature; // complete SAS without the endpoints
+            
+            // blobEndpoint;
+            // fileEndpoint;
+            // tableEndpoint;
+            // queueEndpoint;
+
+            textBoxAccountName.Text = SAS_Utils.SAS.storageAccountName.v;   // storage Account Name, if provided on any Endpoint
+
+            textBoxContainerName.Text = SAS_Utils.SAS.containerName.v;
+            textBoxBlobName.Text = SAS_Utils.SAS.blobName.v;
+            textBoxShareName.Text = SAS_Utils.SAS.shareName.v;
+            textBoxFileName.Text = SAS_Utils.SAS.fileName.v;
+            textBoxQueueName.Text = SAS_Utils.SAS.queueName.v;
+            textBoxTableName.Text = (SAS_Utils.SAS.tn.v == "not found" ? SAS_Utils.SAS.tableName.v : SAS_Utils.SAS.tn.v);  // uses tn if Access SAS, otherwise uses tableName if exists 
+
+
+            // onlySASprovided;        // true if the endpoints not provided
+
+            ComboBox_ss.Text = (SAS_Utils.SAS.ss.v == "not found" ? "" : SAS_Utils.SAS.ss.v);
+            ComboBox_srt.Text = (SAS_Utils.SAS.srt.v == "not found" ? "" : SAS_Utils.SAS.srt.v);
+            ComboBox_sp.Text = (SAS_Utils.SAS.sp.v == "not found" ? "" : SAS_Utils.SAS.sp.v);
+            textBox_se.Text = (SAS_Utils.SAS.se.v == "not found" ? "" : SAS_Utils.SAS.se.v);
+            textBox_st.Text = (SAS_Utils.SAS.st.v == "not found" ? "" : SAS_Utils.SAS.st.v);
+            textBox_sip.Text = (SAS_Utils.SAS.sip.v == "not found" ? "" : SAS_Utils.SAS.sip.v);
+            ComboBox_spr.Text = (SAS_Utils.SAS.spr.v == "not found" ? "" : SAS_Utils.SAS.spr.v);
+
+            textBox_sig_left.Text = (SAS_Utils.SAS.sig == "not found" ? "" : SAS_Utils.SAS.sig);  // Encripted signature
+            Set_Color_Signature();
+
+            ComboBox_sr.Text = (SAS_Utils.SAS.sr.v == "not found" ? "" : SAS_Utils.SAS.sr.v);
+            textBox_tn.Text = (SAS_Utils.SAS.tn.v == "not found" ? "" : SAS_Utils.SAS.tn.v);
+            textBox_erk.Text = (SAS_Utils.SAS.erk == "not found" ? "" : SAS_Utils.SAS.erk);
+            textBox_srk.Text = (SAS_Utils.SAS.srk == "not found" ? "" : SAS_Utils.SAS.srk);
+            textBox_epk.Text = (SAS_Utils.SAS.epk == "not found" ? "" : SAS_Utils.SAS.epk);
+            textBox_spk.Text = (SAS_Utils.SAS.spk == "not found" ? "" : SAS_Utils.SAS.spk);
+            textBox_si.Text = (SAS_Utils.SAS.si.v == "not found" ? "" : SAS_Utils.SAS.si.v);        // Policy Name
+
+            SAS_Utils.PopulateComboBox_sv(ComboBox_apiVersion, ComboBox_sr.Text, textBox_tn.Text);
+            SAS_Utils.PopulateComboBox_sv(ComboBox_sv, ComboBox_sr.Text, textBox_tn.Text);
+            ComboBox_apiVersion.SelectedIndex = ComboBox_apiVersion.Items.IndexOf((SAS_Utils.SAS.apiVersion.v == "not found" ? "" : SAS_Utils.SAS.apiVersion.v));
+            ComboBox_sv.SelectedIndex = ComboBox_sv.Items.IndexOf((SAS_Utils.SAS.sv.v == "not found" ? "" : SAS_Utils.SAS.sv.v));
+        }
+
+
+
+
+
+
+        /// <summary>
+        /// Update graphic Combo and Text Boxes with values from the SAS struct
+        /// Used before "Regenerate SAS"
+        /// </summary>
+        private void Get_ValuesFromBoxes_ToStruct()
+        {
+            // sharedAccessSignature; // complete SAS without the endpoints
+
+            // blobEndpoint;
+            // fileEndpoint;
+            // tableEndpoint;
+            // queueEndpoint;
+
+            SAS_Utils.SAS.storageAccountName.v = textBoxAccountName.Text;
+
+            SAS_Utils.SAS.containerName.v = textBoxContainerName.Text;
+            SAS_Utils.SAS.blobName.v = textBoxBlobName.Text;
+            SAS_Utils.SAS.shareName.v = textBoxShareName.Text;
+            SAS_Utils.SAS.fileName.v = textBoxFileName.Text;
+            SAS_Utils.SAS.queueName.v = textBoxQueueName.Text;
+            SAS_Utils.SAS.tableName.v = textBoxTableName.Text;
+
+            // onlySASprovided;        // true if the endpoints not provided
+
+            SAS_Utils.SAS.apiVersion.v = ComboBox_apiVersion.Text;
+            SAS_Utils.SAS.sv.v = ComboBox_sv.Text;
+            SAS_Utils.SAS.ss.v = ComboBox_ss.Text;
+            SAS_Utils.SAS.srt.v = ComboBox_srt.Text;
+            SAS_Utils.SAS.sp.v = ComboBox_sp.Text;
+            SAS_Utils.SAS.se.v = textBox_se.Text;
+            SAS_Utils.SAS.st.v = textBox_st.Text;
+            SAS_Utils.SAS.sip.v = textBox_sip.Text;
+            SAS_Utils.SAS.spr.v = ComboBox_spr.Text;
+            SAS_Utils.SAS.sig = textBox_sig_left.Text;  // Encripted signatute from left, to validate existing data
+
+            SAS_Utils.SAS.sr.v = ComboBox_sr.Text;
+            SAS_Utils.SAS.tn.v = textBox_tn.Text;
+            SAS_Utils.SAS.blobSnapshotName.v = textBoxBlobSnapshotName.Text;    // v12.0.0.0_preview
+            SAS_Utils.SAS.erk = textBox_erk.Text;
+            SAS_Utils.SAS.srk = textBox_srk.Text;
+            SAS_Utils.SAS.epk = textBox_epk.Text;
+            SAS_Utils.SAS.spk = textBox_spk.Text;
+            SAS_Utils.SAS.si.v = textBox_si.Text;
+
+
+            // used by v12.0.0.0_preview
+            SAS_Utils.fromIP[0] = 0;
+            SAS_Utils.fromIP[1] = 0;
+            SAS_Utils.fromIP[2] = 0;
+            SAS_Utils.fromIP[3] = 0;
+
+            SAS_Utils.toIP[0] = 0;
+            SAS_Utils.toIP[1] = 0;
+            SAS_Utils.toIP[2] = 0;
+            SAS_Utils.toIP[3] = 0;
+        }
+
+
+
+
+
+
+
+
+
+        //-----------------------------------------------------------------------------------------------------------
+        //----------------------------- EVENT methods
+        //-----------------------------------------------------------------------------------------------------------
 
         /// <summary>
         /// 
@@ -521,7 +870,7 @@ namespace Storage_Helper_SAS_Tool
             if (sp_process.IsChecked == true) s += "p";
 
             ComboBox_sp.Text = s;
-            if(s != "")
+            if (s != "")
                 label_sp.Foreground = Brushes.Black;
         }
 
@@ -537,25 +886,9 @@ namespace Storage_Helper_SAS_Tool
             sp_process.IsChecked = Test(ComboBox_sp.Text, "p");
         }
 
-        private void ComboBox_ss_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
-
-        private void ComboBox_DropDownClosed_1(object sender, EventArgs e)
-        {
-            
-        }
 
 
-        public string ss_WithColor(string color, string msg)
-        {
-            if (color=="Red")
-                label_ss.Foreground = System.Windows.Media.Brushes.Red; 
-            if(color=="Black")
-                label_ss.Foreground = System.Windows.Media.Brushes.Black;
-            return msg;
-        }
+
 
 
         /// <summary>
@@ -576,7 +909,7 @@ namespace Storage_Helper_SAS_Tool
 
             //if (sr_queue.IsChecked == true) s += "q";           // TODO - check if this the correct option
 
-            if (sr_blobSnapshot.IsChecked == true) s += "bs";   
+            if (sr_blobSnapshot.IsChecked == true) s += "bs";
 
             ComboBox_sr.Text = s;
 
@@ -593,7 +926,7 @@ namespace Storage_Helper_SAS_Tool
                 SetStatus_PartitionRowBoxes(false);
 
                 textBox_si.IsEnabled = true;
-                label_PolicyName.IsEnabled = true;
+                label_si.IsEnabled = true;
 
                 label_srt.Foreground = Brushes.Black;
                 label_sr.Foreground = Brushes.Black;
@@ -605,77 +938,77 @@ namespace Storage_Helper_SAS_Tool
                 {
                     // blob - racwd
                     case "b":
-                        sp_read.IsEnabled   = true;
-                        sp_write.IsEnabled  = true;
+                        sp_read.IsEnabled = true;
+                        sp_write.IsEnabled = true;
                         sp_delete.IsEnabled = true;  // Uncheck the disable checkboxes
-                        sp_list.IsEnabled   = false; sp_list.IsChecked    = false;
-                        sp_add.IsEnabled    = true;
+                        sp_list.IsEnabled = false; sp_list.IsChecked = false;
+                        sp_add.IsEnabled = true;
                         sp_create.IsEnabled = true;
-                        sp_update.IsEnabled = false; sp_update.IsChecked  = false;
-                        sp_process.IsEnabled= false; sp_process.IsChecked = false;
+                        sp_update.IsEnabled = false; sp_update.IsChecked = false;
+                        sp_process.IsEnabled = false; sp_process.IsChecked = false;
                         break;
 
                     // container - racwdl
                     case "c":
-                        sp_read.IsEnabled   = true;
-                        sp_write.IsEnabled  = true;
+                        sp_read.IsEnabled = true;
+                        sp_write.IsEnabled = true;
                         sp_delete.IsEnabled = true;
-                        sp_list.IsEnabled   = true;
-                        sp_add.IsEnabled    = true;
+                        sp_list.IsEnabled = true;
+                        sp_add.IsEnabled = true;
                         sp_create.IsEnabled = true;  // Uncheck the disable checkboxes
-                        sp_update.IsEnabled = false; sp_update.IsChecked  = false;
-                        sp_process.IsEnabled= false; sp_process.IsChecked = false;
+                        sp_update.IsEnabled = false; sp_update.IsChecked = false;
+                        sp_process.IsEnabled = false; sp_process.IsChecked = false;
                         break;
 
                     // file - rcwd
                     case "f":
-                        sp_read.IsEnabled   = true;
-                        sp_write.IsEnabled  = true;
+                        sp_read.IsEnabled = true;
+                        sp_write.IsEnabled = true;
                         sp_delete.IsEnabled = true;  // Uncheck the disable checkboxes
-                        sp_list.IsEnabled   = false; sp_list.IsChecked = false;
-                        sp_add.IsEnabled    = false; sp_add.IsChecked  = false;
+                        sp_list.IsEnabled = false; sp_list.IsChecked = false;
+                        sp_add.IsEnabled = false; sp_add.IsChecked = false;
                         sp_create.IsEnabled = true;
-                        sp_update.IsEnabled = false; sp_update.IsChecked  = false;
-                        sp_process.IsEnabled= false; sp_process.IsChecked = false;
+                        sp_update.IsEnabled = false; sp_update.IsChecked = false;
+                        sp_process.IsEnabled = false; sp_process.IsChecked = false;
                         labelMessages.Content = "Service File SAS suported on Service version 2015-02-21 and later. From Storage Explorer, seems 2015-02-21 is not suppoerted. 2015-02-21 removed from the list.";
                         break;
 
                     // share - rcwdl
                     case "s":
-                        sp_read.IsEnabled   = true;
-                        sp_write.IsEnabled  = true;
+                        sp_read.IsEnabled = true;
+                        sp_write.IsEnabled = true;
                         sp_delete.IsEnabled = true;
-                        sp_list.IsEnabled   = true;  // Uncheck the disable checkboxes
-                        sp_add.IsEnabled    = false; sp_add.IsChecked     = false;
+                        sp_list.IsEnabled = true;  // Uncheck the disable checkboxes
+                        sp_add.IsEnabled = false; sp_add.IsChecked = false;
                         sp_create.IsEnabled = true;
-                        sp_update.IsEnabled = false; sp_update.IsChecked  = false;
-                        sp_process.IsEnabled= false; sp_process.IsChecked = false;
+                        sp_update.IsEnabled = false; sp_update.IsChecked = false;
+                        sp_process.IsEnabled = false; sp_process.IsChecked = false;
                         labelMessages.Content = "Service Share SAS suported on Service version 2015-02-21 and later. From Storage Explorer, seems 2015-02-21 is not suppoerted. 2015-02-21 removed from the list.";
 
                         break;
 
                     // queue - raup     // TODO - q for queues ????
                     case "q":           // TODO - how specify the queue name ????
-                        sp_read.IsEnabled   = true;  // Uncheck the disable checkboxes
-                        sp_write.IsEnabled  = false; sp_write.IsChecked  = false;
+                        sp_read.IsEnabled = true;  // Uncheck the disable checkboxes
+                        sp_write.IsEnabled = false; sp_write.IsChecked = false;
                         sp_delete.IsEnabled = false; sp_delete.IsChecked = false;
-                        sp_list.IsEnabled   = false; sp_list.IsChecked   = false;
-                        sp_add.IsEnabled    = true;
+                        sp_list.IsEnabled = false; sp_list.IsChecked = false;
+                        sp_add.IsEnabled = true;
                         sp_create.IsEnabled = false; sp_create.IsChecked = false;
                         sp_update.IsEnabled = true;
-                        sp_process.IsEnabled= true;
+                        sp_process.IsEnabled = true;
                         break;
 
                     // blob snapshot - drw                 // v12.0.0.0-preview
-                    case "bs":                          
-                        sp_read.IsEnabled   = true;  // Uncheck the disable checkboxes
-                        sp_write.IsEnabled  = true; 
-                        sp_delete.IsEnabled = true; 
-                        sp_list.IsEnabled   = false; sp_list.IsChecked   = false;
-                        sp_add.IsEnabled    = false; sp_add.IsEnabled    = false;
+                    case "bs":
+                        sp_read.IsEnabled = true;  // Uncheck the disable checkboxes
+                        sp_write.IsEnabled = true;
+                        sp_delete.IsEnabled = true;
+                        sp_list.IsEnabled = false; sp_list.IsChecked = false;
+                        sp_add.IsEnabled = false; sp_add.IsEnabled = false;
                         sp_create.IsEnabled = false; sp_create.IsChecked = false;
                         sp_update.IsEnabled = false; sp_update.IsEnabled = false;
-                        sp_process.IsEnabled= false; sp_process.IsEnabled= false;
+                        sp_process.IsEnabled = false; sp_process.IsEnabled = false;
                         break;
                 }
                 ComboBox_sp_UpdateText();
@@ -684,6 +1017,10 @@ namespace Storage_Helper_SAS_Tool
             SAS_Utils.PopulateComboBox_sv(ComboBox_sv, ComboBox_sr.Text, textBox_tn.Text);
             SAS_Utils.PopulateComboBox_sv(ComboBox_apiVersion, ComboBox_sr.Text, textBox_tn.Text);
         }
+
+
+
+
 
         /// <summary>
         /// ComboBox sr - Drop Down Opened
@@ -700,7 +1037,7 @@ namespace Storage_Helper_SAS_Tool
         /// <param name="e"></param>
         private void ComboBox_sr_DropDownOpened(object sender, EventArgs e)
         {
-            if(checkBoxPreRelease12.IsChecked == true)
+            if (checkBoxPreRelease12.IsChecked == true)
             {
                 sr_blobSnapshot.IsChecked = Test(ComboBox_sr.Text, "bs");
                 if (sr_blobSnapshot.IsChecked == true) return; // avoid mark 'b' and 's'
@@ -722,6 +1059,7 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
+
         private void Sr_blob_Click(object sender, RoutedEventArgs e)
         {
             // allow only one selected at same time
@@ -731,6 +1069,8 @@ namespace Storage_Helper_SAS_Tool
             //q  sr_queue.IsChecked = false;
             sr_blobSnapshot.IsChecked = false;
         }
+
+
 
         private void Sr_container_Click(object sender, RoutedEventArgs e)
         {
@@ -742,6 +1082,8 @@ namespace Storage_Helper_SAS_Tool
             sr_blobSnapshot.IsChecked = false;
         }
 
+
+
         private void Sr_share_Click(object sender, RoutedEventArgs e)
         {
             // allow only one selected at same time
@@ -751,6 +1093,8 @@ namespace Storage_Helper_SAS_Tool
             //q  sr_queue.IsChecked = false;
             sr_blobSnapshot.IsChecked = false;
         }
+
+
 
         private void Sr_file_Click(object sender, RoutedEventArgs e)
         {
@@ -762,6 +1106,8 @@ namespace Storage_Helper_SAS_Tool
             sr_blobSnapshot.IsChecked = false;
         }
 
+
+
         private void Sr_queue_Click(object sender, RoutedEventArgs e)
         {
             // allow only one selected at same time
@@ -771,6 +1117,8 @@ namespace Storage_Helper_SAS_Tool
             sr_file.IsChecked = false;
             sr_blobSnapshot.IsChecked = false;
         }
+
+
 
         private void Sr_blobSnapshot_Click(object sender, RoutedEventArgs e)
         {
@@ -782,6 +1130,8 @@ namespace Storage_Helper_SAS_Tool
             sr_blob.IsChecked = false;
         }
 
+
+
         private void ComboBox_srt_DropDownClosed(object sender, EventArgs e)
         {
             string s = "";
@@ -791,19 +1141,22 @@ namespace Storage_Helper_SAS_Tool
 
             ComboBox_srt.Text = s;
 
-            if(s != "")
+            if (s != "")
             {
                 ComboBox_sr.Text = "";      // clear sr
                 // ComboBox_sr.IsEnabled = true;        // leaving enable to make it possible to change to Service SAS - B,C,S,F
 
-                textBox_tn.Text = "";          // clear tn
-                // textBox_tn.IsEnabled = true;        // leaving enable to make it possible to change to Service SAS - table
-
                 ComboBox_ss.IsEnabled = true;
+
+                ComboBox_sr.IsEnabled = true;
+
+                textBox_tn.Text = "";          // clear tn
+                if (checkBoxPreRelease12.IsChecked == false)
+                    textBox_tn.IsEnabled = true;    // leaving enable to make it possible to change to Service SAS - table
 
                 SetStatus_PartitionRowBoxes(false);
                 textBox_si.IsEnabled = false;
-                label_PolicyName.IsEnabled = false;
+                label_si.IsEnabled = false;
 
                 label_srt.Foreground = Brushes.Black;
                 label_sr.Foreground = Brushes.Black;
@@ -813,20 +1166,22 @@ namespace Storage_Helper_SAS_Tool
                 // https://docs.microsoft.com/pt-pt/rest/api/storageservices/create-account-sas?redirectedfrom=MSDN#account-sas-permissions-by-operation
                 // https://docs.microsoft.com/pt-pt/rest/api/storageservices/create-account-sas?redirectedfrom=MSDN#specifying-account-sas-parameters
                 // used by blob, file, table, queue
-                sp_read.IsEnabled   = true; 
-                sp_write.IsEnabled  = true; 
+                sp_read.IsEnabled = true;
+                sp_write.IsEnabled = true;
                 sp_delete.IsEnabled = true; // Uncheck the disable checkboxes
-                sp_list.IsEnabled   = true; //sp_list.IsChecked   = false;
+                sp_list.IsEnabled = true; //sp_list.IsChecked   = false;
                 sp_create.IsEnabled = true;
-                sp_add.IsEnabled    = true;     // Table, Queue only
+                sp_add.IsEnabled = true;     // Table, Queue only
                 sp_update.IsEnabled = true;     // Table, Queue only
-                sp_process.IsEnabled= true;     // Queue only
+                sp_process.IsEnabled = true;     // Queue only
                 ComboBox_sp_UpdateText();
             }
 
             SAS_Utils.PopulateComboBox_sv(ComboBox_sv, ComboBox_sr.Text, textBox_tn.Text);
             SAS_Utils.PopulateComboBox_sv(ComboBox_apiVersion, ComboBox_sr.Text, textBox_tn.Text);
         }
+
+
 
         private void ComboBox_srt_DropDownOpened(object sender, EventArgs e)
         {
@@ -836,15 +1191,20 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
+
         private void ComboBox_sv_DropDownOpened(object sender, EventArgs e)
         {
             SAS_Utils.PopulateComboBox_sv(ComboBox_sv, ComboBox_sr.Text, textBox_tn.Text);
         }
 
+
+
         private void ComboBox_apiVersion_DropDownOpened(object sender, EventArgs e)
         {
             SAS_Utils.PopulateComboBox_sv(ComboBox_apiVersion, ComboBox_sr.Text, textBox_tn.Text);
         }
+
+
 
         private void TextBox_tn_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -862,7 +1222,7 @@ namespace Storage_Helper_SAS_Tool
 
 
                 textBox_si.IsEnabled = true;
-                label_PolicyName.IsEnabled = true;
+                label_si.IsEnabled = true;
 
                 // enable partitinon and row limits
                 SetStatus_PartitionRowBoxes(true);
@@ -878,14 +1238,14 @@ namespace Storage_Helper_SAS_Tool
                 // Setting the sp (signed permissions) based on Service SAS tn
                 // https://docs.microsoft.com/pt-pt/rest/api/storageservices/create-service-sas#permissions-for-a-table
                 // queue - raup
-                sp_read.IsEnabled   = true; // Uncheck the disable checkboxes
-                sp_write.IsEnabled  = false; sp_write.IsChecked  = false;
-                sp_delete.IsEnabled = true; 
-                sp_list.IsEnabled   = false; sp_list.IsChecked   = false;
-                sp_add.IsEnabled    = true; 
+                sp_read.IsEnabled = true; // Uncheck the disable checkboxes
+                sp_write.IsEnabled = false; sp_write.IsChecked = false;
+                sp_delete.IsEnabled = true;
+                sp_list.IsEnabled = false; sp_list.IsChecked = false;
+                sp_add.IsEnabled = true;
                 sp_create.IsEnabled = false; sp_create.IsChecked = false;
-                sp_update.IsEnabled = true; 
-                sp_process.IsEnabled= false; sp_process.IsChecked = false;
+                sp_update.IsEnabled = true;
+                sp_process.IsEnabled = false; sp_process.IsChecked = false;
                 ComboBox_sp_UpdateText();
             }
 
@@ -894,188 +1254,25 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
-        private void SetStatus_PartitionRowBoxes(bool status)
-        {
-            if(status == false)
-            { 
-                textBox_erk.Text = "";         // clear erk
-                textBox_srk.Text = "";         // clear srk
-                textBox_epk.Text = "";         // clear epk
-                textBox_spk.Text = "";         // clear spk
-            }
-
-            textBox_erk.IsEnabled = status;
-            textBox_srk.IsEnabled = status;
-            textBox_epk.IsEnabled = status;
-            textBox_spk.IsEnabled = status;
-
-            label_erk.IsEnabled = status;
-            label_srk.IsEnabled = status;
-            label_epk.IsEnabled = status;
-            label_spk.IsEnabled = status;
-        }
-
-
-
-
-
-
-        /// <summary>
-        /// Update SAS struct with values from graphic Combo and Text Boxes with values from the decoded SAS.
-        /// Only update the textBox's if no issue found on the specified service
-        /// Used after "Check SAS Parameters"
-        /// </summary>
-        private void Set_ValuesFromStruct_ToBoxes()
-        {
-            // sharedAccessSignature; // complete SAS without the endpoints
-
-            // blobEndpoint;
-            // fileEndpoint;
-            // tableEndpoint;
-            // queueEndpoint;
-
-            textBoxAccountName.Text = SAS_Utils.SAS.storageAccountName.v;   // storage Account Name, if provided on any Endpoint
-
-            textBoxContainerName.Text = SAS_Utils.SAS.containerName.v;
-            textBoxBlobName.Text = SAS_Utils.SAS.blobName.v;
-            textBoxShareName.Text = SAS_Utils.SAS.shareName.v;
-            textBoxFileName.Text = SAS_Utils.SAS.fileName.v;
-            textBoxQueueName.Text = SAS_Utils.SAS.queueName.v;
-            textBoxTableName.Text = (SAS_Utils.SAS.tn.v == "not found" ? SAS_Utils.SAS.tableName.v : SAS_Utils.SAS.tn.v);  // uses tn if Access SAS, otherwise uses tableName if exists 
-
-
-            // onlySASprovided;        // true if the endpoints not provided
-
-            ComboBox_ss.Text = (SAS_Utils.SAS.ss.v == "not found" ? "" : SAS_Utils.SAS.ss.v);
-            ComboBox_srt.Text = (SAS_Utils.SAS.srt.v == "not found" ? "" : SAS_Utils.SAS.srt.v);
-            ComboBox_sp.Text = (SAS_Utils.SAS.sp.v == "not found" ? "" : SAS_Utils.SAS.sp.v);
-            textBox_se.Text = (SAS_Utils.SAS.se.v == "not found" ? "" : SAS_Utils.SAS.se.v);
-            textBox_st.Text = (SAS_Utils.SAS.st.v == "not found" ? "" : SAS_Utils.SAS.st.v);
-            textBox_sip.Text = (SAS_Utils.SAS.sip.v == "not found" ? "" : SAS_Utils.SAS.sip.v);
-            ComboBox_spr.Text = (SAS_Utils.SAS.spr.v == "not found" ? "" : SAS_Utils.SAS.spr.v);
-
-            textBox_sig_left.Text = (SAS_Utils.SAS.sig == "not found" ? "" : SAS_Utils.SAS.sig);  // Encripted signature
-            Set_Color_Signature(); 
-
-            ComboBox_sr.Text = (SAS_Utils.SAS.sr.v == "not found" ? "" : SAS_Utils.SAS.sr.v);
-            textBox_tn.Text = (SAS_Utils.SAS.tn.v == "not found" ? "" : SAS_Utils.SAS.tn.v);
-            textBox_erk.Text = (SAS_Utils.SAS.erk == "not found" ? "" : SAS_Utils.SAS.erk);
-            textBox_srk.Text = (SAS_Utils.SAS.srk == "not found" ? "" : SAS_Utils.SAS.srk);
-            textBox_epk.Text = (SAS_Utils.SAS.epk == "not found" ? "" : SAS_Utils.SAS.epk);
-            textBox_spk.Text = (SAS_Utils.SAS.spk == "not found" ? "" : SAS_Utils.SAS.spk);
-            textBox_si.Text = (SAS_Utils.SAS.si == "not found" ? "" : SAS_Utils.SAS.si);        // Policy Name
-
-            SAS_Utils.PopulateComboBox_sv(ComboBox_apiVersion, ComboBox_sr.Text, textBox_tn.Text);
-            SAS_Utils.PopulateComboBox_sv(ComboBox_sv, ComboBox_sr.Text, textBox_tn.Text);
-            ComboBox_apiVersion.SelectedIndex = ComboBox_apiVersion.Items.IndexOf((SAS_Utils.SAS.apiVersion.v == "not found" ? "" : SAS_Utils.SAS.apiVersion.v));
-            ComboBox_sv.SelectedIndex = ComboBox_sv.Items.IndexOf((SAS_Utils.SAS.sv.v == "not found" ? "" : SAS_Utils.SAS.sv.v));
-
-            // Set label colors in case of error
-            //----------------------------
-            labelAccountName.Foreground = (SAS_Utils.SAS.storageAccountName.s ? Brushes.Black : Brushes.Red);
-
-            labelContainerName.Foreground = (SAS_Utils.SAS.containerName.s ? Brushes.Black : Brushes.Red);
-            labelBlobName.Foreground = (SAS_Utils.SAS.blobName.s ? Brushes.Black : Brushes.Red);
-            labelBlobSnapshotName.Foreground = (SAS_Utils.SAS.blobSnapshotName.s ? Brushes.Black : Brushes.Red);
-            labelShareName.Foreground = (SAS_Utils.SAS.shareName.s ? Brushes.Black : Brushes.Red);
-            labelFileName.Foreground = (SAS_Utils.SAS.fileName.s ? Brushes.Black : Brushes.Red);
-            labelQueueName.Foreground = (SAS_Utils.SAS.queueName.s ? Brushes.Black : Brushes.Red);
-            labelTableName.Foreground = (SAS_Utils.SAS.tableName.s ? Brushes.Black : Brushes.Red);
-
-            label_sv.Foreground = (SAS_Utils.SAS.sv.s ? Brushes.Black : Brushes.Red);
-            label_ss.Foreground = (SAS_Utils.SAS.ss.s ? Brushes.Black : Brushes.Red);
-            label_srt.Foreground = (SAS_Utils.SAS.srt.s ? Brushes.Black : Brushes.Red);
-            label_sp.Foreground = (SAS_Utils.SAS.sp.s ? Brushes.Black : Brushes.Red);
-            label_se.Foreground = (SAS_Utils.SAS.se.s ? Brushes.Black : Brushes.Red);
-            label_st.Foreground = (SAS_Utils.SAS.st.s ? Brushes.Black : Brushes.Red);
-            label_sip.Foreground = (SAS_Utils.SAS.sip.s ? Brushes.Black : Brushes.Red);
-            label_spr.Foreground = (SAS_Utils.SAS.spr.s ? Brushes.Black : Brushes.Red);
-
-            label_sr.Foreground = (SAS_Utils.SAS.sr.s ? Brushes.Black : Brushes.Red);
-            label_tn.Foreground = (SAS_Utils.SAS.tn.s ? Brushes.Black : Brushes.Red);
-
-            // Other labels
-            labelAccountKey.Foreground = Brushes.Black;
-            labelInsertSAS.Foreground = Brushes.Black;
-            label_sip.Foreground = Brushes.Black;
-            //----------------------------
-        }
-
-
-
-
-        /// <summary>
-        /// Update graphic Combo and Text Boxes with values from the SAS struct
-        /// Used before "Regenerate SAS"
-        /// </summary>
-        private void Get_ValuesFromBoxes_ToStruct()
-        {
-            // sharedAccessSignature; // complete SAS without the endpoints
-
-            // blobEndpoint;
-            // fileEndpoint;
-            // tableEndpoint;
-            // queueEndpoint;
-
-            SAS_Utils.SAS.storageAccountName.v = textBoxAccountName.Text;
-
-            SAS_Utils.SAS.containerName.v = textBoxContainerName.Text;
-            SAS_Utils.SAS.blobName.v = textBoxBlobName.Text;
-            SAS_Utils.SAS.shareName.v = textBoxShareName.Text;
-            SAS_Utils.SAS.fileName.v = textBoxFileName.Text;
-            SAS_Utils.SAS.queueName.v = textBoxQueueName.Text;
-            SAS_Utils.SAS.tableName.v = textBoxTableName.Text;
-
-            // onlySASprovided;        // true if the endpoints not provided
-
-            SAS_Utils.SAS.apiVersion.v = ComboBox_apiVersion.Text;
-            SAS_Utils.SAS.sv.v = ComboBox_sv.Text;
-            SAS_Utils.SAS.ss.v = ComboBox_ss.Text;
-            SAS_Utils.SAS.srt.v = ComboBox_srt.Text;
-            SAS_Utils.SAS.sp.v = ComboBox_sp.Text;
-            SAS_Utils.SAS.se.v = textBox_se.Text;
-            SAS_Utils.SAS.st.v = textBox_st.Text;
-            SAS_Utils.SAS.sip.v = textBox_sip.Text;
-            SAS_Utils.SAS.spr.v = ComboBox_spr.Text;
-            SAS_Utils.SAS.sig = textBox_sig_left.Text;  // Encripted signatute from left, to validate existing data
-
-            SAS_Utils.SAS.sr.v = ComboBox_sr.Text;
-            SAS_Utils.SAS.tn.v = textBox_tn.Text;
-            SAS_Utils.SAS.blobSnapshotName.v = textBoxBlobSnapshotName.Text;    // v12.0.0.0_preview
-            SAS_Utils.SAS.erk = textBox_erk.Text;
-            SAS_Utils.SAS.srk = textBox_srk.Text;
-            SAS_Utils.SAS.epk = textBox_epk.Text;
-            SAS_Utils.SAS.spk = textBox_spk.Text;
-            SAS_Utils.SAS.si = textBox_si.Text;
-
-
-            // used by v12.0.0.0_preview
-            SAS_Utils.fromIP[0] = 0;
-            SAS_Utils.fromIP[1] = 0;
-            SAS_Utils.fromIP[2] = 0;
-            SAS_Utils.fromIP[3] = 0;
-
-            SAS_Utils.toIP[0] = 0;
-            SAS_Utils.toIP[1] = 0;
-            SAS_Utils.toIP[2] = 0;
-            SAS_Utils.toIP[3] = 0;
-        }
-
         private void BoxAuthResults_Right_GotFocus(object sender, RoutedEventArgs e)
         {
             RemoveSplash();
         }
 
+
+
         private void ComboBox_sv_DropDownClosed(object sender, EventArgs e)
         {
-            if(ComboBox_sv.Text != "")
+            if (ComboBox_sv.Text != "")
                 label_sv.Foreground = Brushes.Black;
         }
 
+
+
         private void TextBox_se_LostFocus(object sender, RoutedEventArgs e)
         {
-            if(textBox_se.Text != "")
-                if(DateTime.Compare(DateTime.UtcNow.ToUniversalTime(), Convert.ToDateTime(textBox_se.Text).ToUniversalTime()) > 0)
+            if (textBox_se.Text != "")
+                if (DateTime.Compare(DateTime.UtcNow.ToUniversalTime(), Convert.ToDateTime(textBox_se.Text).ToUniversalTime()) > 0)
                 {
                     label_se.Foreground = Brushes.Red;
                     MessageBox.Show("Expiry Date already expired", "Error", MessageBoxButton.OK, MessageBoxImage.Exclamation);
@@ -1084,11 +1281,15 @@ namespace Storage_Helper_SAS_Tool
                     label_se.Foreground = Brushes.Black;
         }
 
+
+
         private void TextBoxAccountKey1_LostFocus(object sender, RoutedEventArgs e)
         {
-            if(textBoxAccountKey1.Text != "")
+            if (textBoxAccountKey1.Text != "")
                 labelAccountKey.Foreground = Brushes.Black;
         }
+
+
 
         private void TextBoxAccountName_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -1096,11 +1297,15 @@ namespace Storage_Helper_SAS_Tool
                 labelAccountName.Foreground = Brushes.Black;
         }
 
+
+
         private void TextBoxContainerName_LostFocus(object sender, RoutedEventArgs e)
         {
             if (textBoxContainerName.Text != "")
                 labelContainerName.Foreground = Brushes.Black;
         }
+
+
 
         private void TextBoxBlobName_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -1108,11 +1313,15 @@ namespace Storage_Helper_SAS_Tool
                 labelBlobName.Foreground = Brushes.Black;
         }
 
+
+
         private void TextBoxBlobSnapshotName_LostFocus(object sender, RoutedEventArgs e)
         {
             if (textBoxBlobSnapshotName.Text != "")
                 labelBlobSnapshotName.Foreground = Brushes.Black;
         }
+
+
 
         private void TextBoxShareName_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -1120,11 +1329,15 @@ namespace Storage_Helper_SAS_Tool
                 labelShareName.Foreground = Brushes.Black;
         }
 
+
+
         private void TextBoxFileName_LostFocus(object sender, RoutedEventArgs e)
         {
             if (textBoxFileName.Text != "")
                 labelFileName.Foreground = Brushes.Black;
         }
+
+
 
         private void TextBoxQueueName_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -1132,11 +1345,15 @@ namespace Storage_Helper_SAS_Tool
                 labelQueueName.Foreground = Brushes.Black;
         }
 
+
+
         private void TextBoxTableName_LostFocus(object sender, RoutedEventArgs e)
         {
             if (textBoxTableName.Text != "")
                 labelTableName.Foreground = Brushes.Black;
         }
+
+
 
         private void TextBox_st_LostFocus(object sender, RoutedEventArgs e)
         {
@@ -1151,42 +1368,37 @@ namespace Storage_Helper_SAS_Tool
         {
             if (checkBoxPreRelease12.IsChecked == true)
             {
-                textBox_tn.Text = "";          // clear tn
-                textBoxTableName.Text = "";     // clear Table Name
                 ComboBox_apiVersion.Text = "";     // clear API-Version
 
-                textBox_tn.IsEnabled = false;
                 textBoxTableName.IsEnabled = false;
                 ComboBox_apiVersion.IsEnabled = false;
 
                 textBoxBlobSnapshotName.IsEnabled = true;
                 sr_blobSnapshot.IsEnabled = true;
-
-                labelMessages.Content = "Table Service are not supported by Storage SDK v12.0.0_preview. API Version replaced by Service Version on Storage SDK v12.0.0_preview";
             }
             else
             {
-                textBox_tn.IsEnabled = true;
-                textBoxTableName.IsEnabled = true;
                 ComboBox_apiVersion.IsEnabled = true;
-                labelMessages.Content = "";
 
                 textBoxBlobSnapshotName.IsEnabled = false;
                 sr_blobSnapshot.IsEnabled = false;
-
-                labelMessages.Content = "Storage SDK v11.x - Account SAS: API Version not supported. Service SAS: No optional parameters supported. Only supports 'Signed Permissions', 'Start' and 'Expiry Date Time'.  Please use SDK v12.0.0.0 instead (Table Service SAS not supported)";
             }
         }
 
         private void Sp_write_Click(object sender, RoutedEventArgs e)
         {
-            if(ComboBox_sr.Text != "" || textBox_tn.Text!="")
+            if (ComboBox_sr.Text != "" || textBox_tn.Text != "")
                 labelMessages.Content = "Selecting the 'Write' permission invatidate the Service SAS on Azure Storage Explorer for some reason.";
         }
+
+
 
         private void LabelHelp_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             SplashInfo();
         }
+
+
+
     }
 }

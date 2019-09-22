@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Controls;
 
-using Microsoft.Azure.Storage.Blob;
-using Microsoft.Azure.Storage.Queue;
-using Microsoft.Azure.Storage.File;
-//using Microsoft.Azure.Cosmos.Table; // Moved to Cosmos library
+
 using Microsoft.Azure.Storage.Auth;
 
 
@@ -26,6 +22,8 @@ namespace Storage_Helper_SAS_Tool
 
 
         private const string DateTimeFormat = "{0}-{1}-{2}T{3}:{4}:{5}Z";
+
+        //--------------------------------------------------------------------------------------------
 
         /// <summary>
         /// To the iso8601 date. 
@@ -53,6 +51,7 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
+
         /// <summary>
         /// 
         /// </summary>
@@ -73,14 +72,14 @@ namespace Storage_Helper_SAS_Tool
         /// <summary>
         /// Validate st, se
         /// </summary>
-        public static bool Validate_DateTimes(Label label_st, Label label_se)
+        public static bool Validate_DateTimes(Label label_st, Label label_se, string st, string se)
         {
             try
             {
-                if (String.IsNullOrEmpty(SAS_Utils.SAS.st.v))
+                if (String.IsNullOrEmpty(st))
                     SAS_Utils.SAS.stDateTime = DateTime.UtcNow.ToUniversalTime(); // not used - replacenetnt to null - SAS.st.v should be checked to check if was provided or not
                 else
-                    SAS_Utils.SAS.stDateTime = Convert.ToDateTime(SAS_Utils.SAS.st.v).ToUniversalTime();
+                    SAS_Utils.SAS.stDateTime = Convert.ToDateTime(st).ToUniversalTime();
             }
             catch (Exception ex)
             {
@@ -91,7 +90,7 @@ namespace Storage_Helper_SAS_Tool
 
             try
             {
-                SAS_Utils.SAS.seDateTime = Convert.ToDateTime(SAS_Utils.SAS.se.v).ToUniversalTime();
+                SAS_Utils.SAS.seDateTime = Convert.ToDateTime(se).ToUniversalTime();
             }
             catch (Exception ex)
             {
@@ -105,6 +104,9 @@ namespace Storage_Helper_SAS_Tool
     }
     //--------------------------------------------------------------------------------------------
     //--------------------------------------------------------------------------------------------
+
+
+
 
 
 
@@ -129,6 +131,7 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
+
         /// <summary>
         /// Count how many chars 'ch' are in source
         /// </summary>
@@ -144,82 +147,6 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
-
-
-        /// <summary>
-        /// Converts the permissions specified for the shared access policy to a string.
-        /// Same permissions for Policy and 'sr' (Service SAS) parameter 
-        /// 
-        /// SharedAccessBlobPermissions: Add	16	
-        ///                              Create	32	
-        ///                              Delete	4	
-        ///                              List	8	
-        ///                              None	0	
-        ///                              Read	1	
-        ///                              Write	2
-        /// </summary>
-        /// <param name="permissions">The shared access permissions.</param>
-        /// <returns>The shared access permissions in string format.</returns>
-        public static string BlobPermissionsToString(SharedAccessBlobPermissions permissions)
-        {
-            // The service supports a fixed order => rwdl
-            StringBuilder builder = new StringBuilder();
-            if ((permissions & SharedAccessBlobPermissions.Read) == SharedAccessBlobPermissions.Read) builder.Append("r");
-            if ((permissions & SharedAccessBlobPermissions.Write) == SharedAccessBlobPermissions.Write) builder.Append("w");
-            if ((permissions & SharedAccessBlobPermissions.Delete) == SharedAccessBlobPermissions.Delete) builder.Append("d");
-            if ((permissions & SharedAccessBlobPermissions.List) == SharedAccessBlobPermissions.List) builder.Append("l");
-            if ((permissions & SharedAccessBlobPermissions.Add) == SharedAccessBlobPermissions.Add) builder.Append("a");
-            if ((permissions & SharedAccessBlobPermissions.Create) == SharedAccessBlobPermissions.Create) builder.Append("c");
-            return builder.ToString();
-        }
-
-
-
-
-        /// <summary>
-        /// Converts the permissions specified for the shared access policy to a string.
-        /// Same permissions for Policy and 'sr' (Service SAS) parameter 
-        /// 
-        /// SharedAccessQueuePermissions:   Add	            2	
-        ///                                 None	        0	
-        ///                                 ProcessMessages	8	
-        ///                                 Read	        1	
-        ///                                 Update	        4
-        /// </summary>
-        /// <param name="permissions">The shared access permissions.</param>
-        /// <returns>The shared access permissions in string format.</returns>
-        public static string QueuePermissionsToString(SharedAccessQueuePermissions permissions)
-        {
-            // The service supports a fixed order => rwdl
-            StringBuilder builder = new StringBuilder();
-            if ((permissions & SharedAccessQueuePermissions.Read) == SharedAccessQueuePermissions.Read) builder.Append("r");
-            if ((permissions & SharedAccessQueuePermissions.Add) == SharedAccessQueuePermissions.Add) builder.Append("a");
-            if ((permissions & SharedAccessQueuePermissions.Update) == SharedAccessQueuePermissions.Update) builder.Append("u");
-            if ((permissions & SharedAccessQueuePermissions.ProcessMessages) == SharedAccessQueuePermissions.ProcessMessages) builder.Append("p");
-            return builder.ToString();
-        }
-
-
-
-        /// <summary>
-        /// Converts the permissions specified for the shared access policy to a string.
-        /// Same permissions for Policy and 'sr' (Service SAS) parameter 
-        /// 
-        /// SharedAccessFilePermissions:  - TODO - not supported by API ???
-        /// </summary>
-        /// <param name="permissions">The shared access permissions.</param>
-        /// <returns>The shared access permissions in string format.</returns>
-        public static string FilePermissionsToString(SharedAccessFilePermissions permissions)
-        {
-            // The service supports a fixed order => rwdl
-            StringBuilder builder = new StringBuilder();
-            if ((permissions & SharedAccessFilePermissions.Read) == SharedAccessFilePermissions.Read) builder.Append("r");
-            if ((permissions & SharedAccessFilePermissions.Write) == SharedAccessFilePermissions.Write) builder.Append("w");
-            if ((permissions & SharedAccessFilePermissions.Delete) == SharedAccessFilePermissions.Delete) builder.Append("d");
-            if ((permissions & SharedAccessFilePermissions.List) == SharedAccessFilePermissions.List) builder.Append("l");
-            if ((permissions & SharedAccessFilePermissions.Create) == SharedAccessFilePermissions.Create) builder.Append("c");
-            return builder.ToString();
-        }
 
 
 
@@ -268,6 +195,8 @@ namespace Storage_Helper_SAS_Tool
             return false;
         }
 
+
+
         /// <summary>
         /// Used to quick check if an string variable is empty
         /// </summary>
@@ -288,25 +217,6 @@ namespace Storage_Helper_SAS_Tool
 
 
 
-
-        /// <summary>
-        /// Get File Name from Uri 
-        /// https://storage.blob.core.windows.net/container/folder1/folder1/blob.txt  -> blob.txt
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <returns></returns>
-        public static string Get_FileNameFromUri(string uri)
-        {
-            return uri.Substring(uri.LastIndexOf('/') + 1);
-        }
-
-
-
-
-
-
-
-
         /// <summary>
         /// Show messageBox returning false - used to shown message and abort the processing
         /// </summary>
@@ -315,9 +225,10 @@ namespace Storage_Helper_SAS_Tool
         /// <returns></returns>
         public static bool WithMessage(string msg, string title)
         {
-            MessageBox.Show(msg, msg, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
             return false;
         }
+
 
 
         /// <summary>
@@ -334,7 +245,23 @@ namespace Storage_Helper_SAS_Tool
             return str;
         }
 
+
+
+        /// <summary>
+        /// Get File Name from Uri 
+        /// https://storage.blob.core.windows.net/container/folder1/folder1/blob.txt  -> blob.txt
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        public static string Get_FileNameFromUri(string uri)
+        {
+            return uri.Substring(uri.LastIndexOf('/') + 1);
+        }
+
+
+
         //-----------------------------------------------------------------------------------------------------------------------------
+        //----------------------------- File content type definitions
         //-----------------------------------------------------------------------------------------------------------------------------
         /// <summary>
         /// Convert file extension to Content Type

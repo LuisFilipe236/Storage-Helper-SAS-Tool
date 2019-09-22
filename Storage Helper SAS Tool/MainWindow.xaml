@@ -12,7 +12,7 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <TextBox x:Name="BoxAuthResults" Margin="5,273,3,21" TextWrapping="Wrap" Text=" " GotFocus="BoxAuthResults_Right_GotFocus" Background="#FFF4F3F3"/>
-        <Label x:Name="labelInsertSAS" Content="Insert SAS or Connection String:" HorizontalAlignment="Left" Margin="13,-1,0,0" VerticalAlignment="Top" Height="26" Width="210" FontWeight="Bold"/>
+        <Label x:Name="labelInsertSAS" Content="Insert SAS or Connection String:" HorizontalAlignment="Left" Margin="13,-1,0,0" VerticalAlignment="Top" Height="26" Width="210" FontWeight="Bold" Background="{x:Null}" Foreground="Black"/>
         <TextBox x:Name="InputBoxSAS" Height="59" Margin="5,24,5,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Grid.ColumnSpan="2" FontSize="11" GotFocus="BoxAuthResults_Right_GotFocus"/>
         <Button x:Name="ButtonTestAccountSAS" Content="Check SAS parameters" HorizontalAlignment="Center" Height="31" Margin="268,95,120.8,0" VerticalAlignment="Top" FontSize="10" Click="ButtonTestAccountSAS_Click" Width="120"/>
         <Button x:Name="ButtonRegenerateSAS" Content="Regenerate SAS" HorizontalAlignment="Center" Height="31" Margin="120,95,268,0" VerticalAlignment="Top" FontSize="10" Click="ButtonRegenerateSAS_Click" Grid.Column="1" Width="120"/>
@@ -91,7 +91,7 @@
             <Label x:Name="labelServiceSAS" Content="Service SAS" HorizontalAlignment="Right" Margin="0,-5,136.8,0" VerticalAlignment="Top" Height="26" FontWeight="Bold" Width="81" Grid.ColumnSpan="4"/>
 
             <TextBox x:Name="textBox_si" ToolTip="si" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Left" Width="97" Height="16" IsEnabled="False" Margin="1.4,40,0,0" Grid.Column="1" Grid.ColumnSpan="3"/>
-            <Label x:Name="label_PolicyName" Content="Policy Name:" ToolTip="si" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" RenderTransformOrigin="0.485,-1.44" Width="71" Margin="0,37,19.6,0" IsEnabled="False" Grid.ColumnSpan="2" Foreground="Black"/>
+            <Label x:Name="label_si" Content="Policy Name:" ToolTip="si" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" RenderTransformOrigin="0.485,-1.44" Width="71" Margin="0,37,19.6,0" IsEnabled="False" Grid.ColumnSpan="2" Foreground="Black"/>
             <Label x:Name="label_sr" Content="Signed Resource:" ToolTip="sr" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,17,19.6,0" Grid.ColumnSpan="2"/>
             <ComboBox  x:Name="ComboBox_sr"  ToolTip="sr" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" DropDownClosed="ComboBox_sr_DropDownClosed" IsEditable="True" IsReadOnly="True" Height="18" FontSize="10" Margin="1.4,20,0,0" DropDownOpened="ComboBox_sr_DropDownOpened" Grid.Column="1" Grid.ColumnSpan="3">
                 <CheckBox x:Name="sr_blob" Content="blob" Click="Sr_blob_Click"/>

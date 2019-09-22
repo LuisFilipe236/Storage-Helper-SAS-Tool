@@ -3148,6 +3148,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.6.1"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.6.1 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.6.1"
+                    }
+                }
             }
         }
     }
@@ -8969,15 +8977,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Storage Helper SAS Tool"
-        "ProductCode" = "8:{BFE36CC2-3F57-42F7-96D1-6F6B01812091}"
-        "PackageCode" = "8:{8B2374B0-5282-48BC-8658-A814C862B2A2}"
+        "ProductCode" = "8:{8DCBCD70-6DF2-4182-A5CD-57546D44830F}"
+        "PackageCode" = "8:{20D174ED-48EA-4A67-81B2-54F4A8E90758}"
         "UpgradeCode" = "8:{969F440E-6AA5-4FF7-A354-8C02A48C2261}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.0.2"
+        "ProductVersion" = "8:1.0.3"
         "Manufacturer" = "8:Microsoft"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
