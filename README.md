@@ -26,7 +26,18 @@
 		<a href="1.txt"><img alt="GitHub Releases (by Asset)" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.2/1.txt?label=downloads"></a>
 //-->
 		<a href="Storage.Helper.SAS.Tool.Installer.msi"><img alt="GitHub Releases (by Asset)" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.2/total?label=downloads_total"></a>
-		<a href="Storage.Helper.SAS.Tool.Installer.msi"><img alt="GitHub Releases (by Asset)" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.2/Storage.Helper.SAS.Tool.Installer.msi?label=downloads_latest_msi"></a>
+		<a href="Storage.Helper.SAS.Tool.Installer.msi"><img alt="GitHub Releases (by Asset)" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.2/Storage.Helper.SAS.Tool.Installer.msi?label=downloads_v1.0.2"></a>
+    </td>
+  </tr>
+    <tr>
+    <td>
+	<b>
+		v1.0.3
+    </b>
+	</td>    
+    <td>
+		<a href="Storage.Helper.SAS.Tool.Installer.msi"><img alt="GitHub Releases (by Asset)" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.3/total?label=downloads_total"></a>
+		<a href="Storage.Helper.SAS.Tool.Installer.msi"><img alt="GitHub Releases (by Asset)" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.3/Storage.Helper.SAS.Tool.Installer.msi?label=downloads_latest_msi"></a>
     </td>
   </tr>
 </table>
