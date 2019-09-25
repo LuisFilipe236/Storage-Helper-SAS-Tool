@@ -38,6 +38,69 @@ namespace Storage_Helper_SAS_Tool
     class SAS_Create_v11
     {
 
+        /// <summary>
+        /// Return info about SDK v11 limitations, on generating SAS
+        /// </summary>
+        /// <returns></returns>
+        public static string Limitations_v11_Info(string StorageSDK_11_Version, ComboBox ComboBox_sr)
+        {
+            string s1 = "-------------------------------------------------\n";
+
+            string s3 = "\n";
+            s3 += "Notes:\n";
+
+            // Regenerated Account SAS (srt) 
+            if (SAS_Utils.SAS.srt.v != "not found" && SAS_Utils.SAS.srt.v != "")
+            {
+                s3 += "Regenerated using Storage SDK " + StorageSDK_11_Version + "\n";
+                s3 += " - Storage SDK v11 only support 'Service Version' = 2019-02-02\n";
+                s3 += " - Optional 'Api Version' not supported on Storage SDK v11, and not used on Account SAS generation.\n";
+                s3 += "\n\n";
+                s3 += "Tips:";
+                s3 += " - On Azure Storage Explorer, Account SAS need all resources sco, and at least rwl permissions.";
+            }
+
+            // Regenerated Service SAS (sr) or (tn)
+            if (SAS_Utils.SAS.sr.v != "not found" && SAS_Utils.SAS.sr.v != "")
+            {
+                s3 += "Regenerated using Storage SDK " + StorageSDK_11_Version + "\n";
+                s3 += " - Storage SDK v11 only support 'Service Version' = 2019-02-02\n";
+                s3 += " - Optional parameters not supported on Storage SDK v11, and not used on Service SAS generation:\n";
+                s3 += "     Api Version\n";
+                s3 += "     Signed Protocol\n";
+                s3 += "     Signed IP\n";
+                s3 += "\n\n";
+                s3 += "Tips:";
+                switch (ComboBox_sr.Text)
+                {
+                    case "c":
+                        s3 += " - On Azure Storage Explorer, Container Service SAS need at least l permissions.";
+                        break;
+                    case "b":
+                        s3 += " - On Azure Storage Explorer, Blob Service SAS is not supported.";
+                        s3 += " - On Browser, Blob Service SAS need at least rd permissions.";
+                        break;
+                    case "s":
+                        s3 += " - On Azure Storage Explorer, Share Service SAS need at least rwl permissions.";
+                        break;
+                    case "f":
+                        s3 += " - On Azure Storage Explorer, File Service SAS is not supported.";
+                        s3 += " - On Azure Storage Explorer, File Service SAS need all the rwdc permissions.";
+                        break;
+                    case "q":
+                        s3 += " - On Azure Storage Explorer, Queue Service SAS failed with all the permissions.";
+                        s3 += " - Queue Service SAS is not well documented.";
+                        break;
+                    case "bs":
+
+                        break;
+                }
+            }
+
+            return s1 + s3;
+        }
+
+
         //---------------------------------------------------------------------------------------------------------------------
         //-------------------- Account SAS methods
         //---------------------------------------------------------------------------------------------------------------------

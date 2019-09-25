@@ -218,7 +218,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="SAS_Create_CosmosDB.cs" />
+    <Compile Include="SAS_Create_Cosmos.cs" />
     <Compile Include="SAS_Create_v11.cs" />
     <Compile Include="SAS_Create_v12.cs" />
     <Compile Include="SAS_Utils.cs" />

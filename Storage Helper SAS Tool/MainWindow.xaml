@@ -99,9 +99,9 @@
                 <CheckBox x:Name="sr_file" Content="file" Click="Sr_file_Click"/>
                 <CheckBox x:Name="sr_share" Content="share" Click="Sr_share_Click"/>
                 <CheckBox x:Name="sr_blobSnapshot" Content="blobSnapshot" Click="Sr_blobSnapshot_Click"/>
+                <CheckBox x:Name="sr_queue" Content="queue" Click="Sr_queue_Click"/>
                 <!--
-                //q  <CheckBox x:Name="sr_queue" Content="queue" Click="Sr_queue_Click"/>
-                //bs <CheckBox x:Name="sr_blobSnapshot" Content="snapshot" Click="Sr_blobSnapshot_Click"/>
+                // Table defined on the TexBox 'tn' and not on ComboBox sr
                 -->
             </ComboBox>
             <Label x:Name="label_srk" Content="Start Row:"  ToolTip="srk" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="31,117,19.6,0" IsEnabled="False" Grid.ColumnSpan="2" Foreground="Black"/>

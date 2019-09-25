@@ -13,8 +13,31 @@ namespace Storage_Helper_SAS_Tool
     /// SharedAccessTablePolicy  // Microsoft.Azure.Cosmos.Table
     /// https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-service-sas-create-dotnet#create-a-service-sas-for-a-blob-container
     /// </summary>
-    class SAS_Create_CosmosDB
+    class SAS_Create_Cosmos
     {
+
+        /// <summary>
+        /// Cosmos Table Limitations
+        /// </summary>
+        /// <returns></returns>
+        public static string Limitations_Cosmos_Info(string Cosmos_Version)
+        {
+            string s3 = "Regenerated using Cosmos Table SDK " + Cosmos_Version + "\n";
+
+            s3 += " - Cosmos Table SDK only support 'Service Version' = 2018-03-28\n";
+            s3 += " - Optional parameters not supported on Cosmos Table SDK, and not used on Service SAS generation:\n";
+            s3 += "     Api Version\n";
+            s3 += "     Signed Protocol\n";
+            s3 += "     Signed IP\n";
+            s3 += "     Table Name\n";
+            s3 += "     Start, End Row, Partition\n";
+            s3 += "\n\n";
+            s3 += "Tips:";
+            s3 += " - On Azure Storage Explorer, Table Service SAS need at least ru permissions.";
+
+            return s3;
+        }
+
 
 
         public static bool Regenerate_ServiceSAS_Table(Label labelTableName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxTableName, TextBox textBoxPolicyName, TextBox BoxAuthResults)

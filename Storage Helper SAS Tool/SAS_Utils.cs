@@ -1190,13 +1190,13 @@ namespace Storage_Helper_SAS_Tool
         {
             SAS.storageAccountName.v = Get_SASValue(SAS.blobEndpoint, "://", ".");
 
-            if (SAS.storageAccountName.v == "")
+            if (SAS.storageAccountName.v == "" || SAS.storageAccountName.v == "not found")
                 SAS.storageAccountName.v = Get_SASValue(SAS.fileEndpoint, "://", ".");
 
-            if (SAS.storageAccountName.v == "")
+            if (SAS.storageAccountName.v == "" || SAS.storageAccountName.v == "not found")
                 SAS.storageAccountName.v = Get_SASValue(SAS.tableEndpoint, "://", ".");
 
-            if (SAS.storageAccountName.v == "")
+            if (SAS.storageAccountName.v == "" || SAS.storageAccountName.v == "not found")
                 SAS.storageAccountName.v = Get_SASValue(SAS.queueEndpoint, "://", ".");
         }
 

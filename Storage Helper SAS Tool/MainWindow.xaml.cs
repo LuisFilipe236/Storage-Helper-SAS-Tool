@@ -255,7 +255,7 @@ namespace Storage_Helper_SAS_Tool
                     case "bs":  // Blob Shapshot
                         ret = SAS_Create_v11.Regenerate_ServiceSAS_BlobSnapshot(BoxAuthResults_Right);   // <-- TODO - Not implemeted - lack on documentation
                         break;
-                    case "??":  // Queue Shapshot               // <-- TODO - how identify Queue - not supported, but CloudQueue.GetSharedAccessSignature(policy) exists ??? - lack on documentation
+                    case "q":  // Queue Shapshot               // <-- TODO - how identify Queue - not supported, but CloudQueue.GetSharedAccessSignature(policy) exists ??? - lack on documentation
                         ret = SAS_Create_v11.Regenerate_ServiceSAS_Queue(labelQueueName, textBoxAccountName, textBoxAccountKey1, textBoxQueueName, textBox_si, BoxAuthResults_Right);
                         break;
                 }
@@ -263,54 +263,15 @@ namespace Storage_Helper_SAS_Tool
 
             // Regenerate Service SAS (tn) from SAS structure values (table only) - uses Microsoft.Azure.Cosmos.Table library
             if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
-                ret = SAS_Create_CosmosDB.Regenerate_ServiceSAS_Table(labelTableName, textBoxAccountName, textBoxAccountKey1, textBoxTableName, textBox_si, BoxAuthResults_Right);
+                ret = SAS_Create_Cosmos.Regenerate_ServiceSAS_Table(labelTableName, textBoxAccountName, textBoxAccountKey1, textBoxTableName, textBox_si, BoxAuthResults_Right);
 
             if (!ret) return;
 
-            BoxAuthResults_Right.Text += Limitations_v11_Info();
-        }
-
-
-
-        /// <summary>
-        /// Return info about SDK v11 limitations, on generating SAS
-        /// </summary>
-        /// <returns></returns>
-        private string Limitations_v11_Info()
-        {
-            string s1 = "-------------------------------------------------\n";
-            string s2 = "Regenerated using Storage SDK " + StorageSDK_11_Version + "\n";
-
-            string s3 = "\n";
-            s3 += "Notes:\n";
-
-            // Regenerated Account SAS (srt) 
-            if (SAS_Utils.SAS.srt.v != "not found" && SAS_Utils.SAS.srt.v != "")
-                s3 += " - Storage SDK v11 only support 'Service Version' = 2019-02-02\n" +
-                      " - Optional 'Api Version' not supported on Storage SDK v11, and not used on Account SAS generation.\n";
-
-            // Regenerated Service SAS (sr) or (tn)
-            if (SAS_Utils.SAS.sr.v != "not found" && SAS_Utils.SAS.sr.v != "")
-                s3 += " - Storage SDK v11 only support 'Service Version' = 2019-02-02\n" +
-                      " - Optional parameters not supported on Storage SDK v11, and not used on Service SAS generation:\n" +
-                      "     Api Version\n" +
-                      "     Signed Protocol\n" +
-                      "     Signed IP\n";
-
             // Regenerated Service SAS Table (tn)
             if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
-            { 
-                s2 = "Regenerated using Cosmos Table SDK " + Cosmos_Version + "\n";
-                s3 += " - Cosmos Table SDK only support 'Service Version' = 2018-03-28\n" +
-                      " - Optional parameters not supported on Cosmos Table SDK, and not used on Service SAS generation:\n" +
-                      "     Api Version\n" +
-                      "     Signed Protocol\n" +
-                      "     Signed IP\n" +
-                      "     Table Name\n" +
-                      "     Start, End Row, Partition\n";
-            }
-
-            return s1 + s2 + s3;
+                BoxAuthResults_Right.Text += SAS_Create_Cosmos.Limitations_Cosmos_Info(Cosmos_Version);
+            else
+                BoxAuthResults_Right.Text += SAS_Create_v11.Limitations_v11_Info(StorageSDK_11_Version, ComboBox_sr);
         }
 
 
@@ -347,7 +308,7 @@ namespace Storage_Helper_SAS_Tool
                     case "s":   // share
                         ret = SAS_Create_v12.Regenerate_ServiceSAS_Share(labelShareName, textBoxAccountName, textBoxAccountKey1, textBoxShareName, textBox_si, BoxAuthResults_Right);
                         break;
-                    case "??":  // Queue Shapshot               // <-- TODO - how identify Queue - not supported, but CloudQueue.GetSharedAccessSignature(policy) exists ??? - lack on documentation
+                    case "q":  // Queue Shapshot               // <-- TODO - how identify Queue - not supported, but CloudQueue.GetSharedAccessSignature(policy) exists ??? - lack on documentation
                         ret = SAS_Create_v12.Regenerate_ServiceSAS_Queue(labelQueueName, textBoxAccountName, textBoxAccountKey1, textBoxQueueName, textBox_si, BoxAuthResults_Right);
                         break;
                 }
@@ -355,50 +316,18 @@ namespace Storage_Helper_SAS_Tool
 
             // Regenerate Table Service SAS uses CosmoDB - Microsoft.Azure.Cosmos.Table library
             if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
-                ret = SAS_Create_CosmosDB.Regenerate_ServiceSAS_Table(labelTableName, textBoxAccountName, textBoxAccountKey1, textBoxTableName, textBox_si, BoxAuthResults_Right);
+                ret = SAS_Create_Cosmos.Regenerate_ServiceSAS_Table(labelTableName, textBoxAccountName, textBoxAccountKey1, textBoxTableName, textBox_si, BoxAuthResults_Right);
 
             if (!ret) return;
 
-            BoxAuthResults_Right.Text += Limitations_v12_Info();                          
-        }
-
-
-
-        /// <summary>
-        /// Return info about SDK v11 limitations, on generating SAS
-        /// </summary>
-        /// <returns></returns>
-        private string Limitations_v12_Info()
-        {
-            string s1 = "-------------------------------------------------\n";
-            string s2 = "Regenerated using Storage SDK " + StorageSDK_12_Version + "\n";
-
-            string s3 = "\n";
-            s3 += "Notes:\n";
-
-            // Regenerated Account SAS (srt) 
-            if (SAS_Utils.SAS.srt.v != "not found" && SAS_Utils.SAS.srt.v != "")
-                s3 += " - Parameter 'Api Version' not defined on this SDK - uses the same as 'Service Version'\n";
-
-            // Regenerated Service SAS (sr) or (tn)
-            if (SAS_Utils.SAS.sr.v != "not found" && SAS_Utils.SAS.sr.v != "")
-                s3 += " - Parameter 'Api Version' not defined on this SDK - uses the same as 'Service Version'\n";
-
             // Regenerated Service SAS Table (tn)
             if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
-            { 
-                s2 = "Regenerated using Cosmos Table SDK " + Cosmos_Version + "\n";
-                s3 = " - Cosmos Table SDK only support 'Service Version' = 2018-03-28\n" +
-                      " - Optional parameters not supported on Cosmos Table SDK, and not used on Service SAS generation:\n" +
-                      "     Api Version\n" +
-                      "     Signed Protocol\n" +
-                      "     Signed IP\n" +
-                      "     Table Name\n" +
-                      "     Start, End Row, Partition\n";
-            }
-
-            return s1 + s2 + s3;
+                BoxAuthResults_Right.Text += SAS_Create_Cosmos.Limitations_Cosmos_Info(Cosmos_Version);
+            else
+                BoxAuthResults_Right.Text += SAS_Create_v12.Limitations_v12_Info(StorageSDK_12_Version, ComboBox_sr);                          
         }
+
+
 
 
 
@@ -907,9 +836,11 @@ namespace Storage_Helper_SAS_Tool
             if (sr_share.IsChecked == true) s += "s";
             if (sr_file.IsChecked == true) s += "f";
 
-            //if (sr_queue.IsChecked == true) s += "q";           // TODO - check if this the correct option
+            if (sr_queue.IsChecked == true) s += "q";           // TODO - check if this the correct option
 
             if (sr_blobSnapshot.IsChecked == true) s += "bs";
+
+            // Table defined on the TexBox 'tn' and not on ComboBox sr
 
             ComboBox_sr.Text = s;
 
@@ -1055,7 +986,11 @@ namespace Storage_Helper_SAS_Tool
             sr_share.IsChecked = Test(ComboBox_sr.Text, "s");
             sr_file.IsChecked = Test(ComboBox_sr.Text, "f");
 
-            // sr_queue.IsChecked = Test(ComboBox_sr.Text, "q");       // TODO - to check if 'q' is the correct option
+            sr_queue.IsChecked = Test(ComboBox_sr.Text, "q");       // TODO - to check if 'q' is the correct option
+
+            sr_file.IsChecked = Test(ComboBox_sr.Text, "bs");
+
+            // Table defined on the TexBox 'tn' and not on ComboBox sr
         }
 
 
@@ -1066,7 +1001,7 @@ namespace Storage_Helper_SAS_Tool
             sr_container.IsChecked = false;
             sr_share.IsChecked = false;
             sr_file.IsChecked = false;
-            //q  sr_queue.IsChecked = false;
+            sr_queue.IsChecked = false;
             sr_blobSnapshot.IsChecked = false;
         }
 
@@ -1078,7 +1013,7 @@ namespace Storage_Helper_SAS_Tool
             sr_blob.IsChecked = false;
             sr_share.IsChecked = false;
             sr_file.IsChecked = false;
-            //q  sr_queue.IsChecked = false;
+            sr_queue.IsChecked = false;
             sr_blobSnapshot.IsChecked = false;
         }
 
@@ -1090,7 +1025,7 @@ namespace Storage_Helper_SAS_Tool
             sr_container.IsChecked = false;
             sr_blob.IsChecked = false;
             sr_file.IsChecked = false;
-            //q  sr_queue.IsChecked = false;
+            sr_queue.IsChecked = false;
             sr_blobSnapshot.IsChecked = false;
         }
 
@@ -1102,7 +1037,7 @@ namespace Storage_Helper_SAS_Tool
             sr_container.IsChecked = false;
             sr_share.IsChecked = false;
             sr_blob.IsChecked = false;
-            //q  sr_queue.IsChecked = false;
+            sr_queue.IsChecked = false;
             sr_blobSnapshot.IsChecked = false;
         }
 
@@ -1126,9 +1061,11 @@ namespace Storage_Helper_SAS_Tool
             sr_container.IsChecked = false;
             sr_share.IsChecked = false;
             sr_file.IsChecked = false;
-            //q sr_queue.IsChecked = false;
+            sr_queue.IsChecked = false;
             sr_blob.IsChecked = false;
         }
+
+        // Table defined on the TexBox 'tn' and not on ComboBox sr
 
 
 
@@ -1397,8 +1334,6 @@ namespace Storage_Helper_SAS_Tool
         {
             SplashInfo();
         }
-
-
 
     }
 }
