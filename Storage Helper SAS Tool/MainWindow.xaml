@@ -50,7 +50,7 @@
             <Label x:Name="label_srt" Content="Signed Resource Types:" ToolTip="srt" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Width="121" Margin="-2,60,191,0"/>
             <Label x:Name="label_ss" Content="Signed Services:" ToolTip="ss" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,40,191,0"/>
             <Label x:Name="label_sv" Content="Service Version:"  ToolTip="sv" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,20,191,0" Foreground="Black"/>
-            <ComboBox  x:Name="ComboBox_sp" ToolTip="sp" Text="" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" DropDownClosed="ComboBox_sp_DropDownClosed" IsEditable="True" IsReadOnly="True" Height="18" FontSize="10" Margin="120,84,0,0" DropDownOpened="ComboBox_sp_DropDownOpened">
+            <ComboBox  x:Name="ComboBox_sp" ToolTip="sp" Text="" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" DropDownClosed="ComboBox_sp_DropDownClosed" IsEditable="True" IsReadOnly="True" Height="18" FontSize="10" Margin="120,84,0,0" DropDownOpened="ComboBox_sp_DropDownOpened" IsDropDownOpen="True">
                 <CheckBox x:Name="sp_read" Content="read"/>
                 <CheckBox x:Name="sp_write" Content="write" Click="Sp_write_Click"/>
                 <CheckBox x:Name="sp_delete" Content="delete"/>

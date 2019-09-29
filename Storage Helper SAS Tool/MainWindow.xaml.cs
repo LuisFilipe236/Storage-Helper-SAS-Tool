@@ -610,20 +610,26 @@ namespace Storage_Helper_SAS_Tool
             SAS_Utils.PopulateComboBox_sv(ComboBox_sv, ComboBox_sr.Text, textBox_tn.Text);
             ComboBox_sv.SelectedIndex = ComboBox_sv.Items.IndexOf((SAS_Utils.SAS.sv.v == "not found" ? "" : SAS_Utils.SAS.sv.v));
 
-            if (ComboBox_srt.Text != "")
-                Set_srtPermissions();
-            else
-                if (textBox_tn.Text != "")
-                    Set_tnPermissions();
-                else
-                    Set_srPermissions(ComboBox_sr.Text);    // If empty (and no srt or tn) means queue service SAS
+            Set_BoxPermissions();
 
             ComboBox_sp.Text = (SAS_Utils.SAS.sp.v == "not found" ? "" : SAS_Utils.SAS.sp.v);
         }
 
 
 
-
+        /// <summary>
+        /// Set Combo Box Permissions based on sr, srt, tn selections
+        /// </summary>
+        private void Set_BoxPermissions()
+        {
+            if (ComboBox_srt.Text != "")
+                Set_srtPermissions();
+            else
+                if (textBox_tn.Text != "")
+                Set_tnPermissions();
+            else
+                Set_srPermissions(ComboBox_sr.Text);    // If empty (and no srt or tn) means queue service SAS
+        }
 
 
         /// <summary>
@@ -762,6 +768,8 @@ namespace Storage_Helper_SAS_Tool
         /// <param name="e"></param>
         private void ComboBox_sp_DropDownOpened(object sender, EventArgs e)
         {
+            Set_BoxPermissions();
+
             sp_read.IsChecked = Test(ComboBox_sp.Text, "r");
             sp_write.IsChecked = Test(ComboBox_sp.Text, "w");
             sp_delete.IsChecked = Test(ComboBox_sp.Text, "d");
