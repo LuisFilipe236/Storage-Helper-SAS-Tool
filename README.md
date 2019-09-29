@@ -2,8 +2,7 @@
 
 <table>
 
-  </tr>
-    <tr>
+  <tr>
     <td>
 	<b>
 		v1.0.4
