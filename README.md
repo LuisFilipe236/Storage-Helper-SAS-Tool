@@ -4,15 +4,12 @@
 
   <tr>
     <td>
-	<b>
-		v1.0.4
-    </b>
+	<b>v1.0.4</b>
 	</td>    
     <td>
 		<a href="https://github.com/LuisFilipe236/Storage-Helper-SAS-Tool/releases/download/v1.0.4/Storage.Helper.SAS.Tool.Installer.msi">
 			<img alt="Storage Helper Tool v1.0.4" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.4/total?label=downloads_v1.0.4">
 		</a>
-
     </td>
   </tr>
       
@@ -53,6 +50,7 @@ Click on the MSI last version counter above to download the MSI installer for Wi
 
 
 <b>Versions:</b>
+
 <b>v1.0.4:</b>
 Changes:
 - Removed support for Storage SDK v11.x and the option to select SDK v11.x / v12.x from interface
