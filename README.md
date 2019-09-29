@@ -6,6 +6,21 @@
     <tr>
     <td>
 	<b>
+		v1.0.4
+    </b>
+	</td>    
+    <td>
+		<a href="https://github.com/LuisFilipe236/Storage-Helper-SAS-Tool/releases/download/v1.0.4/Storage.Helper.SAS.Tool.Installer.msi">
+			<img alt="Storage Helper Tool v1.0.4" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.4/total?label=downloads_v1.0.4">
+		</a>
+
+    </td>
+  </tr>
+
+  </tr>
+    <tr>
+    <td>
+	<b>
 		v1.0.3
     </b>
 	</td>    
@@ -13,11 +28,7 @@
 		<a href="https://github.com/LuisFilipe236/Storage-Helper-SAS-Tool/releases/download/v1.0.3/Storage.Helper.SAS.Tool.Installer.msi">
 			<img alt="Storage Helper Tool v1.0.3" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.3/total?label=downloads_v1.0.3">
 		</a>
-<!--
-		<a href="https://github.com/LuisFilipe236/Storage-Helper-SAS-Tool/releases/download/v1.0.3/Storage.Helper.SAS.Tool.Installer.msi">
-			<img alt="Storage Helper Tool v1.0.3" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.3/Storage.Helper.SAS.Tool.Installer.msi?label=downloads_v1.0.3">
-		</a>
-//-->
+
     </td>
   </tr>
 
@@ -28,10 +39,6 @@
     </b>
 	</td>    
     <td>
-<!--
-		<a href="./"><img alt="GitHub Releases (by Asset)" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.2/total?label=downloads"></a>
-		<a href="1.txt"><img alt="GitHub Releases (by Asset)" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.2/1.txt?label=downloads"></a>
-//-->
 		<a href="https://github.com/LuisFilipe236/Storage-Helper-SAS-Tool/releases/download/v1.0.2/Storage.Helper.SAS.Tool.Installer.msi">
 			<img alt="Storage Helper Tool v1.0.2" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.2/total?label=downloads_v1.0.2">
 		</a>
