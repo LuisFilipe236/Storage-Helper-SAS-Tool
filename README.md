@@ -25,6 +25,7 @@ You can run this application or the source code at your own risk.
 
 
 
+
 <b>HOW TO USE:</b>
 
 Checking SAS parameters:
@@ -44,6 +45,7 @@ Developed by Azure Storage Support Team to test proposes only.
 
  
   
+
 <b>HOW TO INSTALL:</b>
 
 Click on the MSI last version counter above to download the MSI installer for Windows.
@@ -52,6 +54,7 @@ Click on the MSI last version counter above to download the MSI installer for Wi
 <b>TODO:</b>
  - Implement check Policy permissions (service SAS);
  - Support for User Delegation SAS (sv>=2018-11-09 supported on Blob Service SAS only)
+
 
 
 <b>VERSIONS:</b>
