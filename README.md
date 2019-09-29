@@ -23,7 +23,7 @@ This application is to test proposes only, runs only locally and don't use the p
 This application don't save any information on any place and does not use the Storage Account Key or the Storage Account SAS to access the storage resources on any way.
 You can run this application or the source code at your own risk.
 
-<p>
+<hr>
 
 <b>HOW TO USE:</b>
 
@@ -48,6 +48,7 @@ Developed by Azure Storage Support Team to test proposes only.
 
 Click on the MSI last version counter above to download the MSI installer for Windows.
 
+<hr>
 
 <b>TODO:</b>
  - Implement check Policy permissions (service SAS);
@@ -59,10 +60,11 @@ Click on the MSI last version counter above to download the MSI installer for Wi
 
 <b>v1.0.4:</b>
 Changes:
-- Removed support for Storage SDK v11.x and the option to select SDK v11.x / v12.x from interface
-- Removed Api-Version parameter from interface - not used on SDK v12.x and not supported on Cosmo Table
-- Removed Table Name field as query parameter from interface (on right gorup ComboBoxes)
-- Corrected the Queue, Table and BlobSnapshot Service SAS Regeneration
+- Removed support for Storage SDK v11.x and the option to select SDK v11.x / v12.x from interface;
+- Removed Api-Version parameter from interface - not used on SDK v12.x and not supported on Cosmos Table;
+- Removed Table Name field as query parameter from interface (on right gorup ComboBoxes);
+- Corrected the Queue, Table and BlobSnapshot Service SAS Regeneration;
+- Added Notes, URI, and link to test SAS on browser, on Regenerated output, in UrlEncecoded and UrlDecoded formats;
 
 <b>v1.0.3:</b>
 Changes:
