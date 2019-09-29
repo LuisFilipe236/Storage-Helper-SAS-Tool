@@ -207,7 +207,7 @@ namespace Storage_Helper_SAS_Tool
         public static bool StringEmpty(Label label, string s, string msg, string title)
         {
             if (String.IsNullOrEmpty(s))
-            {
+            {    
                 label.Foreground = Brushes.Red;
                 MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return true;
