@@ -23,8 +23,7 @@ This application is to test proposes only, runs only locally and don't use the p
 This application don't save any information on any place and does not use the Storage Account Key or the Storage Account SAS to access the storage resources on any way.
 You can run this application or the source code at your own risk.
 
-
-
+<p>
 
 <b>HOW TO USE:</b>
 
@@ -43,9 +42,8 @@ Use the two 'Signature' boxes to compare the two signatures, if you wish to comp
 
 Developed by Azure Storage Support Team to test proposes only.
 
- 
+<hr>
   
-
 <b>HOW TO INSTALL:</b>
 
 Click on the MSI last version counter above to download the MSI installer for Windows.
@@ -55,7 +53,7 @@ Click on the MSI last version counter above to download the MSI installer for Wi
  - Implement check Policy permissions (service SAS);
  - Support for User Delegation SAS (sv>=2018-11-09 supported on Blob Service SAS only)
 
-
+ <hr>
 
 <b>VERSIONS:</b>
 
