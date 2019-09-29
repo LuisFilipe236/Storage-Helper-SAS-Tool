@@ -22,24 +22,37 @@ namespace Storage_Helper_SAS_Tool
         /// <returns></returns>
         public static string Limitations_Cosmos_Info(string Cosmos_Version)
         {
-            string s3 = "Regenerated using Cosmos Table SDK " + Cosmos_Version + "\n";
+            string s = "-------------------------------------------------\n";
+            s += "Notes:\n";
+            s += "Regenerated using Cosmos Table SDK " + Cosmos_Version + "\n";
+            s += " - Parameter 'Api Version' not defined on this SDK - uses the same as 'Service Version'\n";
+            s += " - Cosmos Table SDK only support 'Service Version' = 2018-03-28\n";
+            s += " - Optional parameters not supported on Cosmos Table SDK, and not used to regenerate Table Service SAS:\n";
+            s += "     Api Version\n";
+            s += "     Signed Protocol\n";
+            s += "     Signed IP\n";
+            s += "     Table Name\n";
+            s += "     Start, End Row, Partition\n";
+            s += "\n";
+            s += "Tips:";
+            //s += " - On Azure Storage Explorer, Table Service SAS need at least ru permissions.";
 
-            s3 += " - Cosmos Table SDK only support 'Service Version' = 2018-03-28\n";
-            s3 += " - Optional parameters not supported on Cosmos Table SDK, and not used on Service SAS generation:\n";
-            s3 += "     Api Version\n";
-            s3 += "     Signed Protocol\n";
-            s3 += "     Signed IP\n";
-            s3 += "     Table Name\n";
-            s3 += "     Start, End Row, Partition\n";
-            s3 += "\n\n";
-            s3 += "Tips:";
-            s3 += " - On Azure Storage Explorer, Table Service SAS need at least ru permissions.";
-
-            return s3;
+            return s;
         }
 
 
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="labelTableName"></param>
+        /// <param name="textBoxAccountName"></param>
+        /// <param name="textBoxAccountKey1"></param>
+        /// <param name="textBoxTableName"></param>
+        /// <param name="textBoxPolicyName"></param>
+        /// <param name="BoxAuthResults"></param>
+        /// <returns></returns>
         public static bool Regenerate_ServiceSAS_Table(Label labelTableName, TextBox textBoxAccountName, TextBox textBoxAccountKey1, TextBox textBoxTableName, TextBox textBoxPolicyName, TextBox BoxAuthResults)
         {
             if (Utils.StringEmpty(labelTableName, textBoxTableName.Text, "Missing Table Name", "Error")) return false;
@@ -48,14 +61,18 @@ namespace Storage_Helper_SAS_Tool
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text = "Regenerated Service SAS - Table:\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
-            BoxAuthResults.Text += "Regenerated Service SAS URI - Table (Unescaped):\n";
-            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n\n\n";
+            BoxAuthResults.Text += "-------------------------------------------------\n";
+            BoxAuthResults.Text += "Table URI:\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".table.core.windows.net/" + textBoxTableName.Text + Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".table.core.windows.net/" + textBoxTableName.Text + sas + "\n\n";
 
-
-            BoxAuthResults.Text += "Table URI:\n" + "https://" + textBoxAccountName.Text + ".table.core.windows.net/" + textBoxTableName.Text + Uri.UnescapeDataString(sas) + "\n\n";
-
+            BoxAuthResults.Text += "-------------------------------------------------\n";
+            BoxAuthResults.Text += "Test your SAS on Browser (list entities):\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".table.core.windows.net/" + textBoxTableName.Text + Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".table.core.windows.net/" + textBoxTableName.Text + sas + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
 
@@ -67,7 +84,6 @@ namespace Storage_Helper_SAS_Tool
 
         /// <summary>
         /// Create a service SAS for a Table - SharedAccessTablePolicy - Microsoft.Azure.Cosmos.Table
-        /// ---> Using the 'Microsoft.Azure.Cosmos.Table' library <---
         /// SharedAccessTablePolicy: https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.cosmos.table.sharedaccesstablepolicy?view=azure-dotnet
         /// </summary>
         /// <param name="accountName"></param>
@@ -130,7 +146,6 @@ namespace Storage_Helper_SAS_Tool
 
         /// <summary>
         /// Set Permissions From String, for Service SAS - Tables
-        /// ---> Using the 'Microsoft.Azure.Cosmos.Table' library <---
         ///      "raud"
         /// </summary>
         /// <returns></returns>

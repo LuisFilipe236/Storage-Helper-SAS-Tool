@@ -11,35 +11,33 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="BoxAuthResults" Margin="5,273,3,21" TextWrapping="Wrap" Text=" " GotFocus="BoxAuthResults_Right_GotFocus" Background="#FFF4F3F3"/>
+        <TextBox x:Name="BoxAuthResults_left" Margin="5,273,3,21" TextWrapping="Wrap" Text=" " GotFocus="BoxAuthResults_Right_GotFocus" Background="#FFF4F3F3"/>
         <Label x:Name="labelInsertSAS" Content="Insert SAS or Connection String:" HorizontalAlignment="Left" Margin="13,-1,0,0" VerticalAlignment="Top" Height="26" Width="210" FontWeight="Bold" Background="{x:Null}" Foreground="Black"/>
         <TextBox x:Name="InputBoxSAS" Height="59" Margin="5,24,5,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Grid.ColumnSpan="2" FontSize="11" GotFocus="BoxAuthResults_Right_GotFocus"/>
         <Button x:Name="ButtonTestAccountSAS" Content="Check SAS parameters" HorizontalAlignment="Center" Height="31" Margin="268,95,120.8,0" VerticalAlignment="Top" FontSize="10" Click="ButtonTestAccountSAS_Click" Width="120"/>
         <Button x:Name="ButtonRegenerateSAS" Content="Regenerate SAS" HorizontalAlignment="Center" Height="31" Margin="120,95,268,0" VerticalAlignment="Top" FontSize="10" Click="ButtonRegenerateSAS_Click" Grid.Column="1" Width="120"/>
-        <CheckBox x:Name="checkBoxPreRelease12" Content="Use SDK v12 preview" HorizontalAlignment="Center" Margin="120.2,128,267.6,0" VerticalAlignment="Top" Grid.Column="1" IsChecked="True" FontSize="10" Click="CheckBoxPreRelease12_Click"/>
         <TextBox x:Name="textBoxAccountKey1" Margin="77.2,253,5,0" TextWrapping="Wrap" Text="" FontSize="10" Height="17" Grid.Column="1" VerticalAlignment="Top" LostFocus="TextBoxAccountKey1_LostFocus"/>
         <Label x:Name="labelAccountKey" Content="Account Key:" Margin="3.2,249,0,0" FontSize="10" Height="27" HorizontalAlignment="Left" VerticalAlignment="Top" Width="104" Grid.Column="1" FontWeight="Bold"/>
         <Label x:Name="labelHelp" Content="?" HorizontalAlignment="Right" Margin="0,0,9.6,506" VerticalAlignment="Top" Grid.Column="1" Height="26" Width="21" FontWeight="Bold" RenderTransformOrigin="0.51,0.515" MouseLeftButtonUp="LabelHelp_MouseLeftButtonUp"/>
         <TextBox x:Name="BoxAuthResults_Right" Margin="3,273,5,21" TextWrapping="Wrap" Text=" " Grid.Column="1" GotFocus="BoxAuthResults_Right_GotFocus" Background="#FFF4F3F3"/>
         <Grid Grid.Column="1" Margin="270.2,86,9.6,0" HorizontalAlignment="Center" Width="229" Height="165" VerticalAlignment="Top">
-            <TextBox x:Name="textBoxContainerName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,23,5,0" LostFocus="TextBoxContainerName_LostFocus"/>
-            <Label x:Name="labelContainerName" Content="Container Name:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="90" Margin="0,20,126,0"/>
-            <TextBox x:Name="textBoxBlobName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,43,5,0" LostFocus="TextBoxBlobName_LostFocus"/>
-            <TextBox x:Name="textBoxShareName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,83,5,0" LostFocus="TextBoxShareName_LostFocus"/>
-            <TextBox x:Name="textBoxFileName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,103,5,0" LostFocus="TextBoxFileName_LostFocus"/>
-            <TextBox x:Name="textBoxQueueName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,123,5,0" LostFocus="TextBoxQueueName_LostFocus"/>
-            <Label x:Name="labelBlobName" Content="Blob Name:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="66" Margin="0,40,126,0"/>
-            <Label x:Name="labelShareName" Content="Share Name:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="71" Margin="0,80,126,0"/>
-            <Label x:Name="labelFileName" Content="File Name:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="59" Margin="0,100,127,0"/>
-            <Label x:Name="labelQueueName" Content="Queue Name:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="74" Margin="0,120,126,0"/>
-            <Label x:Name="labelTableName" Content="Table Name:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="69" Margin="0,140,126,-2"/>
-            <TextBox x:Name="textBoxTableName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,143,5,0" LostFocus="TextBoxTableName_LostFocus"/>
-            <TextBox x:Name="textBoxAccountName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" Height="16" Margin="0,3,5,0" HorizontalAlignment="Right" Width="120" LostFocus="TextBoxAccountName_LostFocus"/>
-            <Label x:Name="labelAccountName" Content="Account Name:" HorizontalAlignment="Right" VerticalAlignment="Top" Height="26" FontWeight="Bold" Margin="0,-3,128,0"/>
-            <Label x:Name="labelBlobSnapshotName" Content="Snapshot Name:" VerticalAlignment="Top" FontSize="10" FontWeight="Bold" HorizontalAlignment="Right" Width="86" Margin="0,60,130,0"/>
-            <TextBox x:Name="textBoxBlobSnapshotName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,63,5,0" LostFocus="TextBoxBlobSnapshotName_LostFocus"/>
+            <TextBox x:Name="textBoxContainerName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,41,5,0" LostFocus="TextBoxContainerName_LostFocus"/>
+            <Label x:Name="labelContainerName" Content="Container Name:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="90" Margin="0,38,126,0"/>
+            <TextBox x:Name="textBoxBlobName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,61,5,0" LostFocus="TextBoxBlobName_LostFocus"/>
+            <TextBox x:Name="textBoxShareName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,101,5,0" LostFocus="TextBoxShareName_LostFocus"/>
+            <TextBox x:Name="textBoxFileName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,121,5,0" LostFocus="TextBoxFileName_LostFocus"/>
+            <TextBox x:Name="textBoxQueueName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,141,5,0" LostFocus="TextBoxQueueName_LostFocus"/>
+            <Label x:Name="labelBlobName" Content="Blob Name:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="66" Margin="0,58,126,0"/>
+            <Label x:Name="labelShareName" Content="Share Name:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="71" Margin="0,98,126,0"/>
+            <Label x:Name="labelFileName" Content="File Name:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="59" Margin="0,118,127,0"/>
+            <Label x:Name="labelQueueName" Content="Queue Name:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="74" Margin="0,138,126,0"/>
+            <TextBox x:Name="textBoxAccountName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" Height="16" Margin="0,11,5,0" HorizontalAlignment="Right" Width="120" LostFocus="TextBoxAccountName_LostFocus"/>
+            <Label x:Name="labelAccountName" Content="Account Name:" HorizontalAlignment="Right" VerticalAlignment="Top" Height="26" FontWeight="Bold" Margin="0,5,128,0"/>
+            <Label x:Name="labelBlobSnapshotName" Content="Snapshot Name:" VerticalAlignment="Top" FontSize="10" FontWeight="Bold" HorizontalAlignment="Right" Width="86" Margin="0,78,130,0"/>
+            <TextBox x:Name="textBoxBlobSnapshotName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,81,5,0" LostFocus="TextBoxBlobSnapshotName_LostFocus"/>
         </Grid>
         <Grid Margin="32,84,166.8,259" HorizontalAlignment="Center" Width="310">
+            <Label x:Name="labelAccountSAS" Content="Account SAS" HorizontalAlignment="Left" Margin="98,-1,0,0" VerticalAlignment="Top" Height="26" FontWeight="Bold" Width="81"/>
             <Label x:Name="label_spr" Content="Signed Protocol:" ToolTip="spr" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,140,191,0"/>
             <Label x:Name="label_sip" Content="Signed IP:" ToolTip="sip" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,160,191,0"/>
             <TextBox x:Name="textBox_sip" ToolTip="sip" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" Width="180" Height="16" HorizontalAlignment="Left" Margin="119,164,0,0"/>
@@ -48,7 +46,6 @@
                 <ComboBoxItem x:Name="spr_https" Content="https" HorizontalAlignment="Left" Width="88"/>
                 <ComboBoxItem x:Name="spr_http_https" Content="http,https" HorizontalAlignment="Left" Width="88"/>
             </ComboBox>
-            <Label x:Name="label_apiVersion" Content="Api Version:" ToolTip="api-version" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,0,191,0"/>
             <Label x:Name="label_sp" Content="Signed Permissions:" ToolTip="sp" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,80,191,0"/>
             <Label x:Name="label_srt" Content="Signed Resource Types:" ToolTip="srt" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Width="121" Margin="-2,60,191,0"/>
             <Label x:Name="label_ss" Content="Signed Services:" ToolTip="ss" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,40,191,0"/>
@@ -75,7 +72,6 @@
                 <CheckBox x:Name="srt_container" Content="container"/>
                 <CheckBox x:Name="srt_object" Content="object"/>
             </ComboBox>
-            <ComboBox  x:Name="ComboBox_apiVersion"  ToolTip="api-version" Text="" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" Height="18" FontSize="10" Margin="120,4,0,0" DropDownOpened="ComboBox_apiVersion_DropDownOpened" IsEnabled="False" IsReadOnly="True" IsEditable="True"/>
             <Label x:Name="label_st" Content="Signed Start (UTC):" ToolTip="st" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,100,191,0"/>
             <Label x:Name="label_se" Content="Signed Expiry (UTC):" ToolTip="se" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,120,191,0"/>
             <TextBox x:Name="textBox_st" ToolTip="st" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Left" Width="180" Height="16" Margin="120,104,0,0" LostFocus="TextBox_st_LostFocus"/>
@@ -93,14 +89,14 @@
             <TextBox x:Name="textBox_si" ToolTip="si" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Left" Width="97" Height="16" IsEnabled="False" Margin="1.4,40,0,0" Grid.Column="1" Grid.ColumnSpan="3"/>
             <Label x:Name="label_si" Content="Policy Name:" ToolTip="si" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" RenderTransformOrigin="0.485,-1.44" Width="71" Margin="0,37,19.6,0" IsEnabled="False" Grid.ColumnSpan="2" Foreground="Black"/>
             <Label x:Name="label_sr" Content="Signed Resource:" ToolTip="sr" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,17,19.6,0" Grid.ColumnSpan="2"/>
-            <ComboBox  x:Name="ComboBox_sr"  ToolTip="sr" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" DropDownClosed="ComboBox_sr_DropDownClosed" IsEditable="True" IsReadOnly="True" Height="18" FontSize="10" Margin="1.4,20,0,0" DropDownOpened="ComboBox_sr_DropDownOpened" Grid.Column="1" Grid.ColumnSpan="3">
+            <ComboBox  x:Name="ComboBox_sr"  ToolTip="sr - leave blank to generate Queue Service SAS" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" DropDownClosed="ComboBox_sr_DropDownClosed" IsEditable="True" IsReadOnly="True" Height="18" FontSize="10" Margin="1.4,20,0,0" DropDownOpened="ComboBox_sr_DropDownOpened" Grid.Column="1" Grid.ColumnSpan="3">
                 <CheckBox x:Name="sr_blob" Content="blob" Click="Sr_blob_Click"/>
                 <CheckBox x:Name="sr_container" Content="container" Click="Sr_container_Click"/>
                 <CheckBox x:Name="sr_file" Content="file" Click="Sr_file_Click"/>
                 <CheckBox x:Name="sr_share" Content="share" Click="Sr_share_Click"/>
                 <CheckBox x:Name="sr_blobSnapshot" Content="blobSnapshot" Click="Sr_blobSnapshot_Click"/>
-                <CheckBox x:Name="sr_queue" Content="queue" Click="Sr_queue_Click"/>
                 <!--
+                <CheckBox x:Name="sr_queue" Content="queue" Click="Sr_queue_Click"/>
                 // Table defined on the TexBox 'tn' and not on ComboBox sr
                 -->
             </ComboBox>

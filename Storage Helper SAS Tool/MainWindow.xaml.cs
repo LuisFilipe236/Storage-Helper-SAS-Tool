@@ -71,7 +71,6 @@ namespace Storage_Helper_SAS_Tool
     public partial class MainWindow : Window
     {
         //----------------------------------------------------------------------------
-        private string StorageSDK_11_Version = "v11.0.1";           // used to show the SDK version used after the SAS creation
         private string StorageSDK_12_Version = "v12.0.0-preview.3";
         private string Cosmos_Version = "v2.0.0";
 
@@ -104,17 +103,6 @@ namespace Storage_Helper_SAS_Tool
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
             string version = fileVersionInfo.ProductVersion;
-
-            //-----------------------------------------------------------
-            // GitHub API - Get a single release details
-            // https://developer.github.com/v3/repos/releases/#get-a-single-release
-            //
-            // GitHub release counters
-            // https://shields.io/category/downloads
-            //
-            // GitHub - Get a single Release by Tag name
-            // https://api.github.com/repos/LuisFilipe236/Storage-Helper-SAS-Tool/releases/tags/v1.0.1
-            //-----------------------------------------------------------
 
             BoxAuthResults_Right.Text = "x\n\n"; // 'x' used to remove the splash on click
             BoxAuthResults_Right.Text += "Storage Helper SAS Tool - version " + version + " (beta)\n";
@@ -150,10 +138,10 @@ namespace Storage_Helper_SAS_Tool
 
             BoxAuthResults_Right.Text += "-------------------------------------------------------------------------------------------------\n";
             //BoxAuthResults_Right.Text += "==> TODO:";
-            BoxAuthResults_Right.Text += " \n";
-            BoxAuthResults_Right.Text += " \n";
-            BoxAuthResults_Right.Text += " \n";
-            BoxAuthResults_Right.Text += " \n";
+            BoxAuthResults_Right.Text += "\n";
+            BoxAuthResults_Right.Text += "\n";
+            BoxAuthResults_Right.Text += "\n";
+            BoxAuthResults_Right.Text += "\n";
         }
 
 
@@ -179,7 +167,7 @@ namespace Storage_Helper_SAS_Tool
         {
             RemoveSplash();
 
-            new SAS_Utils().SAS_Validate(System.Uri.UnescapeDataString(InputBoxSAS.Text.Trim()), BoxAuthResults);   // unscaped and removing leading and trailling whitespaces
+            new SAS_Utils().SAS_Validate(System.Uri.UnescapeDataString(InputBoxSAS.Text.Trim()), BoxAuthResults_left);   // unscaped and removing leading and trailling whitespaces
 
             Set_ValuesFromStruct_ToBoxes();
 
@@ -210,13 +198,10 @@ namespace Storage_Helper_SAS_Tool
             Get_ValuesFromBoxes_ToStruct();
 
 
-            // Choose between SDK v11 or v12_preview
+            // Using SDK v12_preview
             //------------------------------------------------
-            if (checkBoxPreRelease12.IsChecked == true)
-                RegenerateSAS_SDKv12_preview();
-            else
-                RegenerateSAS_SDKv11();
-            //------------------------------------------------
+            RegenerateSAS_SDKv12_preview();
+
 
             textBox_sig_right.Text = SAS_Utils.SAS.sig;
 
@@ -225,55 +210,7 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
-
-        /// <summary>
-        /// Regenerate SAS using Storage SDK v11.0.0
-        /// </summary>
-        private void RegenerateSAS_SDKv11()
-        {
-            bool ret = true;
-            // Regenerate Account SAS (srt) from SAS structure values
-            if (SAS_Utils.SAS.srt.v != "not found" && SAS_Utils.SAS.srt.v != "")
-                ret = SAS_Create_v11.Regenerate_AccountSAS(textBoxAccountName, textBoxAccountKey1, BoxAuthResults_Right, ComboBox_ss.Text);
-
-            // Regenerate Service SAS (sr) from SAS structure values (blob, container, file, share, blob Snapshot, Queue ??)
-            if (SAS_Utils.SAS.sr.v != "not found" && SAS_Utils.SAS.sr.v != "")
-                switch (SAS_Utils.SAS.sr.v)   // service SAS
-                {
-                    case "b":   // blob
-                        ret = SAS_Create_v11.Regenerate_ServiceSAS_Blob(labelContainerName, labelBlobName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBoxBlobName, textBox_si, BoxAuthResults_Right);
-                        break;
-                    case "c":   // container
-                        ret = SAS_Create_v11.Regenerate_ServiceSAS_Container(labelContainerName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBox_si, BoxAuthResults_Right);
-                        break;
-                    case "f":   // file
-                        ret = SAS_Create_v11.Regenerate_ServiceSAS_File(labelShareName, labelFileName, textBoxAccountName, textBoxAccountKey1, textBoxShareName, textBoxFileName, textBox_si, BoxAuthResults_Right);
-                        break;
-                    case "s":   // share
-                        ret = SAS_Create_v11.Regenerate_ServiceSAS_Share(labelShareName, textBoxAccountName, textBoxAccountKey1, textBoxShareName, textBox_si, BoxAuthResults_Right);
-                        break;
-                    case "bs":  // Blob Shapshot
-                        ret = SAS_Create_v11.Regenerate_ServiceSAS_BlobSnapshot(BoxAuthResults_Right);   // <-- TODO - Not implemeted - lack on documentation
-                        break;
-                    case "q":  // Queue Shapshot               // <-- TODO - how identify Queue - not supported, but CloudQueue.GetSharedAccessSignature(policy) exists ??? - lack on documentation
-                        ret = SAS_Create_v11.Regenerate_ServiceSAS_Queue(labelQueueName, textBoxAccountName, textBoxAccountKey1, textBoxQueueName, textBox_si, BoxAuthResults_Right);
-                        break;
-                }
-
-
-            // Regenerate Service SAS (tn) from SAS structure values (table only) - uses Microsoft.Azure.Cosmos.Table library
-            if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
-                ret = SAS_Create_Cosmos.Regenerate_ServiceSAS_Table(labelTableName, textBoxAccountName, textBoxAccountKey1, textBoxTableName, textBox_si, BoxAuthResults_Right);
-
-            if (!ret) return;
-
-            // Regenerated Service SAS Table (tn)
-            if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
-                BoxAuthResults_Right.Text += SAS_Create_Cosmos.Limitations_Cosmos_Info(Cosmos_Version);
-            else
-                BoxAuthResults_Right.Text += SAS_Create_v11.Limitations_v11_Info(StorageSDK_11_Version, ComboBox_sr);
-        }
-
+        
 
 
         /// <summary>
@@ -308,15 +245,16 @@ namespace Storage_Helper_SAS_Tool
                     case "s":   // share
                         ret = SAS_Create_v12.Regenerate_ServiceSAS_Share(labelShareName, textBoxAccountName, textBoxAccountKey1, textBoxShareName, textBox_si, BoxAuthResults_Right);
                         break;
-                    case "q":  // Queue Shapshot               // <-- TODO - how identify Queue - not supported, but CloudQueue.GetSharedAccessSignature(policy) exists ??? - lack on documentation
-                        ret = SAS_Create_v12.Regenerate_ServiceSAS_Queue(labelQueueName, textBoxAccountName, textBoxAccountKey1, textBoxQueueName, textBox_si, BoxAuthResults_Right);
-                        break;
                 }
+                else
+                    if ((SAS_Utils.SAS.srt.v == "not found" || SAS_Utils.SAS.srt.v == "") && (SAS_Utils.SAS.tn.v == "not found" || SAS_Utils.SAS.tn.v == ""))
+                        ret = SAS_Create_v12.Regenerate_ServiceSAS_Queue(labelQueueName, textBoxAccountName, textBoxAccountKey1, textBoxQueueName, textBox_si, BoxAuthResults_Right);
+
 
 
             // Regenerate Table Service SAS uses CosmoDB - Microsoft.Azure.Cosmos.Table library
             if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
-                ret = SAS_Create_Cosmos.Regenerate_ServiceSAS_Table(labelTableName, textBoxAccountName, textBoxAccountKey1, textBoxTableName, textBox_si, BoxAuthResults_Right);
+                ret = SAS_Create_Cosmos.Regenerate_ServiceSAS_Table(label_tn, textBoxAccountName, textBoxAccountKey1, textBox_tn, textBox_si, BoxAuthResults_Right);
 
             if (!ret) return;
 
@@ -324,7 +262,8 @@ namespace Storage_Helper_SAS_Tool
             if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
                 BoxAuthResults_Right.Text += SAS_Create_Cosmos.Limitations_Cosmos_Info(Cosmos_Version);
             else
-                BoxAuthResults_Right.Text += SAS_Create_v12.Limitations_v12_Info(StorageSDK_12_Version, ComboBox_sr);                          
+
+                BoxAuthResults_Right.Text += SAS_Create_v12.Limitations_v12_Info(StorageSDK_12_Version);                       
         }
 
 
@@ -440,7 +379,9 @@ namespace Storage_Helper_SAS_Tool
 
 
             // srt, sr, tn - Signed Resource Type (account SAS), Signed Resource, Table Name (Service SAS)
+            // no srt, sr, tn - Queue Service SAS
             //------------------------------------------------------------------------------
+            /*
             if (String.IsNullOrEmpty(ComboBox_srt.Text) && String.IsNullOrEmpty(ComboBox_sr.Text) && String.IsNullOrEmpty(textBox_tn.Text))     // No one provided
             {
                 label_srt.Foreground = Brushes.Red;
@@ -448,13 +389,16 @@ namespace Storage_Helper_SAS_Tool
                 if(checkBoxPreRelease12.IsChecked == false) label_tn.Foreground = Brushes.Red;
                 return ErrorMsg(label_srt, "Please provide the 'Signed Resource Type' for an account SAS, or 'Signed Resource' "+ (checkBoxPreRelease12.IsChecked == false? "or 'Table Name' ":"") + "for a Service SAS", "Error");
             }
-
-
-            // api-version
+            */
+            // no srt, sr, tn - Queue Service SAS
             //------------------------------------------------------------------------------
-            if (!String.IsNullOrEmpty(ComboBox_apiVersion.Text) && checkBoxPreRelease12.IsChecked == true)     // Check is NOT null and sdk 12 selected
-                return ErrorMsg(label_apiVersion, "Api Version is not supported on Storage SDK v12", "Error");
+            //if (String.IsNullOrEmpty(textBoxQueueName.Text))              // Check is null
+            //    return ErrorMsg(labelQueueName, "Missing Queue Name", "Error");
 
+
+            // api-version - Not used by SDK v12 (sama as sv) and options on Cosmo Table - SharedAccessTablePolicy don't support optional parameters
+            //------------------------------------------------------------------------------
+ 
 
             // sv - Signed Version
             //------------------------------------------------------------------------------
@@ -525,7 +469,7 @@ namespace Storage_Helper_SAS_Tool
             if (!Check_Space_Upercase(textBoxShareName, labelShareName, "Share Name")) return false;
             if (!Check_Space_Upercase(textBoxFileName, labelFileName, "File Name")) return false;
             if (!Check_Space_Upercase(textBoxQueueName, labelQueueName, "Queue Name")) return false;
-            if (!Check_Space_Upercase(textBoxTableName, labelTableName, "Table Name")) return false;
+            if (!Check_Space_Upercase(textBox_tn, label_tn, "Table Name")) return false;
 
 
             // erk, srk, epk, spk - table Start/End Row/Partition
@@ -562,9 +506,8 @@ namespace Storage_Helper_SAS_Tool
             labelShareName.Foreground = (SAS_Utils.SAS.shareName.s ? Brushes.Black : Brushes.Red);
             labelFileName.Foreground = (SAS_Utils.SAS.fileName.s ? Brushes.Black : Brushes.Red);
             labelQueueName.Foreground = (SAS_Utils.SAS.queueName.s ? Brushes.Black : Brushes.Red);
-            labelTableName.Foreground = (SAS_Utils.SAS.tableName.s ? Brushes.Black : Brushes.Red);
+            //labelTableName.Foreground = (SAS_Utils.SAS.tableName.s ? Brushes.Black : Brushes.Red); // replaced by label_tn
 
-            label_apiVersion.Foreground = (SAS_Utils.SAS.apiVersion.s ? Brushes.Black : Brushes.Red);
             label_sv.Foreground = (SAS_Utils.SAS.sv.s ? Brushes.Black : Brushes.Red);
             label_ss.Foreground = (SAS_Utils.SAS.ss.s ? Brushes.Black : Brushes.Red);
             label_srt.Foreground = (SAS_Utils.SAS.srt.s ? Brushes.Black : Brushes.Red);
@@ -640,14 +583,14 @@ namespace Storage_Helper_SAS_Tool
             textBoxShareName.Text = SAS_Utils.SAS.shareName.v;
             textBoxFileName.Text = SAS_Utils.SAS.fileName.v;
             textBoxQueueName.Text = SAS_Utils.SAS.queueName.v;
-            textBoxTableName.Text = (SAS_Utils.SAS.tn.v == "not found" ? SAS_Utils.SAS.tableName.v : SAS_Utils.SAS.tn.v);  // uses tn if Access SAS, otherwise uses tableName if exists 
+            textBox_tn.Text = (SAS_Utils.SAS.tn.v == "not found" ? SAS_Utils.SAS.tableName.v : SAS_Utils.SAS.tn.v);  // uses tn if Access SAS, otherwise uses tableName if exists 
 
 
             // onlySASprovided;        // true if the endpoints not provided
 
             ComboBox_ss.Text = (SAS_Utils.SAS.ss.v == "not found" ? "" : SAS_Utils.SAS.ss.v);
             ComboBox_srt.Text = (SAS_Utils.SAS.srt.v == "not found" ? "" : SAS_Utils.SAS.srt.v);
-            ComboBox_sp.Text = (SAS_Utils.SAS.sp.v == "not found" ? "" : SAS_Utils.SAS.sp.v);
+            //ComboBox_sp.Text = (SAS_Utils.SAS.sp.v == "not found" ? "" : SAS_Utils.SAS.sp.v);     // see bellow, after Set_srPermissions()
             textBox_se.Text = (SAS_Utils.SAS.se.v == "not found" ? "" : SAS_Utils.SAS.se.v);
             textBox_st.Text = (SAS_Utils.SAS.st.v == "not found" ? "" : SAS_Utils.SAS.st.v);
             textBox_sip.Text = (SAS_Utils.SAS.sip.v == "not found" ? "" : SAS_Utils.SAS.sip.v);
@@ -664,10 +607,18 @@ namespace Storage_Helper_SAS_Tool
             textBox_spk.Text = (SAS_Utils.SAS.spk == "not found" ? "" : SAS_Utils.SAS.spk);
             textBox_si.Text = (SAS_Utils.SAS.si.v == "not found" ? "" : SAS_Utils.SAS.si.v);        // Policy Name
 
-            SAS_Utils.PopulateComboBox_sv(ComboBox_apiVersion, ComboBox_sr.Text, textBox_tn.Text);
             SAS_Utils.PopulateComboBox_sv(ComboBox_sv, ComboBox_sr.Text, textBox_tn.Text);
-            ComboBox_apiVersion.SelectedIndex = ComboBox_apiVersion.Items.IndexOf((SAS_Utils.SAS.apiVersion.v == "not found" ? "" : SAS_Utils.SAS.apiVersion.v));
             ComboBox_sv.SelectedIndex = ComboBox_sv.Items.IndexOf((SAS_Utils.SAS.sv.v == "not found" ? "" : SAS_Utils.SAS.sv.v));
+
+            if (ComboBox_srt.Text != "")
+                Set_srtPermissions();
+            else
+                if (textBox_tn.Text != "")
+                    Set_tnPermissions();
+                else
+                    Set_srPermissions(ComboBox_sr.Text);    // If empty (and no srt or tn) means queue service SAS
+
+            ComboBox_sp.Text = (SAS_Utils.SAS.sp.v == "not found" ? "" : SAS_Utils.SAS.sp.v);
         }
 
 
@@ -695,11 +646,10 @@ namespace Storage_Helper_SAS_Tool
             SAS_Utils.SAS.shareName.v = textBoxShareName.Text;
             SAS_Utils.SAS.fileName.v = textBoxFileName.Text;
             SAS_Utils.SAS.queueName.v = textBoxQueueName.Text;
-            SAS_Utils.SAS.tableName.v = textBoxTableName.Text;
+            SAS_Utils.SAS.tableName.v = textBox_tn.Text;
 
             // onlySASprovided;        // true if the endpoints not provided
 
-            SAS_Utils.SAS.apiVersion.v = ComboBox_apiVersion.Text;
             SAS_Utils.SAS.sv.v = ComboBox_sv.Text;
             SAS_Utils.SAS.ss.v = ComboBox_ss.Text;
             SAS_Utils.SAS.srt.v = ComboBox_srt.Text;
@@ -803,6 +753,13 @@ namespace Storage_Helper_SAS_Tool
                 label_sp.Foreground = Brushes.Black;
         }
 
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ComboBox_sp_DropDownOpened(object sender, EventArgs e)
         {
             sp_read.IsChecked = Test(ComboBox_sp.Text, "r");
@@ -836,7 +793,7 @@ namespace Storage_Helper_SAS_Tool
             if (sr_share.IsChecked == true) s += "s";
             if (sr_file.IsChecked == true) s += "f";
 
-            if (sr_queue.IsChecked == true) s += "q";           // TODO - check if this the correct option
+            // sr empty means Queue
 
             if (sr_blobSnapshot.IsChecked == true) s += "bs";
 
@@ -844,9 +801,8 @@ namespace Storage_Helper_SAS_Tool
 
             ComboBox_sr.Text = s;
 
-            if (s != "")
+            if (s != "") 
             {
-                ComboBox_apiVersion.Text = "";     // clear API-Version
                 ComboBox_srt.Text = "";         // clear srt
                 // ComboBox_srt.IsEnabled = false; // leaving enable to make it possible to change to Account SAS
 
@@ -863,93 +819,102 @@ namespace Storage_Helper_SAS_Tool
                 label_sr.Foreground = Brushes.Black;
                 label_tn.Foreground = Brushes.Black;
 
-                // Setting the sp (signed permissions) based on Service SAS sr
-                // https://docs.microsoft.com/pt-pt/rest/api/storageservices/create-service-sas#permissions-for-a-blob
-                switch (s)
-                {
-                    // blob - racwd
-                    case "b":
-                        sp_read.IsEnabled = true;
-                        sp_write.IsEnabled = true;
-                        sp_delete.IsEnabled = true;  // Uncheck the disable checkboxes
-                        sp_list.IsEnabled = false; sp_list.IsChecked = false;
-                        sp_add.IsEnabled = true;
-                        sp_create.IsEnabled = true;
-                        sp_update.IsEnabled = false; sp_update.IsChecked = false;
-                        sp_process.IsEnabled = false; sp_process.IsChecked = false;
-                        break;
-
-                    // container - racwdl
-                    case "c":
-                        sp_read.IsEnabled = true;
-                        sp_write.IsEnabled = true;
-                        sp_delete.IsEnabled = true;
-                        sp_list.IsEnabled = true;
-                        sp_add.IsEnabled = true;
-                        sp_create.IsEnabled = true;  // Uncheck the disable checkboxes
-                        sp_update.IsEnabled = false; sp_update.IsChecked = false;
-                        sp_process.IsEnabled = false; sp_process.IsChecked = false;
-                        break;
-
-                    // file - rcwd
-                    case "f":
-                        sp_read.IsEnabled = true;
-                        sp_write.IsEnabled = true;
-                        sp_delete.IsEnabled = true;  // Uncheck the disable checkboxes
-                        sp_list.IsEnabled = false; sp_list.IsChecked = false;
-                        sp_add.IsEnabled = false; sp_add.IsChecked = false;
-                        sp_create.IsEnabled = true;
-                        sp_update.IsEnabled = false; sp_update.IsChecked = false;
-                        sp_process.IsEnabled = false; sp_process.IsChecked = false;
-                        labelMessages.Content = "Service File SAS suported on Service version 2015-02-21 and later. From Storage Explorer, seems 2015-02-21 is not suppoerted. 2015-02-21 removed from the list.";
-                        break;
-
-                    // share - rcwdl
-                    case "s":
-                        sp_read.IsEnabled = true;
-                        sp_write.IsEnabled = true;
-                        sp_delete.IsEnabled = true;
-                        sp_list.IsEnabled = true;  // Uncheck the disable checkboxes
-                        sp_add.IsEnabled = false; sp_add.IsChecked = false;
-                        sp_create.IsEnabled = true;
-                        sp_update.IsEnabled = false; sp_update.IsChecked = false;
-                        sp_process.IsEnabled = false; sp_process.IsChecked = false;
-                        labelMessages.Content = "Service Share SAS suported on Service version 2015-02-21 and later. From Storage Explorer, seems 2015-02-21 is not suppoerted. 2015-02-21 removed from the list.";
-
-                        break;
-
-                    // queue - raup     // TODO - q for queues ????
-                    case "q":           // TODO - how specify the queue name ????
-                        sp_read.IsEnabled = true;  // Uncheck the disable checkboxes
-                        sp_write.IsEnabled = false; sp_write.IsChecked = false;
-                        sp_delete.IsEnabled = false; sp_delete.IsChecked = false;
-                        sp_list.IsEnabled = false; sp_list.IsChecked = false;
-                        sp_add.IsEnabled = true;
-                        sp_create.IsEnabled = false; sp_create.IsChecked = false;
-                        sp_update.IsEnabled = true;
-                        sp_process.IsEnabled = true;
-                        break;
-
-                    // blob snapshot - drw                 // v12.0.0.0-preview
-                    case "bs":
-                        sp_read.IsEnabled = true;  // Uncheck the disable checkboxes
-                        sp_write.IsEnabled = true;
-                        sp_delete.IsEnabled = true;
-                        sp_list.IsEnabled = false; sp_list.IsChecked = false;
-                        sp_add.IsEnabled = false; sp_add.IsEnabled = false;
-                        sp_create.IsEnabled = false; sp_create.IsChecked = false;
-                        sp_update.IsEnabled = false; sp_update.IsEnabled = false;
-                        sp_process.IsEnabled = false; sp_process.IsEnabled = false;
-                        break;
-                }
-                ComboBox_sp_UpdateText();
+                Set_srPermissions(s);
             }
 
+            if(s == "" && ComboBox_srt.Text == "" && textBox_tn.Text == "") // is valid for Queue Service SAS
+                Set_srPermissions("");  // set permissions for  Queue Service SAS
+
             SAS_Utils.PopulateComboBox_sv(ComboBox_sv, ComboBox_sr.Text, textBox_tn.Text);
-            SAS_Utils.PopulateComboBox_sv(ComboBox_apiVersion, ComboBox_sr.Text, textBox_tn.Text);
         }
 
 
+        /// <summary>
+        /// Set ComboBox Permissions options enabled/disabled based on the sr value
+        /// </summary>
+        private void Set_srPermissions(string s)
+        {
+            // Setting the sp (signed permissions) based on Service SAS sr
+            // https://docs.microsoft.com/pt-pt/rest/api/storageservices/create-service-sas#permissions-for-a-blob
+            switch (s)
+            {
+                // blob - racwd
+                case "b":
+                    sp_read.IsEnabled = true;
+                    sp_write.IsEnabled = true;
+                    sp_delete.IsEnabled = true;  // Uncheck the disable checkboxes
+                    sp_list.IsEnabled = false; sp_list.IsChecked = false;
+                    sp_add.IsEnabled = true;
+                    sp_create.IsEnabled = true;
+                    sp_update.IsEnabled = false; sp_update.IsChecked = false;
+                    sp_process.IsEnabled = false; sp_process.IsChecked = false;
+                    break;
+
+                // container - racwdl
+                case "c":
+                    sp_read.IsEnabled = true;
+                    sp_write.IsEnabled = true;
+                    sp_delete.IsEnabled = true;
+                    sp_list.IsEnabled = true;
+                    sp_add.IsEnabled = true;
+                    sp_create.IsEnabled = true;  // Uncheck the disable checkboxes
+                    sp_update.IsEnabled = false; sp_update.IsChecked = false;
+                    sp_process.IsEnabled = false; sp_process.IsChecked = false;
+                    break;
+
+                // file - rcwd
+                case "f":
+                    sp_read.IsEnabled = true;
+                    sp_write.IsEnabled = true;
+                    sp_delete.IsEnabled = true;  // Uncheck the disable checkboxes
+                    sp_list.IsEnabled = false; sp_list.IsChecked = false;
+                    sp_add.IsEnabled = false; sp_add.IsChecked = false;
+                    sp_create.IsEnabled = true;
+                    sp_update.IsEnabled = false; sp_update.IsChecked = false;
+                    sp_process.IsEnabled = false; sp_process.IsChecked = false;
+                    labelMessages.Content = "Service File SAS suported on Service version 2015-02-21 and later. From Storage Explorer, seems 2015-02-21 is not suppoerted. 2015-02-21 removed from the list.";
+                    break;
+
+                // share - rcwdl
+                case "s":
+                    sp_read.IsEnabled = true;
+                    sp_write.IsEnabled = true;
+                    sp_delete.IsEnabled = true;
+                    sp_list.IsEnabled = true;  // Uncheck the disable checkboxes
+                    sp_add.IsEnabled = false; sp_add.IsChecked = false;
+                    sp_create.IsEnabled = true;
+                    sp_update.IsEnabled = false; sp_update.IsChecked = false;
+                    sp_process.IsEnabled = false; sp_process.IsChecked = false;
+                    labelMessages.Content = "Service Share SAS suported on Service version 2015-02-21 and later. From Storage Explorer, seems 2015-02-21 is not suppoerted. 2015-02-21 removed from the list.";
+
+                    break;
+
+                // queue - raup   
+                case "":           // st empty means queue Service SAS
+                    sp_read.IsEnabled = true;  // Uncheck the disable checkboxes
+                    sp_write.IsEnabled = false; sp_write.IsChecked = false;
+                    sp_delete.IsEnabled = false; sp_delete.IsChecked = false;
+                    sp_list.IsEnabled = false; sp_list.IsChecked = false;
+                    sp_add.IsEnabled = true;
+                    sp_create.IsEnabled = false; sp_create.IsChecked = false;
+                    sp_update.IsEnabled = true;
+                    sp_process.IsEnabled = true;
+                    break;
+
+                // blob snapshot - drw                 // v12.0.0.0-preview
+                case "bs":
+                    sp_read.IsEnabled = true;  // Uncheck the disable checkboxes
+                    sp_write.IsEnabled = true;
+                    sp_delete.IsEnabled = true;
+                    sp_list.IsEnabled = false; sp_list.IsChecked = false;
+                    sp_add.IsEnabled = false; sp_add.IsEnabled = false;
+                    sp_create.IsEnabled = false; sp_create.IsChecked = false;
+                    sp_update.IsEnabled = false; sp_update.IsEnabled = false;
+                    sp_process.IsEnabled = false; sp_process.IsEnabled = false;
+                    break;
+            }
+            ComboBox_sp_UpdateText();
+        }
 
 
 
@@ -968,25 +933,15 @@ namespace Storage_Helper_SAS_Tool
         /// <param name="e"></param>
         private void ComboBox_sr_DropDownOpened(object sender, EventArgs e)
         {
-            if (checkBoxPreRelease12.IsChecked == true)
-            {
-                sr_blobSnapshot.IsChecked = Test(ComboBox_sr.Text, "bs");
-                if (sr_blobSnapshot.IsChecked == true) return; // avoid mark 'b' and 's'
-            }
-            else
-            {
-                sr_blobSnapshot.IsChecked = false;
-                sr_blobSnapshot.IsEnabled = false;
-                labelMessages.Content = "Blob Snapshot is only supported by Storage SDK v12.0.0_preview";
-            }
+            sr_blobSnapshot.IsChecked = Test(ComboBox_sr.Text, "bs");
+            if (sr_blobSnapshot.IsChecked == true)
+                return; // avoid mark 'b' and 's'
 
             sr_blob.IsChecked = Test(ComboBox_sr.Text, "b");
             sr_container.IsChecked = Test(ComboBox_sr.Text, "c");
 
             sr_share.IsChecked = Test(ComboBox_sr.Text, "s");
             sr_file.IsChecked = Test(ComboBox_sr.Text, "f");
-
-            sr_queue.IsChecked = Test(ComboBox_sr.Text, "q");       // TODO - to check if 'q' is the correct option
 
             sr_file.IsChecked = Test(ComboBox_sr.Text, "bs");
 
@@ -1001,7 +956,6 @@ namespace Storage_Helper_SAS_Tool
             sr_container.IsChecked = false;
             sr_share.IsChecked = false;
             sr_file.IsChecked = false;
-            sr_queue.IsChecked = false;
             sr_blobSnapshot.IsChecked = false;
         }
 
@@ -1013,7 +967,6 @@ namespace Storage_Helper_SAS_Tool
             sr_blob.IsChecked = false;
             sr_share.IsChecked = false;
             sr_file.IsChecked = false;
-            sr_queue.IsChecked = false;
             sr_blobSnapshot.IsChecked = false;
         }
 
@@ -1025,7 +978,6 @@ namespace Storage_Helper_SAS_Tool
             sr_container.IsChecked = false;
             sr_blob.IsChecked = false;
             sr_file.IsChecked = false;
-            sr_queue.IsChecked = false;
             sr_blobSnapshot.IsChecked = false;
         }
 
@@ -1037,7 +989,6 @@ namespace Storage_Helper_SAS_Tool
             sr_container.IsChecked = false;
             sr_share.IsChecked = false;
             sr_blob.IsChecked = false;
-            sr_queue.IsChecked = false;
             sr_blobSnapshot.IsChecked = false;
         }
 
@@ -1061,7 +1012,6 @@ namespace Storage_Helper_SAS_Tool
             sr_container.IsChecked = false;
             sr_share.IsChecked = false;
             sr_file.IsChecked = false;
-            sr_queue.IsChecked = false;
             sr_blob.IsChecked = false;
         }
 
@@ -1078,7 +1028,7 @@ namespace Storage_Helper_SAS_Tool
 
             ComboBox_srt.Text = s;
 
-            if (s != "")
+            if (ComboBox_srt.Text != "")
             {
                 ComboBox_sr.Text = "";      // clear sr
                 // ComboBox_sr.IsEnabled = true;        // leaving enable to make it possible to change to Service SAS - B,C,S,F
@@ -1088,8 +1038,7 @@ namespace Storage_Helper_SAS_Tool
                 ComboBox_sr.IsEnabled = true;
 
                 textBox_tn.Text = "";          // clear tn
-                if (checkBoxPreRelease12.IsChecked == false)
-                    textBox_tn.IsEnabled = true;    // leaving enable to make it possible to change to Service SAS - table
+                textBox_tn.IsEnabled = true;    // leaving enable to make it possible to change to Service SAS - table
 
                 SetStatus_PartitionRowBoxes(false);
                 textBox_si.IsEnabled = false;
@@ -1099,23 +1048,35 @@ namespace Storage_Helper_SAS_Tool
                 label_sr.Foreground = Brushes.Black;
                 label_tn.Foreground = Brushes.Black;
 
-                // Setting the sp (signed permissions) for Account SAS
-                // https://docs.microsoft.com/pt-pt/rest/api/storageservices/create-account-sas?redirectedfrom=MSDN#account-sas-permissions-by-operation
-                // https://docs.microsoft.com/pt-pt/rest/api/storageservices/create-account-sas?redirectedfrom=MSDN#specifying-account-sas-parameters
-                // used by blob, file, table, queue
-                sp_read.IsEnabled = true;
-                sp_write.IsEnabled = true;
-                sp_delete.IsEnabled = true; // Uncheck the disable checkboxes
-                sp_list.IsEnabled = true; //sp_list.IsChecked   = false;
-                sp_create.IsEnabled = true;
-                sp_add.IsEnabled = true;     // Table, Queue only
-                sp_update.IsEnabled = true;     // Table, Queue only
-                sp_process.IsEnabled = true;     // Queue only
-                ComboBox_sp_UpdateText();
+                Set_srtPermissions();
             }
 
+            if (ComboBox_sr.Text == "" && s == "" && textBox_tn.Text == "") // is valid for Queue Service SAS
+                Set_srPermissions("");  // set permissions for  Queue Service SAS
+
             SAS_Utils.PopulateComboBox_sv(ComboBox_sv, ComboBox_sr.Text, textBox_tn.Text);
-            SAS_Utils.PopulateComboBox_sv(ComboBox_apiVersion, ComboBox_sr.Text, textBox_tn.Text);
+        }
+
+
+
+        /// <summary>
+        /// Set ComboBox Permissions options enabled/disabled for srt - account sas
+        /// </summary>
+        private void Set_srtPermissions()
+        {
+            // Setting the sp (signed permissions) for Account SAS
+            // https://docs.microsoft.com/pt-pt/rest/api/storageservices/create-account-sas?redirectedfrom=MSDN#account-sas-permissions-by-operation
+            // https://docs.microsoft.com/pt-pt/rest/api/storageservices/create-account-sas?redirectedfrom=MSDN#specifying-account-sas-parameters
+            // used by blob, file, table, queue
+            sp_read.IsEnabled = true;
+            sp_write.IsEnabled = true;
+            sp_delete.IsEnabled = true; // Uncheck the disable checkboxes
+            sp_list.IsEnabled = true; //sp_list.IsChecked   = false;
+            sp_create.IsEnabled = true;
+            sp_add.IsEnabled = true;     // Table, Queue only
+            sp_update.IsEnabled = true;     // Table, Queue only
+            sp_process.IsEnabled = true;     // Queue only
+            ComboBox_sp_UpdateText();
         }
 
 
@@ -1136,18 +1097,11 @@ namespace Storage_Helper_SAS_Tool
 
 
 
-        private void ComboBox_apiVersion_DropDownOpened(object sender, EventArgs e)
-        {
-            SAS_Utils.PopulateComboBox_sv(ComboBox_apiVersion, ComboBox_sr.Text, textBox_tn.Text);
-        }
-
-
 
         private void TextBox_tn_LostFocus(object sender, RoutedEventArgs e)
         {
             if (textBox_tn.Text != "")
             {
-                ComboBox_apiVersion.Text = "";  // clear API-Version
                 ComboBox_srt.Text = "";      // clear srt
                 // ComboBox_srt.IsEnabled = false;      // leaving enable to make it possible to change to Account SAS
 
@@ -1164,32 +1118,40 @@ namespace Storage_Helper_SAS_Tool
                 // enable partitinon and row limits
                 SetStatus_PartitionRowBoxes(true);
 
-                textBoxTableName.Text = textBox_tn.Text;
-                labelTableName.Foreground = Brushes.Black;
+                textBox_tn.Text = textBox_tn.Text;
+                // labelTableName.Foreground = Brushes.Black; // replaced by label_tn
 
                 label_srt.Foreground = Brushes.Black;
                 label_sr.Foreground = Brushes.Black;
                 label_tn.Foreground = Brushes.Black;
 
-
-                // Setting the sp (signed permissions) based on Service SAS tn
-                // https://docs.microsoft.com/pt-pt/rest/api/storageservices/create-service-sas#permissions-for-a-table
-                // queue - raup
-                sp_read.IsEnabled = true; // Uncheck the disable checkboxes
-                sp_write.IsEnabled = false; sp_write.IsChecked = false;
-                sp_delete.IsEnabled = true;
-                sp_list.IsEnabled = false; sp_list.IsChecked = false;
-                sp_add.IsEnabled = true;
-                sp_create.IsEnabled = false; sp_create.IsChecked = false;
-                sp_update.IsEnabled = true;
-                sp_process.IsEnabled = false; sp_process.IsChecked = false;
-                ComboBox_sp_UpdateText();
+                Set_tnPermissions();
             }
 
+            if (ComboBox_sr.Text == "" && ComboBox_srt.Text == "" && textBox_tn.Text == "") // is valid for Queue Service SAS
+                Set_srPermissions("");  // set permissions for  Queue Service SAS
+
             SAS_Utils.PopulateComboBox_sv(ComboBox_sv, ComboBox_sr.Text, textBox_tn.Text);
-            SAS_Utils.PopulateComboBox_sv(ComboBox_apiVersion, ComboBox_sr.Text, textBox_tn.Text);
         }
 
+        /// <summary>
+        /// Set ComboBox Permissions options enabled/disabled for table service SAS
+        /// </summary>
+        private void Set_tnPermissions()
+        {
+            // Setting the sp (signed permissions) based on Service SAS tn
+            // https://docs.microsoft.com/pt-pt/rest/api/storageservices/create-service-sas#permissions-for-a-table
+            // queue - raup
+            sp_read.IsEnabled = true; // Uncheck the disable checkboxes
+            sp_write.IsEnabled = false; sp_write.IsChecked = false;
+            sp_delete.IsEnabled = true;
+            sp_list.IsEnabled = false; sp_list.IsChecked = false;
+            sp_add.IsEnabled = true;
+            sp_create.IsEnabled = false; sp_create.IsChecked = false;
+            sp_update.IsEnabled = true;
+            sp_process.IsEnabled = false; sp_process.IsChecked = false;
+            ComboBox_sp_UpdateText();
+        }
 
         private void BoxAuthResults_Right_GotFocus(object sender, RoutedEventArgs e)
         {
@@ -1284,14 +1246,6 @@ namespace Storage_Helper_SAS_Tool
 
 
 
-        private void TextBoxTableName_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (textBoxTableName.Text != "")
-                labelTableName.Foreground = Brushes.Black;
-        }
-
-
-
         private void TextBox_st_LostFocus(object sender, RoutedEventArgs e)
         {
             if (textBox_st.Text != "")
@@ -1301,26 +1255,7 @@ namespace Storage_Helper_SAS_Tool
 
 
 
-        private void CheckBoxPreRelease12_Click(object sender, RoutedEventArgs e)
-        {
-            if (checkBoxPreRelease12.IsChecked == true)
-            {
-                ComboBox_apiVersion.Text = "";     // clear API-Version
 
-                textBoxTableName.IsEnabled = false;
-                ComboBox_apiVersion.IsEnabled = false;
-
-                textBoxBlobSnapshotName.IsEnabled = true;
-                sr_blobSnapshot.IsEnabled = true;
-            }
-            else
-            {
-                ComboBox_apiVersion.IsEnabled = true;
-
-                textBoxBlobSnapshotName.IsEnabled = false;
-                sr_blobSnapshot.IsEnabled = false;
-            }
-        }
 
         private void Sp_write_Click(object sender, RoutedEventArgs e)
         {

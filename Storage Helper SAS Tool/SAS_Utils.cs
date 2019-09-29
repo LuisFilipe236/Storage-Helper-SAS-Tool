@@ -58,7 +58,8 @@ namespace Storage_Helper_SAS_Tool
         public static byte[] toIP   = { 0, 0, 0, 0 };
 
         /// <summary>
-        /// Struct to save all individual values from analized SAS
+        /// Struct to save all individual values from analized SAS, used to regenerate new SAS
+        /// The struct easly allow access all the SAS parameters from any class
         /// </summary>
         public struct SasParameters
         {
@@ -80,7 +81,6 @@ namespace Storage_Helper_SAS_Tool
 
             public bool onlySASprovided;        // true if the endpoints not provided
 
-            public StrParameter apiVersion;
             public StrParameter sv;     // Service Version
             public StrParameter ss;     // Signed Services 
             public StrParameter srt;    // Signed Resource Types (account SAS)
@@ -196,7 +196,6 @@ namespace Storage_Helper_SAS_Tool
             // Service SAS: https://docs.microsoft.com/en-us/rest/api/storageservices/constructing-a-service-sas
             //---------------------------------------------------------------------
             //---------------------------------------------------------------------
-            SAS.apiVersion.v =  Get_SASValue(SAS.sharedAccessSignature.v, "api-version=", "&"); // Optional
             SAS.sv.v =          Get_SASValue(SAS.sharedAccessSignature.v, "sv=", "&");                  // Required (>=2015-04-05)
             SAS.ss.v =          Get_SASValue(SAS.sharedAccessSignature.v, "ss=", "&");
             SAS.srt.v =         Get_SASValue(SAS.sharedAccessSignature.v, "srt=", "&");
@@ -284,9 +283,6 @@ namespace Storage_Helper_SAS_Tool
             // Verify if Services on URI are the same as on Service SAS permissions (Service SAS) 
             BoxAuthResults.Text += Show_Services();
 
-            // api-version: (optional) {storage service version to use to execute the request made using the account SAS URI}
-            BoxAuthResults.Text += Show_ApiVersion(SAS.apiVersion.v);
-
             // ss: {bqtf} - Required 
             // Service endpoints: (optional)
             BoxAuthResults.Text += Show_ss(SAS.ss.v, SAS.blobEndpoint, SAS.fileEndpoint, SAS.tableEndpoint, SAS.queueEndpoint, SAS.spr.v, SAS.onlySASprovided, SAS.srt.v);
@@ -304,20 +300,21 @@ namespace Storage_Helper_SAS_Tool
             //                               { s,f }   // share, file     - for files, version 2015-02-21 and later
             //                               {bs}      // blob snapshot,               version 2018-11-09 and later
             // tn: tablename - Required - The name of the table to share.
+            // No sr, srt or tn provided means queue service
             //---------------------------------------------------------------------
             string s = SAS_ValidateParam.Sr_srt_tn(SAS.sr.v, SAS.srt.v, SAS.tn.v);
             switch (s)
             {
-                // No srt, sr or tn provided - Required
+                // No srt, sr or tn provided - Service Queue SAS
                 //---------------------------------------------------------------------
                 case "":
-                    BoxAuthResults.Text += Show_EmptyOrAll_srt_sr_tn("");
+                    BoxAuthResults.Text += Show_Queue(SAS.queueName.v);
                     break;
 
                 // More than one srt, sr or tn provided - Only one Required
                 //---------------------------------------------------------------------
                 case "all":
-                    BoxAuthResults.Text += Show_EmptyOrAll_srt_sr_tn("all");
+                    BoxAuthResults.Text += Show_All_srt_sr_tn("all");
                     break;
 
                 //---------------- Account SAS ----------------------------------------
@@ -562,7 +559,10 @@ namespace Storage_Helper_SAS_Tool
                         // remove subfolders
                         int i = s2.LastIndexOf('/');
                         if (i == s2.Length - 1 && s2 != "")    // blob name ends with '/'
+                        { 
                             SAS.blobName.v = "<invalid blob on endpoint>";
+                            SAS.blobName.s = false;
+                        }
                         else
                             if (i > 0)                          // sub folders exist - removing subfolders
                             SAS.blobName.v = s2.Substring(i + 1);
@@ -588,7 +588,10 @@ namespace Storage_Helper_SAS_Tool
                         // remove subfolders
                         int i = s2.LastIndexOf('/');
                         if (i == s2.Length - 1 && s2 != "")    // file name ends with '/'
+                        { 
                             SAS.fileName.v = "<invalid file on endpoint>";
+                            SAS.fileName.s = false;
+                        }
                         else
                             if (i > 0)                          // sub folders exist - removing subfolders
                             SAS.fileName.v = s2.Substring(i + 1);
@@ -598,22 +601,27 @@ namespace Storage_Helper_SAS_Tool
                 }
             }
 
+            // Table name if provided on tn paramenter and not on the URL
+            /*
             if (SAS.tableEndpoint != "not found")
             {
-                // Format, if exists: https://<storage>.table.core.windows.net/table
+                // Format, if exists: https://<storage>.table.core.windows.net/
                 string s = Get_SASValue(SAS.tableEndpoint, ".table.core.windows.net/");
                 int start = s.LastIndexOf("/") + 1; // start of the table name
-                if (s != "not found" && start > 0)
-                    SAS.tableName.v = s.Substring(start, s.Length - start);
+                //if (s != "not found" && start > 0)
+                //    SAS.tableName.v = s.Substring(start, s.Length - start);
+                SAS.tableName.v = s.TrimStart().Replace("/", String.Empty);          // remove '/' at the end, if exists
             }
+            */
 
             if (SAS.queueEndpoint != "not found")
             {
                 // Format, if exists: https://<storage>.queue.core.windows.net/queue
                 string s = Get_SASValue(SAS.queueEndpoint, ".queue.core.windows.net/");
                 int start = s.LastIndexOf("/") + 1; // start of the Queue name
-                if (s != "not found" && start > 0)
-                    SAS.queueName.v = s.Substring(start, s.Length - start);
+                SAS.queueName.v = s.TrimStart().Replace("/", String.Empty);          // remove '/' at the end, if exists
+                if(SAS.queueName.v == "")
+                    SAS.queueName.s = false;
             }
         }
 
@@ -628,9 +636,9 @@ namespace Storage_Helper_SAS_Tool
                 return "Account SAS detected\n-----------------------------\n";
             else
             if (SAS.sr.v != "not found" || SAS.tn.v != "not found")
-                return "Service SAS detected\n-----------------------------\n";
+                return "Service SAS detected\n-----------------------------\n";         // Blob, Container, Share, File, Table
             else
-                return "--> SAS type not detected (no 'srt', 'sr' or 'tn')\n";
+                return "Service SAS detected\n-----------------------------\n";         // Queue
         }
 
 
@@ -719,33 +727,6 @@ namespace Storage_Helper_SAS_Tool
 
 
 
-
-
-        /// <summary>
-        /// api-version: (optional) {storage service version to use to execute the request made using the account SAS URI}
-        /// 
-        /// You can specify two versioning options on a shared access signature. 
-        /// If specified, the optional api-version header indicates which service version to use to execute the API operation. 
-        /// The SignedVersion (sv) parameter specifies the service version to use to authorize and authenticate the request made with the SAS. 
-        /// If the api-version header is not specified, then the value of the SignedVersion (sv) parameter also indicates the version to 
-        /// use to execute the API operation.
-        /// https://docs.microsoft.com/en-us/rest/api/storageservices/versioning-for-the-azure-storage-services#specifying-service-versions-in-requests
-        /// </summary>
-        public static string Show_ApiVersion(string apiVersion)
-        {
-            string s = "'api-version' parameter (Storage Service Version):\n";
-
-            string res = SAS_ValidateParam.Api_Version(apiVersion);
-
-            if (SAS.apiVersion.s == false)           // error on value                    
-                return s + "  --> " + res + "\n\n";
-
-            if (res == "")
-                return ""; // silent return ("not found")
-
-            // value validated
-            return s + "  API Version used: " + apiVersion + "\n\n";
-        }
 
 
 
@@ -855,11 +836,11 @@ namespace Storage_Helper_SAS_Tool
 
 
         /// <summary>
-        /// Format the output string in case of none srt, st or tn parameter provided, or more than one provided
+        /// Format the output string in case of more than one provided
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
-        public static string Show_EmptyOrAll_srt_sr_tn(string str)
+        public static string Show_All_srt_sr_tn(string str)
         {
             string s = "'srt', 'sr', 'tn' parameters (Account / Service SAS):\n";
 
@@ -871,7 +852,7 @@ namespace Storage_Helper_SAS_Tool
                 return s + "  --> " + res + "\n\n";
         }
 
-
+        
 
         /// <summary>
         /// Format the output string for srt parameter 
@@ -949,6 +930,25 @@ namespace Storage_Helper_SAS_Tool
             string s = "'tn' parameter (Table Name):\n";
 
             string res = SAS_ValidateParam.Tn(tn);
+
+            if (SAS.tn.s == true)           // value validated
+                return s + "  " + res + "\n\n";
+            else                            // error on value 
+                return s + "  --> " + res + "\n\n";
+        }
+
+
+
+        /// <summary>
+        /// Format the output string in case of none queue parameter provided on URI, - Service Queue
+        /// </summary>
+        /// <param name="queue"></param>
+        /// <returns></returns>
+        public static string Show_Queue(string queue)
+        {
+            string s = "Queue Service SAS (no 'srt', 'sr', 'tn'):\n";
+
+            string res = SAS_ValidateParam.Queue(queue);
 
             if (SAS.tn.s == true)           // value validated
                 return s + "  " + res + "\n\n";
@@ -1070,29 +1070,6 @@ namespace Storage_Helper_SAS_Tool
 
 
 
-
-
-        /// <summary>
-        /// TODO - How to define Queue ????
-        /// 
-        /// Service SAS for Queue
-        /// Same permissions for Policy and 'sr' (Service SAS) parameter 
-        /// </summary>
-        /// <param name="sp"></param>
-        /// <param name="sv"></param>
-        /// <returns></returns>
-        public static string Show_sp_queue(string sp, string sv)
-        {
-            string s = "  Permissions for Queue (Service SAS)  ('???'=??):\n";
-
-            string res = SAS_ValidateParam.Sp_queue(sp, sv);
-
-            if (SAS.sp.s == false)           // error on value                    
-                return s + "  --> " + res + "\n\n";
-
-            // value validated
-            return s + "  " + res + "\n\n";
-        }
 
 
 
@@ -1377,9 +1354,6 @@ namespace Storage_Helper_SAS_Tool
         {
             switch (param)
             {
-                case "apiVersion":
-                    SAS.apiVersion.s = state;
-                    break;
                 case "sv":
                     SAS.sv.s = state;
                     break;
@@ -1413,6 +1387,9 @@ namespace Storage_Helper_SAS_Tool
                 case "si":
                     SAS.si.s = state;
                     break;
+                case "queue":
+                    SAS.queueName.s = state;
+                    break;
             }
         }
         //--------------------------------------------------------------------------------------------------------
@@ -1440,7 +1417,6 @@ namespace Storage_Helper_SAS_Tool
 
             //SAS.onlySASprovided = true;
 
-            SAS.apiVersion.v = "";  SAS.apiVersion.s = true;
             SAS.sv.v = "";          SAS.sv.s = true;
             SAS.ss.v = "";          SAS.ss.s = true;
             SAS.srt.v = "";         SAS.srt.s = true;

@@ -73,4 +73,18 @@ Developed by Azure Storage Support Team to test proposes only.
 Click on the MSI last version counter above to download the MSI installer for Windows.
 
 
+<b>Versions:</b>
+<b>v1.0.4:</b>
+Changes:
+- Removed support for Storage SDK v11.x and the option to select SDK v11.x / v12.x from interface
+- Removed Api-Version parameter from interface - not used on SDK v12.x and not supported on Cosmo Table
+- Removed Table Name field as query parameter from interface (on right gorup ComboBoxes)
+- Corrected the Queue, Table and BlobSnapshot Service SAS Regeneration
 
+<b>v1.0.3:</b>
+Changes:
+
+<b>v1.0.2:</b>
+Changes:
+- Added support for Storage SDK 12.0.0 (preview) 
+- Added support for Cosmos Table SDK 2.0.0

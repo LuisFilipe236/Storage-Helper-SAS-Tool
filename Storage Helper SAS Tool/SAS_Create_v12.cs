@@ -44,49 +44,40 @@ namespace Storage_Helper_SAS_Tool
         /// Return info about SDK v11 limitations, on generating SAS
         /// </summary>
         /// <returns></returns>
-        public static string Limitations_v12_Info(string StorageSDK_12_Version, ComboBox ComboBox_sr)
+        public static string Limitations_v12_Info(string StorageSDK_12_Version)
         {
-            string s1 = "-------------------------------------------------\n";
-
-            string s3 = "\n";
-            s3 += "Notes:\n";
+            string s = "-------------------------------------------------\n";
+            s += "Notes:\n";
+            s += " - Regenerated using Storage SDK " + StorageSDK_12_Version + "\n";
+            s += " - Parameter 'Api Version' not defined on this SDK - uses the same as 'Service Version'\n";
+            s += "\n";
+            s += "Tips:\n";
 
             // Regenerated Account SAS (srt) 
             if (SAS_Utils.SAS.srt.v != "not found" && SAS_Utils.SAS.srt.v != "")
             {
-                s3 += "Regenerated using Storage SDK " + StorageSDK_12_Version + "\n";
-                s3 += " - Parameter 'Api Version' not defined on this SDK - uses the same as 'Service Version'\n";
-                s3 += "\n\n";
-                s3 += "Tips:";
-                s3 += " - On Azure Storage Explorer, Account SAS need all resources sco, and at least rwl permissions.";
+                // s += " - On Azure Storage Explorer, Account SAS need all resources sco, and at least rwl permissions.";
+                s += "\n";
             }
 
             // Regenerated Service SAS (sr) or (tn)
             if (SAS_Utils.SAS.sr.v != "not found" && SAS_Utils.SAS.sr.v != "")
             {
-                s3 += "Regenerated using Storage SDK " + StorageSDK_12_Version + "\n";
-                s3 += " - Parameter 'Api Version' not defined on this SDK - uses the same as 'Service Version'\n";
-                s3 += "\n\n";
-                s3 += "Tips:";
-                switch (ComboBox_sr.Text)
+                switch (SAS_Utils.SAS.sr.v)
                 {
                     case "c":
-                        s3 += " - On Azure Storage Explorer, Container Service SAS need at least l permissions.";
+                        // s += " - On Azure Storage Explorer, Container Service SAS need at least l permissions.\n";
                         break;
                     case "b":
-                        s3 += " - On Azure Storage Explorer, Blob Service SAS is not supported.";
-                        s3 += " - On Browser, Blob Service SAS need at least rd permissions.";
+                        // s += " - On Azure Storage Explorer, Blob Service SAS is not supported.\n";
+                        // s += " - On Browser, Blob Service SAS need at least rd permissions.\n";
                         break;
                     case "s":
-                        s3 += " - On Azure Storage Explorer, Share Service SAS need at least rwl permissions.";
+                        // s += " - On Azure Storage Explorer, Share Service SAS need at least rwl permissions.\n";
                         break;
                     case "f":
-                        s3 += " - On Azure Storage Explorer, File Service SAS is not supported.";
-                        s3 += " - On Azure Storage Explorer, File Service SAS need all the rwdc permissions.";
-                        break;
-                    case "q":
-                        s3 += " - On Azure Storage Explorer, Queue Service SAS failed with all the permissions.";
-                        s3 += " - Queue Service SAS is not well documented.";
+                        // s += " - On Azure Storage Explorer, File Service SAS is not supported.\n";
+                        // s += " - On Browser, File Service SAS need all the rwdc permissions.\n";
                         break;
                     case "bs":
 
@@ -94,8 +85,17 @@ namespace Storage_Helper_SAS_Tool
                 }
             }
 
-            return s1 + s3;
+            // All empty means Queue Service SAS
+            if ((SAS_Utils.SAS.srt.v == "not found" || SAS_Utils.SAS.srt.v == "") &&
+                (SAS_Utils.SAS.sr.v == "not found" || SAS_Utils.SAS.sr.v == "") &&
+                SAS_Utils.SAS.tn.v == "")
+                // s += " - On Azure Storage Explorer, Queue Service SAS failed with all the permissions.\n";
+                s += "\n";
+
+            return s;
         }
+
+
 
 
         //---------------------------------------------------------------------------------------------------------------------
@@ -129,23 +129,43 @@ namespace Storage_Helper_SAS_Tool
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Account SAS token:\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
-            BoxAuthResults.Text += "Regenerated Account SAS token (Unescaped):\n";
-            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n\n\n";
-
-
+            BoxAuthResults.Text += "-------------------------------------------------\n";
             if (ss.IndexOf("b") != -1)
-                BoxAuthResults.Text += "Blob URI:\n" + "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n\n";
+            {
+                BoxAuthResults.Text += "Blob URI:\n";
+                BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n";
+                BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + sas + "\n\n";
+            }
 
             if (ss.IndexOf("f") != -1)
-                BoxAuthResults.Text += "File URI:\n" + "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n\n";
+            {
+                BoxAuthResults.Text += "File URI:\n";
+                BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n";
+                BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + sas + "\n\n";
+            }
 
             if (ss.IndexOf("q") != -1)
-                BoxAuthResults.Text += "Queue URI:\n" + "https://" + textBoxAccountName.Text + ".queue.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n\n";
+            {
+                BoxAuthResults.Text += "Queue URI:\n";
+                BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".queue.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n";
+                BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".queue.core.windows.net/" + sas + "\n\n";
+            }
 
             if (ss.IndexOf("t") != -1)
-                BoxAuthResults.Text += "Table URI:\n" + "https://" + textBoxAccountName.Text + ".table.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n\n";
+            {
+                BoxAuthResults.Text += "Table URI:\n";
+                BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".table.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n";
+                BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".table.core.windows.net/" + sas + "\n\n";
+            }
+
+            BoxAuthResults.Text += "-------------------------------------------------\n";
+            BoxAuthResults.Text += "Test your SAS on Browser (get blob) (replace <container> and <blob>):\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/<container>/<blob>" + Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/<container>/<blob>" + sas + "\n\n";
+
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
 
@@ -221,12 +241,18 @@ namespace Storage_Helper_SAS_Tool
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Container:\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
-            BoxAuthResults.Text += "Regenerated Service SAS URI - Container (Unescaped):\n";
-            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n\n\n";
+            BoxAuthResults.Text += "-------------------------------------------------\n";
+            BoxAuthResults.Text += "Container URI:\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + sas + "\n\n";
 
-            BoxAuthResults.Text += "Container URI:\n" + "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + Uri.UnescapeDataString(sas) + "\n\n";
+            BoxAuthResults.Text += "-------------------------------------------------\n";
+            BoxAuthResults.Text += "Test your SAS on Browser (list blobs):\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + "?restype=container&comp=list" + Uri.UnescapeDataString(sas).Replace("?", "&") + "\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + "?restype=container&comp=list" + sas.Replace("?", "&") + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
 
@@ -245,12 +271,18 @@ namespace Storage_Helper_SAS_Tool
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Blob:\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
-            BoxAuthResults.Text += "Regenerated Service SAS URI - Blob (Unescaped):\n";
-            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n\n\n";
+            BoxAuthResults.Text += "-------------------------------------------------\n";
+            BoxAuthResults.Text += "Blob URI:\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/"+ textBoxContainerName.Text + "/"+ textBoxBlobName.Text + Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + "/" + textBoxBlobName.Text + sas + "\n\n";
 
-            BoxAuthResults.Text += "Blob URI:\n" + "https://" + textBoxAccountName.Text + ".blob.core.windows.net/"+ textBoxContainerName.Text + "/"+ textBoxBlobName.Text + Uri.UnescapeDataString(sas) + "\n\n";
+            BoxAuthResults.Text += "-------------------------------------------------\n";
+            BoxAuthResults.Text += "Test your SAS on Browser (get blob):\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + "/" + textBoxBlobName.Text + Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + "/" + textBoxBlobName.Text + sas + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
 
@@ -269,12 +301,18 @@ namespace Storage_Helper_SAS_Tool
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Blob Snapshot:\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
-            BoxAuthResults.Text += "Regenerated Service SAS URI - Blob Snapshot (Unescaped):\n";
-            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n\n\n";
+            BoxAuthResults.Text += "-------------------------------------------------\n";
+            BoxAuthResults.Text += "Blob Snapshot URI:\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + "/" + textBoxBlobSnapsotName.Text + Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + "/" + textBoxBlobSnapsotName.Text + sas + "\n\n";
 
-            BoxAuthResults.Text += "Blob Snapshot URI:\n" + "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + "/" + textBoxBlobSnapsotName.Text + Uri.UnescapeDataString(sas) + "\n\n";
+            BoxAuthResults.Text += "-------------------------------------------------\n";
+            BoxAuthResults.Text += "Test your SAS on Browser (get snapshot) (repalce <DateTime> by snapshot datetime):\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + "/" + textBoxBlobSnapsotName.Text + "?snapshot=<DateTime>" + Uri.UnescapeDataString(sas).Replace("?","&") + "\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".blob.core.windows.net/" + textBoxContainerName.Text + "/" + textBoxBlobSnapsotName.Text + "?snapshot=<DateTime>" + sas.Replace("?", "&") + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
 
@@ -376,12 +414,18 @@ namespace Storage_Helper_SAS_Tool
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Share:\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
-            BoxAuthResults.Text += "Regenerated Service SAS URI - Share (Unescaped):\n";
-            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n\n\n";
+            BoxAuthResults.Text += "-------------------------------------------------\n";
+            BoxAuthResults.Text += "Share URI:\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + textBoxShareName.Text + Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + textBoxShareName.Text + sas + "\n\n";
 
-            BoxAuthResults.Text += "Share URI:\n" + "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + textBoxShareName.Text + Uri.UnescapeDataString(sas) + "\n\n";
+            BoxAuthResults.Text += "-------------------------------------------------\n";
+            BoxAuthResults.Text += "Test your SAS on Browser (list files):\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + textBoxShareName.Text + "?restype=directory&comp=list" + Uri.UnescapeDataString(sas).Replace("?", "&") + "\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + textBoxShareName.Text + "?restype=directory&comp=list" + sas.Replace("?", "&") + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
 
@@ -400,12 +444,18 @@ namespace Storage_Helper_SAS_Tool
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Service SAS - File:\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
-            BoxAuthResults.Text += "Regenerated Service SAS URI - File (Unescaped):\n";
-            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n\n\n";
+            BoxAuthResults.Text += "-------------------------------------------------\n";
+            BoxAuthResults.Text += "File URI:\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + textBoxShareName.Text + "/" + textBoxFileName.Text + Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + textBoxShareName.Text + "/" + textBoxFileName.Text + sas + "\n\n";
 
-            BoxAuthResults.Text += "File URI:\n" + "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + textBoxShareName.Text + "/" + textBoxFileName.Text + Uri.UnescapeDataString(sas) + "\n\n";
+            BoxAuthResults.Text += "-------------------------------------------------\n";
+            BoxAuthResults.Text += "Test your SAS on Browser (get file):\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + textBoxShareName.Text + "/" + textBoxFileName.Text + Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".file.core.windows.net/" + textBoxShareName.Text + "/" + textBoxFileName.Text + sas + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
 
@@ -498,12 +548,18 @@ namespace Storage_Helper_SAS_Tool
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Queue:\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
-            BoxAuthResults.Text += "Regenerated Service SAS URI - Queue (Unescaped):\n";
-            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n\n\n";
+            BoxAuthResults.Text += "-------------------------------------------------\n";
+            BoxAuthResults.Text += "Queue URI:\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".queue.core.windows.net/" + textBoxQueueName.Text + Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".queue.core.windows.net/" + textBoxQueueName.Text + sas + "\n\n";
 
-            BoxAuthResults.Text += "Queue URI:\n" + "https://" + textBoxAccountName.Text + ".queue.core.windows.net/" + textBoxQueueName.Text + Uri.UnescapeDataString(sas) + "\n\n";
+            BoxAuthResults.Text += "-------------------------------------------------\n";
+            BoxAuthResults.Text += "Test your SAS on Browser (list messages):\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".queue.core.windows.net/" + textBoxQueueName.Text + "/messages" + Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += "https://" + textBoxAccountName.Text + ".queue.core.windows.net/" + textBoxQueueName.Text + "/messages" + sas + "\n\n";
 
             SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
 

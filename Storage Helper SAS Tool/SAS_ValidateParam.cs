@@ -16,40 +16,6 @@ namespace Storage_Helper_SAS_Tool
 
     class SAS_ValidateParam
     {
-        /// <summary>
-        /// Validate api-version (optional)
-        /// </summary>
-        /// <param name="apiVersion"></param>
-        /// <returns></returns>
-        public static string Api_Version(string apiVersion)
-        {
-            // no api-version (optional) provided - exit without any information
-            if (apiVersion == "not found")
-                return SAS_Utils.andSetState("apiVersion", true, "");
-
-            // api-version without any value
-            if (String.IsNullOrEmpty(apiVersion))
-                return SAS_Utils.andSetState("apiVersion", false, "'api-version' provided without any value (api-version=" + apiVersion + ")");
-
-            // wrong api-version length and format - yyyy-mm-dd
-            if (apiVersion.Length != 10 || apiVersion.Substring(4, 1) != "-" || apiVersion.Substring(7, 1) != "-")
-                return SAS_Utils.andSetState("apiVersion", false, "Invalid format on 'api-version' provided. Format should be yyyy-mm-dd (api-version=" + apiVersion + ")");
-
-            // api-version date validation - TODO - validate the storage service versions
-            try
-            {
-                DateTime d = Convert.ToDateTime(apiVersion);
-            }
-            catch (Exception ex)
-            {
-                return SAS_Utils.andSetState("apiVersion", false, "Invalid date on 'api-version' provided (api-version=" + apiVersion + "): " + ex.Message + "");
-            }
-
-            // value validated
-            return SAS_Utils.andSetState("apiVersion", true, "");
-        }
-
-
 
         public static string Ss(string ss, string spr, string srt)
         {
@@ -212,11 +178,23 @@ namespace Storage_Helper_SAS_Tool
         public static string Tn(string tn)
         {
             // no (required) tn provided
-            if (tn == "not found")
+            if (tn == "not found" || tn == "")
                 return SAS_Utils.andSetState("tn", false, "'tn' Required but not provided");
 
             //-------------------- tn validated ---------------------------------
             return SAS_Utils.andSetState("tn", true, "Access to Table '" + tn + "'");
+        }
+
+
+
+        public static string Queue(string queue)
+        {
+            // no (required) queue provided
+            if (queue == "")
+                return SAS_Utils.andSetState("queue", false, "'queue' Required on URI but not provided");
+
+            //-------------------- queue validated ---------------------------------
+            return SAS_Utils.andSetState("queue", true, "Access to Queue '" + queue + "'");
         }
 
 
@@ -269,11 +247,8 @@ namespace Storage_Helper_SAS_Tool
             if (tn != "not found")
                 return Sp_tn(sp, tn, sv);
 
-            // How define Queue ???? - TODO
-            //if (sr != "not found")
-            //    return sp_queue(sp, sv);
-
-            return SAS_Utils.andSetState("sp", false, "No 'srt', 'sr', or 'tn' provided");
+            // No 'srt', 'sr', or 'tn' provided - Queue Service
+                return Sp_queue(sp);
         }
 
 
@@ -300,20 +275,20 @@ namespace Storage_Helper_SAS_Tool
             {
                 s += "  Permissions for Objects (Account SAS) (o in 'srt'):\n";
                 if (sp.IndexOf("r") != -1)
-                    s += "    Read Objects\n";
+                    s += "      Read Objects\n";
                 if (sp.IndexOf("w") != -1)
-                    s += "    Write Objects\n";
+                    s += "      Write Objects\n";
                 if (sp.IndexOf("d") != -1)
-                    s += "    Delete Objects, except for Queue messages\n";
-                // 'l' - List Not supported
+                    s += "      Delete Objects, except for Queue messages\n";
+                // 'l' - List Not supported on Objects
                 if (sp.IndexOf("a") != -1)
-                    s += "    Add queue messages, table entities, and append blobs only\n";
+                    s += "      Add queue messages, table entities, and append blobs only\n";
                 if (sp.IndexOf("c") != -1)
-                    s += "    Create new blobs or files, but not overwrite existing blobs or files\n";
+                    s += "      Create new blobs or files, but not overwrite existing blobs or files\n";
                 if (sp.IndexOf("u") != -1)
-                    s += "    Update queue messages and table entities only\n";
+                    s += "      Update queue messages and table entities only\n";
                 if (sp.IndexOf("p") != -1)
-                    s += "    Process queue messages only\n";
+                    s += "      Process queue messages only\n";
 
                 if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("a") == -1 && sp.IndexOf("c") == -1 && sp.IndexOf("u") == -1 && sp.IndexOf("p") == -1)
                 {
@@ -326,16 +301,16 @@ namespace Storage_Helper_SAS_Tool
             {
                 s += "  Permissions for Services (Account SAS) (s in 'srt'):\n";
                 if (sp.IndexOf("r") != -1)
-                    s += "    Read Services\n";
+                    s += "      Read Services\n";
                 if (sp.IndexOf("w") != -1)
-                    s += "    Write Services\n";
-                // 'd' - Delete not supported
+                    s += "      Write Services\n";
+                // 'd' - Delete not supported on Services
                 if (sp.IndexOf("l") != -1)
-                    s += "    List Services\n";
-                // 'a' - Add Not supported
-                // 'c' - Create Not supported
-                // 'u' - Update Not supported
-                // 'p' - Process Not supported
+                    s += "      List Services\n";
+                // 'a' - Add Not supported on Services
+                // 'c' - Create Not supported on Services
+                // 'u' - Update Not supported on Services
+                // 'p' - Process Not supported on Services
 
                 if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("l") == -1)
                 {
@@ -348,17 +323,17 @@ namespace Storage_Helper_SAS_Tool
             {
                 s += "  Permissions for Containers (Account SAS) (c in 'srt'):\n";
                 if (sp.IndexOf("r") != -1)
-                    s += "    Read Containers\n";
+                    s += "      Read Containers\n";
                 if (sp.IndexOf("w") != -1)
-                    s += "    Write Containers\n";
+                    s += "      Write Containers\n";
                 if (sp.IndexOf("d") != -1)
-                    s += "    Delete Containers\n";
+                    s += "      Delete Containers\n";
                 if (sp.IndexOf("l") != -1)
-                    s += "    List Containers\n";
-                // 'a' - Add Not supported
-                // 'c' - Create Not supported
-                // 'u' - Update Not supported
-                // 'p' - Process Not supported
+                    s += "      List Containers\n";
+                // 'a' - Add Not supported on Containers
+                // 'c' - Create Not supported on Containers
+                // 'u' - Update Not supported on Containers
+                // 'p' - Process Not supported on Containers
 
                 if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("l") == -1)
                 {
@@ -405,22 +380,22 @@ namespace Storage_Helper_SAS_Tool
                     //----------------------------------------------
                     s += "  Permissions for Blob (Service SAS) ('sr'=b):\n";
                     if (sp.IndexOf("r") != -1)
-                        s += "    Read the content, properties, metadata and block list. Use the blob as the source of a copy operation.\n";
+                        s += "      Read the content, properties, metadata and block list. Use the blob as the source of a copy operation.\n";
 
                     if (sp.IndexOf("w") != -1)
-                        s += "    Create or write content, properties, metadata, or block list. Snapshot or lease the blob. Resize the blob (page blob only). Use the blob as the destination of a copy operation.\n";
+                        s += "      Create or write content, properties, metadata, or block list. Snapshot or lease the blob. Resize the blob (page blob only). Use the blob as the destination of a copy operation.\n";
 
                     if (sp.IndexOf("d") != -1)
                         if (sv.CompareTo("2017-07-29") < 0)
-                            s += "    Delete the blob\n";
+                            s += "      Delete the blob\n";
                         else
-                            s += "    Delete the blob and breaking a lease on a blob\n";
+                            s += "      Delete the blob and breaking a lease on a blob\n";
 
                     if (sp.IndexOf("a") != -1)
-                        s += "    Add a block to an append blob.\n";
+                        s += "      Add a block to an append blob.\n";
 
                     if (sp.IndexOf("c") != -1)
-                        s += "    Write a new blob, snapshot a blob, or copy a blob to a new blob\n";
+                        s += "      Write a new blob, snapshot a blob, or copy a blob to a new blob\n";
 
 
                     if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("a") == -1 && sp.IndexOf("c") == -1)
@@ -442,25 +417,25 @@ namespace Storage_Helper_SAS_Tool
                     //----------------------------------------------
                     s += "  Permissions for Containers (Service SAS) ('sr'=c):\n";
                     if (sp.IndexOf("r") != -1)
-                        s += "    Read the content, properties, metadata or block list of any blob in the container. Use any blob in the container as the source of a copy operation.\n";
+                        s += "      Read the content, properties, metadata or block list of any blob in the container. Use any blob in the container as the source of a copy operation.\n";
 
                     if (sp.IndexOf("w") != -1)
-                        s += "    For any blob in the container, create or write content, properties, metadata, or block list. Snapshot or lease the blob. Resize the blob (page blob only). Use the blob as the destination of a copy operation.\n";
+                        s += "      For any blob in the container, create or write content, properties, metadata, or block list. Snapshot or lease the blob. Resize the blob (page blob only). Use the blob as the destination of a copy operation.\n";
 
                     if (sp.IndexOf("d") != -1)
                         if (sv.CompareTo("2017-07-29") < 0)
-                            s += "    Delete the blob in the container.\n";
+                            s += "      Delete the blob in the container.\n";
                         else
-                            s += "    Delete any blob in the container, breaking a lease on a container.\n";
+                            s += "      Delete any blob in the container, breaking a lease on a container.\n";
 
                     if (sp.IndexOf("a") != -1)
-                        s += "    Add a block to any append blob in the container.\n";
+                        s += "      Add a block to any append blob in the container.\n";
 
                     if (sp.IndexOf("c") != -1)
-                        s += "    Write a new blob to the container, snapshot any blob in the container, or copy a blob to a new blob in the container.\n";
+                        s += "      Write a new blob to the container, snapshot any blob in the container, or copy a blob to a new blob in the container.\n";
 
                     if (sp.IndexOf("l") != -1)
-                        s += "    List blobs in the container.\n";
+                        s += "      List blobs in the container.\n";
 
                     if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("a") == -1 && sp.IndexOf("c") == -1 && sp.IndexOf("l") == -1)
                     {
@@ -484,19 +459,19 @@ namespace Storage_Helper_SAS_Tool
                     //----------------------------------------------
                     s += "  Permissions for File Share (Service SAS) ('sr'=s):\n";
                     if (sp.IndexOf("r") != -1)
-                        s += "    Read the content, properties or metadata of any file in the share. Use any file in the share as the source of a copy operation.\n";
+                        s += "      Read the content, properties or metadata of any file in the share. Use any file in the share as the source of a copy operation.\n";
 
                     if (sp.IndexOf("w") != -1)
-                        s += "    For any file in the share, create or write content, properties or metadata.Resize the file.Use the file as the destination of a copy operation.\n";
+                        s += "      For any file in the share, create or write content, properties or metadata.Resize the file.Use the file as the destination of a copy operation.\n";
 
                     if (sp.IndexOf("d") != -1)
-                        s += "    Delete any file in the share.\n";
+                        s += "      Delete any file in the share.\n";
 
                     if (sp.IndexOf("l") != -1)
-                        s += "    List files and directories in the share.\n";
+                        s += "      List files and directories in the share.\n";
 
                     if (sp.IndexOf("c") != -1)
-                        s += "    Create a new file in the share, or copy a file to a new file in the share.\n";
+                        s += "      Create a new file in the share, or copy a file to a new file in the share.\n";
 
                     if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("l") == -1 && sp.IndexOf("c") == -1)
                     {
@@ -520,16 +495,16 @@ namespace Storage_Helper_SAS_Tool
                     //----------------------------------------------
                     s += "  Permissions for File (Service SAS) ('sr'=f):\n";
                     if (sp.IndexOf("r") != -1)
-                        s += "    Read the content, properties, metadata.Use the file as the source of a copy operation.\n";
+                        s += "      Read the content, properties, metadata.Use the file as the source of a copy operation.\n";
 
                     if (sp.IndexOf("w") != -1)
-                        s += "    Create or write content, properties, metadata.Resize the file.Use the file as the destination of a copy operation.\n";
+                        s += "      Create or write content, properties, metadata.Resize the file.Use the file as the destination of a copy operation.\n";
 
                     if (sp.IndexOf("d") != -1)
-                        s += "    Delete the file.\n";
+                        s += "      Delete the file.\n";
 
                     if (sp.IndexOf("c") != -1)
-                        s += "    Create a new file or copy a file to a new file.\n";
+                        s += "      Create a new file or copy a file to a new file.\n";
 
                     if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("c") == -1)
                     {
@@ -580,16 +555,16 @@ namespace Storage_Helper_SAS_Tool
             //----------------------------------------------
             s += "  Permissions for Table (Service SAS) (Table name 'tn'=" + tn + "):\n";
             if (sp.IndexOf("r") != -1)
-                s += "    Get entities and query entities.\n";
+                s += "      Get entities and query entities.\n";
 
             if (sp.IndexOf("a") != -1)
-                s += "    Add entities. Note: Add and Update permissions are required for upsert operations.\n";
+                s += "      Add entities. Note: Add and Update permissions are required for upsert operations.\n";
 
             if (sp.IndexOf("u") != -1)
-                s += "    Update entities. Note: Add and Update permissions are required for upsert operations.\n";
+                s += "      Update entities. Note: Add and Update permissions are required for upsert operations.\n";
 
             if (sp.IndexOf("d") != -1)
-                s += "    Delete entities.\n";
+                s += "      Delete entities.\n";
 
             if (sp.IndexOf("r") == -1 && sp.IndexOf("a") == -1 && sp.IndexOf("u") == -1 && sp.IndexOf("d") == -1)
                 return SAS_Utils.andSetState("sp", false, "No Permissions for Tables (sp=" + sp + ")");
@@ -599,8 +574,9 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
-        public static string Sp_queue(string sp, string sv)
+        public static string Sp_queue(string sp)
         {
+            string s = "";
             string v = "Valid permissions for Queues are 'raup'";
 
             // found chars not supported by sp paramenter
@@ -608,21 +584,25 @@ namespace Storage_Helper_SAS_Tool
                 return SAS_Utils.andSetState("sp", false, "Invalid Signed Permissions for Queue (Service SAS) (sp=" + sp + "). " + v);
 
             //----------------------------------------------
+            string s2 = "  Permissions for Queue (Service SAS) (no 'srt', 'sr' or 'tn'):\n";
             if (sp.IndexOf("r") != -1)
-                return SAS_Utils.andSetState("sp", true, "Read metadata and properties, including message count. Peek at messages.");
+                s += "      Read metadata and properties, including message count. Peek at messages.\n";
 
             if (sp.IndexOf("a") != -1)
-                return SAS_Utils.andSetState("sp", true, "Add messages to the queue.");
+                s += "      Add messages to the queue.\n";
 
             if (sp.IndexOf("u") != -1)
-                return SAS_Utils.andSetState("sp", true, "Update messages in the queue. Note: Use the Process permission with Update so you can first get the message you want to update.");
+                s += "      Update messages in the queue. Note: Use the Process permission with Update so you can first get the message you want to update.\n";
 
             if (sp.IndexOf("p") != -1)
-                return SAS_Utils.andSetState("sp", true, "Get and delete messages from the queue.");
+                s += "      Get and delete messages from the queue.\n";
 
             if (sp.IndexOf("r") == -1 && sp.IndexOf("a") == -1 && sp.IndexOf("u") == -1 && sp.IndexOf("p") == -1)
                 return SAS_Utils.andSetState("sp", false, "No Permissions for Queues (sp=" + sp + ")");
             //----------------------------------------------
+
+            if (s != "")
+                return s2 + s;
 
             return SAS_Utils.andSetState("sp", false, "Invalid Signed Permissions for Queue (Service SAS) (sp=" + sp + "). " + v);
         }
@@ -941,7 +921,7 @@ namespace Storage_Helper_SAS_Tool
 
 
         /// <summary>
-        /// 
+        /// sr, srt or tn not provided means queue service
         /// </summary>
         /// <param name="sr"></param>
         /// <param name="srt"></param>
@@ -971,15 +951,20 @@ namespace Storage_Helper_SAS_Tool
 
 
 
-
+        /// <summary>
+        /// sr, srt or tn not provided means queue service
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
         public static string Srt_sr_tn(string s)
         {
             switch (s)
             {
-                case "":
-                    SAS_Utils.SAS.sr.s = false;     // Mark to be red: srt, sr, tn
-                    SAS_Utils.SAS.tn.s = false;
-                    return SAS_Utils.andSetState("srt", false, s += "No 'sr', 'srt' or 'tn' provided. One of them should be provided.");
+                case "":            // sr, srt or tn not provided means queue service
+                    //SAS_Utils.SAS.sr.s = false;     // Mark to be red: srt, sr, tn
+                    //SAS_Utils.SAS.tn.s = false;
+                    //return SAS_Utils.andSetState("srt", false, s += "No 'sr', 'srt' or 'tn' provided. One of them should be provided.");
+                    return s += "No 'sr', 'srt' or 'tn' provided, means Queue Service will be used";
 
                 case "all":
                     SAS_Utils.SAS.sr.s = false;     // Mark to be red: srt, sr, tn
