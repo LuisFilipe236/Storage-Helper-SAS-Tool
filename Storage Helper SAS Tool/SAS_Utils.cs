@@ -620,8 +620,8 @@ namespace Storage_Helper_SAS_Tool
                 string s = Get_SASValue(SAS.queueEndpoint, ".queue.core.windows.net/");
                 int start = s.LastIndexOf("/") + 1; // start of the Queue name
                 SAS.queueName.v = s.TrimStart().Replace("/", String.Empty);          // remove '/' at the end, if exists
-                if(SAS.queueName.v == "")
-                    SAS.queueName.s = false;
+                //if(SAS.queueName.v == "")
+                //    SAS.queueName.s = false;
             }
         }
 
