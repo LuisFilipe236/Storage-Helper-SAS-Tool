@@ -2121,6 +2121,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_B58DC8A6DF264E27AA7665D702C690AF"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_B63464CB4971D7D4DC79245BCDB6E553"
         "OwnerKey" = "8:_FAC7641E3BCFD19132EE9C5F7E919429"
         "MsmSig" = "8:_UNDEFINED"
@@ -6367,6 +6373,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_B58DC8A6DF264E27AA7665D702C690AF"
+            {
+            "SourcePath" = "8:Debug\\Storage Helper SAS Tool Installer.msi"
+            "TargetName" = "8:Storage Helper SAS Tool Installer.msi"
+            "Tag" = "8:"
+            "Folder" = "8:_06F2B83434CA43678065566792A3D270"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_B63464CB4971D7D4DC79245BCDB6E553"
             {
             "AssemblyRegister" = "3:1"
@@ -7675,7 +7701,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Storage Helper SAS Tool"
         "ProductCode" = "8:{898F1A76-6EE2-465A-8985-A6061EA30581}"
-        "PackageCode" = "8:{F376FCF0-F582-49C8-A645-18A54E6C9D0F}"
+        "PackageCode" = "8:{08ECF403-D280-44F4-8C2F-B9E6897319BA}"
         "UpgradeCode" = "8:{969F440E-6AA5-4FF7-A354-8C02A48C2261}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
