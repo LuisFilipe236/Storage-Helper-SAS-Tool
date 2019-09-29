@@ -16,33 +16,6 @@
     </td>
   </tr>
 
-  </tr>
-    <tr>
-    <td>
-	<b>
-		v1.0.3
-    </b>
-	</td>    
-    <td>
-		<a href="https://github.com/LuisFilipe236/Storage-Helper-SAS-Tool/releases/download/v1.0.3/Storage.Helper.SAS.Tool.Installer.msi">
-			<img alt="Storage Helper Tool v1.0.3" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.3/total?label=downloads_v1.0.3">
-		</a>
-
-    </td>
-  </tr>
-
-  <tr>
-    <td>
-	<b>
-		v1.0.2
-    </b>
-	</td>    
-    <td>
-		<a href="https://github.com/LuisFilipe236/Storage-Helper-SAS-Tool/releases/download/v1.0.2/Storage.Helper.SAS.Tool.Installer.msi">
-			<img alt="Storage Helper Tool v1.0.2" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.2/total?label=downloads_v1.0.2">
-		</a>
-    </td>
-
 </table>
 
 
