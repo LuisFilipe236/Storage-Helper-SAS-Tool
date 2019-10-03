@@ -56,7 +56,10 @@ namespace Storage_Helper_SAS_Tool
             // Regenerated Account SAS (srt) 
             if (SAS_Utils.SAS.srt.v != "not found" && SAS_Utils.SAS.srt.v != "")
             {
-                // s += " - On Azure Storage Explorer, Account SAS need all resources sco, and at least rwl permissions.";
+                s += " - Different order on 'sp' parameters can generate different singatures 'sig' for Account SAS, but any regenerated SAS should be valid.";
+                s += " - On Azure Storage Explorer, Account SAS need all resources sco, and at least rl permissions.";
+                s += " - On Browser, Account SAS need at least r permissions.\n";
+                s += " - On Browser, replace <container> and <blob> on the URL, by some existing container nd blob on the storage account.\n";
                 s += "\n";
             }
 
@@ -66,21 +69,27 @@ namespace Storage_Helper_SAS_Tool
                 switch (SAS_Utils.SAS.sr.v)
                 {
                     case "c":
-                        // s += " - On Azure Storage Explorer, Container Service SAS need at least l permissions.\n";
+                        s += " - On Azure Storage Explorer, only URLencoded using Service Version 'sv' 2018-11-09 or above are valid regenerated Container Service SAS.\n";
+                        s += " - On Azure Storage Explorer, Container Service SAS need at least l permissions.\n";
+                        s += " - On Browser, only URLencoded using Service Version 'sv' 2019-02-02 or above are valid regenerated Container Service SAS.\n";
                         break;
                     case "b":
-                        // s += " - On Azure Storage Explorer, Blob Service SAS is not supported.\n";
-                        // s += " - On Browser, Blob Service SAS need at least rd permissions.\n";
+                        s += " - Only Service Version 'sv' 2018-11-09 or above can regenerate valid Blob Service SAS.\n";
+                        s += " - On Azure Storage Explorer, Blob Service SAS is not supported.\n";
+                        s += " - On Browser, Blob Service SAS need at least r permissions.\n";
                         break;
                     case "s":
-                        // s += " - On Azure Storage Explorer, Share Service SAS need at least rwl permissions.\n";
+                        s += " - On Azure Storage Explorer, adding Share Service SAS will remove the first 'h' and the '//' on the URI, and for that reason, Storage Explorer will report and invalid URL (already reported to Storage Explorer Team).\n";
+                        s += " - On Browser, only URLencoded SAS are valid regenerated Share Service SAS.\n";
                         break;
                     case "f":
-                        // s += " - On Azure Storage Explorer, File Service SAS is not supported.\n";
-                        // s += " - On Browser, File Service SAS need all the rwdc permissions.\n";
+                        s += " - On Azure Storage Explorer, File Service SAS is not supported.\n";
+                        s += " - On Browser, File Service SAS need at least r permissions.\n";
                         break;
                     case "bs":
-
+                        s += " - On Azure Storage Explorer, Blob Snapshot Service SAS is not supported.\n";
+                        s += " - On Browser, Blob Snapshot Service SAS need at least rd permissions.\n";
+                        s += " - On Browser, replace <DateTime> on URL by date time of the Blob Snapshot (From 'URL' property in the 'View SnapShots' blade, on Azure Portal.\n";
                         break;
                 }
             }
@@ -353,7 +362,8 @@ namespace Storage_Helper_SAS_Tool
                     // Protocol =                            // SasProtocol - Https, HttpsAndHttp, None
                     Resource = SAS_Utils.SAS.sr.v,           // string - Blob, Container, BlobSnapshot (sv 2018-11-09 and later)
                     //StartTime =                                               - DateTimeOffset.UtcNow                 // OK
-                    ExpiryTime = SAS_Utils.SAS.seDateTime,   // DateTimeOffset  - DateTimeOffset.UtcNow.AddMinutes(60)  // OK
+                    //ExpiryTime = SAS_Utils.SAS.seDateTime,   // DateTimeOffset  - DateTimeOffset.UtcNow.AddMinutes(60)  // OK
+                    ExpiryTime = SAS_Utils.SAS.seDateTime,
                     Version = SAS_Utils.SAS.sv.v             // String - sv
                 };
 
@@ -376,7 +386,10 @@ namespace Storage_Helper_SAS_Tool
                     blobSasBuilder.Identifier = PolicyName;
 
                 if (!String.IsNullOrEmpty(SAS_Utils.SAS.st.v))
+                { 
+                    //blobSasBuilder.StartTime = SAS_Utils.SAS.stDateTime;
                     blobSasBuilder.StartTime = SAS_Utils.SAS.stDateTime;
+                }
 
                 if (!String.IsNullOrEmpty(SAS_Utils.SAS.spr.v))
                     blobSasBuilder.Protocol = Get_SasProtocol(SAS_Utils.SAS.spr.v);     // SasProtocol - Https, HttpsAndHttp, None

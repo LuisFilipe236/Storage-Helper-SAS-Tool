@@ -101,7 +101,7 @@ namespace Storage_Helper_SAS_Tool
             public StrParameter si;           // Policy Name
 
             public DateTime stDateTime; // used to test the valid Date format
-            public DateTime seDateTime; 
+            public DateTime seDateTime;
         };
         public static SasParameters SAS;
 
@@ -419,6 +419,10 @@ namespace Storage_Helper_SAS_Tool
             if (InputBoxSASvalue.IndexOf("?") != -1 && Found(InputBoxSASvalue, "SharedAccessSignature"))
                 return Utils.WithMessage("Only one 'SharedAccessSignature' or '?' should be provided on SAS", "Invalid SAS");
 
+            // test '??' found on SAS
+            if (InputBoxSASvalue.IndexOf("??") != -1)
+                return Utils.WithMessage("Only one '?' should be provided on SAS", "Invalid SAS");
+
             // no 'SharedAccessSignature=' or '?' found
             if (!Found(InputBoxSASvalue, "SharedAccessSignature=") && InputBoxSASvalue.IndexOf("?") == -1)
                 return Utils.WithMessage("Missing 'SharedAccessSignature=' (for connection strings)\n or '?' (for SAS token), on the provided SAS", "Invalid SAS");
@@ -443,7 +447,7 @@ namespace Storage_Helper_SAS_Tool
 
             //
             if (InputBoxSASvalue.IndexOf("?") != -1 && EndpointsExists(InputBoxSASvalue))
-                return Utils.WithMessage("Connection strings should be removed from the SAS token.\nOnly allowed on Connection string", "Invalid SAS");
+                return Utils.WithMessage("Endpoints should be removed from the SAS token.\nOnly allowed on Connection string", "Invalid SAS");
 
             // No error found - restoring the .s value to true, before return
             SAS.sharedAccessSignature.s = true;
@@ -609,8 +613,8 @@ namespace Storage_Helper_SAS_Tool
                 string s = Get_SASValue(SAS.tableEndpoint, ".table.core.windows.net/");
                 int start = s.LastIndexOf("/") + 1; // start of the table name
                 //if (s != "not found" && start > 0)
-                //    SAS.tableName.v = s.Substring(start, s.Length - start);
-                SAS.tableName.v = s.TrimStart().Replace("/", String.Empty);          // remove '/' at the end, if exists
+                //    SAS.tn.v = s.Substring(start, s.Length - start);
+                SAS.tn.v = s.TrimStart().Replace("/", String.Empty);          // remove '/' at the end, if exists
             }
             */
 
@@ -635,10 +639,34 @@ namespace Storage_Helper_SAS_Tool
             if (SAS.srt.v != "not found")
                 return "Account SAS detected\n-----------------------------\n";
             else
-            if (SAS.sr.v != "not found" || SAS.tn.v != "not found")
-                return "Service SAS detected\n-----------------------------\n";         // Blob, Container, Share, File, Table
+            if (SAS.sr.v != "not found" || SAS.tn.v != "not found") // Blob, Container, Share, File, Table
+            {
+                string service = "";
+                if (SAS.tn.v != "not found")
+                    service = "Table";         
+                else
+                    switch(SAS.sr.v)
+                    {
+                        case "b":
+                            service = "Blob";
+                            break;
+                        case "c":
+                            service = "Container";
+                            break;
+                        case "s":
+                            service = "Share";
+                            break;
+                        case "f":
+                            service = "File";
+                            break;
+                        case "bs":
+                            service = "Blob Snapshot";
+                            break;
+                    }
+                return service + " Service SAS detected\n---------------------------- -\n";         
+            }
             else
-                return "Service SAS detected\n-----------------------------\n";         // Queue
+                return "Queue Service SAS detected\n-----------------------------\n";         // Queue
         }
 
 
@@ -744,7 +772,7 @@ namespace Storage_Helper_SAS_Tool
             if (SAS.ss.s == false)           // error on value                    
                 return s + "  --> " + res + "\n\n";
 
-            if (res == "")
+            if (res == "noSrt")
                 return ""; // silent return ("not found")
 
 
@@ -1413,7 +1441,7 @@ namespace Storage_Helper_SAS_Tool
             SAS.shareName.v = "";           SAS.shareName.s = true;
             SAS.fileName.v = "";            SAS.fileName.s = true;
             SAS.queueName.v = "";           SAS.queueName.s = true;
-            SAS.tableName.v = "";           SAS.tableName.s = true;
+            // table name in SAS.tn,v
 
             //SAS.onlySASprovided = true;
 

@@ -576,14 +576,15 @@ namespace Storage_Helper_SAS_Tool
             // tableEndpoint;
             // queueEndpoint;
 
-            textBoxAccountName.Text = SAS_Utils.SAS.storageAccountName.v;   // storage Account Name, if provided on any Endpoint
+            if(SAS_Utils.SAS.storageAccountName.v != "not found")
+                textBoxAccountName.Text = SAS_Utils.SAS.storageAccountName.v;   // storage Account Name, if provided on any Endpoint
 
             textBoxContainerName.Text = SAS_Utils.SAS.containerName.v;
             textBoxBlobName.Text = SAS_Utils.SAS.blobName.v;
             textBoxShareName.Text = SAS_Utils.SAS.shareName.v;
             textBoxFileName.Text = SAS_Utils.SAS.fileName.v;
             textBoxQueueName.Text = SAS_Utils.SAS.queueName.v;
-            textBox_tn.Text = (SAS_Utils.SAS.tn.v == "not found" ? SAS_Utils.SAS.tableName.v : SAS_Utils.SAS.tn.v);  // uses tn if Access SAS, otherwise uses tableName if exists 
+            textBox_tn.Text = SAS_Utils.SAS.tn.v;           
 
 
             // onlySASprovided;        // true if the endpoints not provided
@@ -652,7 +653,6 @@ namespace Storage_Helper_SAS_Tool
             SAS_Utils.SAS.shareName.v = textBoxShareName.Text;
             SAS_Utils.SAS.fileName.v = textBoxFileName.Text;
             SAS_Utils.SAS.queueName.v = textBoxQueueName.Text;
-            SAS_Utils.SAS.tableName.v = textBox_tn.Text;
 
             // onlySASprovided;        // true if the endpoints not provided
 
@@ -768,7 +768,7 @@ namespace Storage_Helper_SAS_Tool
         /// <param name="e"></param>
         private void ComboBox_sp_DropDownOpened(object sender, EventArgs e)
         {
-            Set_BoxPermissions();
+            
 
             sp_read.IsChecked = Test(ComboBox_sp.Text, "r");
             sp_write.IsChecked = Test(ComboBox_sp.Text, "w");
@@ -778,6 +778,8 @@ namespace Storage_Helper_SAS_Tool
             sp_create.IsChecked = Test(ComboBox_sp.Text, "c");
             sp_update.IsChecked = Test(ComboBox_sp.Text, "u");
             sp_process.IsChecked = Test(ComboBox_sp.Text, "p");
+
+            Set_BoxPermissions();
         }
 
 

@@ -22,7 +22,7 @@ namespace Storage_Helper_SAS_Tool
 
             if (srt == "not found")     // Service SAS - ss não requerido
                 if (ss == "not found")
-                    return SAS_Utils.andSetState("ss", true, "");
+                    return SAS_Utils.andSetState("ss", true, "noSrt");   // srt and ss not used - service SAS
                 else
                     return SAS_Utils.andSetState("ss", false, "'ss' Not required on Service SAS, but provided");
 

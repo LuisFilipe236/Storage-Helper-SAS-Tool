@@ -77,7 +77,7 @@ namespace Storage_Helper_SAS_Tool
             try
             {
                 if (String.IsNullOrEmpty(st))
-                    SAS_Utils.SAS.stDateTime = DateTime.UtcNow.ToUniversalTime(); // not used - replacenetnt to null - SAS.st.v should be checked to check if was provided or not
+                    SAS_Utils.SAS.stDateTime = DateTime.UtcNow.ToUniversalTime(); // not used - replaced to null - SAS.st.v should be checked to check if was provided or not
                 else
                     SAS_Utils.SAS.stDateTime = Convert.ToDateTime(st).ToUniversalTime();
             }
