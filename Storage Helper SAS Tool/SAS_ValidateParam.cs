@@ -898,23 +898,24 @@ namespace Storage_Helper_SAS_Tool
                     break;
                 default:
                     if (endpoint.IndexOf("http://") == -1 && endpoint.IndexOf("https://") == -1)
-                        return "  --> but missing/wrong protocol provided on " + service + " Endpoint " + "  (" + endpoint + ")";
+                        return "  --> missing/wrong protocol provided on " + service + " Endpoint " + "  (" + endpoint + ")";
                     break;
             }
 
             // checking the '.core.windows.net' part on the endpoint URI 
             if (endpoint.IndexOf(".core.windows.net") == -1)
-                return "  --> but wrong " + service + " Endpoint URI provided " + "  (" + endpoint + ")";
+                return "  --> wrong " + service + " Endpoint URI provided " + "  (" + endpoint + ")";
 
             // checking for some storage account name on the endpoint URI      TODO - check the storage account name used
             if (endpoint.IndexOf("http://.") != -1 || endpoint.IndexOf("https://.") != -1)
-                return "  --> but missing the Storage Account name on " + service + " Endpoint " + "  (" + endpoint + ")";
+                return "  --> missing the Storage Account name on " + service + " Endpoint " + "  (" + endpoint + ")";
 
             // checking the service on the endpoint URI (blob, queue, table, file) 
             if (endpoint.IndexOf(service.ToLower()) == -1)
-                return " --> but wrong service provided on " + service + " Endpoint URI " + "  (" + endpoint + ")";
+                return " --> wrong service provided on " + service + " Endpoint URI " + "  (" + endpoint + ")";
 
-            return " - " + service + " Endpoint: " + endpoint;
+            //                                           remove all after .net
+            return " - " + service + " Endpoint: " + endpoint.Substring(0, endpoint.IndexOf("windows.net") + "windows.net".Length);
         }
 
 

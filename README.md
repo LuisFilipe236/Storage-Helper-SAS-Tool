@@ -4,6 +4,17 @@
 
   <tr>
     <td>
+	<b>v1.0.5</b>
+	</td>    
+    <td>
+		<a href="https://github.com/LuisFilipe236/Storage-Helper-SAS-Tool/releases/download/v1.0.5/Storage.Helper.SAS.Tool.Installer.msi">
+			<img alt="Storage Helper Tool v1.0.5" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.5/total?label=downloads_v1.0.5">
+		</a>
+    </td>
+  </tr>
+
+  <tr>
+    <td>
 	<b>v1.0.4</b>
 	</td>    
     <td>
@@ -57,6 +68,13 @@ Click on the MSI last version counter above to download the MSI installer for Wi
  <hr>
 
 <b>VERSIONS:</b>
+
+<b>v1.0.5:</b>
+Changes:
+- Alert on two or more '??' in the SAS;
+- Adding endpoints on the left output when provided on SAS or Connection string;
+- Pre check/uncheck the Service Permissions based on the text, from the SAS
+- Implemented the Tips on the Regenerated output. All the limitations identified for each type of SAS are now described after Regenerate a SAS.
 
 <b>v1.0.4:</b>
 Changes:

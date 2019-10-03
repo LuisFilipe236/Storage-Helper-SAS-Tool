@@ -780,10 +780,10 @@ namespace Storage_Helper_SAS_Tool
             //------------------------------------------------------------------
             if (onlySASprovided)     // only SAS token was provided
             {
-                s += "  Blob Service " + (ss.IndexOf("b") == -1 ? "NOT " : "") + "allowed\n";
-                s += "  File Service " + (ss.IndexOf("f") == -1 ? "NOT " : "") + "allowed\n";
-                s += "  Table Service " + (ss.IndexOf("t") == -1 ? "NOT " : "") + "allowed\n";
-                s += "  Queue Service " + (ss.IndexOf("q") == -1 ? "NOT " : "") + "allowed\n";
+                s += "  Blob Service " + (ss.IndexOf("b") == -1 ? "NOT " : "") + "allowed " + (blobEndpoint != "not found" ? SAS_ValidateParam.EndpointFormat(blobEndpoint, "Blob", spr) : "") + "\n";
+                s += "  File Service " + (ss.IndexOf("f") == -1 ? "NOT " : "") + "allowed " + (fileEndpoint != "not found" ? SAS_ValidateParam.EndpointFormat(fileEndpoint, "File", spr) : "") + "\n";
+                s += "  Table Service " + (ss.IndexOf("t") == -1 ? "NOT " : "") + "allowed " + (tableEndpoint != "not found" ? SAS_ValidateParam.EndpointFormat(tableEndpoint, "Table", spr) : "") + "\n";
+                s += "  Queue Service " + (ss.IndexOf("q") == -1 ? "NOT " : "") + "allowed " + (queueEndpoint != "not found" ? SAS_ValidateParam.EndpointFormat(queueEndpoint, "Queue", spr) : "") + "\n";
             }
             else                    // Connection string was provided
             {
