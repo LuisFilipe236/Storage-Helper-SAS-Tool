@@ -74,7 +74,7 @@ Changes:
 - Alert on two or more '??' in the SAS;
 - Adding endpoints on the left output when provided on SAS or Connection string;
 - Pre check/uncheck the Service Permissions based on the text, from the SAS
-- Implemented the Tips on the Regenerated output. All the limitations identified for each type of SAS are now described after Regenerate a SAS.
+- Implemented the Tips on the Regenerated output. All the limitations identified for each type of SAS are now listed after Regenerate a SAS.
 
 <b>v1.0.4:</b>
 Changes:
