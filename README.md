@@ -65,7 +65,7 @@ Click on the MSI last version counter above to download the MSI installer for Wi
  - Implement check Policy permissions (service SAS);
  - Support for User Delegation SAS (sv>=2018-11-09 supported on Blob Service SAS only)
 
- <hr>
+ <hr> 
 
 <b>VERSIONS:</b>
 
