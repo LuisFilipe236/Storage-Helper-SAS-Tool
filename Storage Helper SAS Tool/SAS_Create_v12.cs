@@ -58,8 +58,8 @@ namespace Storage_Helper_SAS_Tool
             {
                 s += " - Different order on 'sp' parameters can generate different singatures 'sig' for Account SAS, but any regenerated SAS should be valid.";
                 s += " - On Azure Storage Explorer, Account SAS need all resources sco, and at least rl permissions.";
-                s += " - On Browser, Account SAS need at least r permissions.\n";
                 s += " - On Browser, replace <container> and <blob> on the URL, by some existing container nd blob on the storage account.\n";
+                s += " - On Browser, Account SAS need at least r permissions to read blob content.\n";
                 s += "\n";
             }
 
@@ -70,17 +70,17 @@ namespace Storage_Helper_SAS_Tool
                 {
                     case "c":
                         s += " - On Azure Storage Explorer, only URLencoded using Service Version 'sv' 2018-11-09 or above are valid regenerated Container Service SAS.\n";
+                        s += " - On Azure Storage Explorer, only URLdecoded using Service Version 'sv' 2019-02-02 or above are valid regenerated Container Service SAS.\n";
                         s += " - On Azure Storage Explorer, Container Service SAS need at least l permissions.\n";
                         s += " - On Browser, only URLencoded using Service Version 'sv' 2019-02-02 or above are valid regenerated Container Service SAS.\n";
                         break;
                     case "b":
-                        s += " - Only Service Version 'sv' 2018-11-09 or above can regenerate valid Blob Service SAS.\n";
                         s += " - On Azure Storage Explorer, Blob Service SAS is not supported.\n";
                         s += " - On Browser, Blob Service SAS need at least r permissions.\n";
                         break;
                     case "s":
-                        s += " - On Azure Storage Explorer, adding Share Service SAS will remove the first 'h' and the '//' on the URI, and for that reason, Storage Explorer will report and invalid URL (already reported to Storage Explorer Team).\n";
-                        s += " - On Browser, only URLencoded SAS are valid regenerated Share Service SAS.\n";
+                        s += " - On Azure Storage Explorer, Share Service SAS need at least l permissions.\n";
+                        s += " - On Browser, Share Service SAS need at least l permissions.\n";
                         break;
                     case "f":
                         s += " - On Azure Storage Explorer, File Service SAS is not supported.\n";
