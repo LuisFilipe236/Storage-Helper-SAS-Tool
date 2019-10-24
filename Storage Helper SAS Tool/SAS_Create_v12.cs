@@ -56,9 +56,9 @@ namespace Storage_Helper_SAS_Tool
             // Regenerated Account SAS (srt) 
             if (SAS_Utils.SAS.srt.v != "not found" && SAS_Utils.SAS.srt.v != "")
             {
-                s += " - Different order on 'sp' parameters can generate different singatures 'sig' for Account SAS, but any regenerated SAS should be valid.";
-                s += " - On Azure Storage Explorer, Account SAS need all resources sco, and at least rl permissions.";
-                s += " - On Browser, replace <container> and <blob> on the URL, by some existing container nd blob on the storage account.\n";
+                //s += " - Different order on 'sp' parameters can generate different singatures 'sig' for Account SAS, but any regenerated SAS should be valid.\n"; // Generated with Powershell only
+                s += " - On Azure Storage Explorer, Account SAS need all resources sco, and at least rl permissions.\n";
+                s += " - On Browser, replace <container> and <blob> on the URL, by some existing container and blob on the storage account.\n";
                 s += " - On Browser, Account SAS need at least r permissions to read blob content.\n";
                 s += "\n";
             }
@@ -70,12 +70,11 @@ namespace Storage_Helper_SAS_Tool
                 {
                     case "c":
                         s += " - On Azure Storage Explorer, only URLencoded using Service Version 'sv' 2018-11-09 or above are valid regenerated Container Service SAS.\n";
-                        s += " - On Azure Storage Explorer, only URLdecoded using Service Version 'sv' 2019-02-02 or above are valid regenerated Container Service SAS.\n";
                         s += " - On Azure Storage Explorer, Container Service SAS need at least l permissions.\n";
                         s += " - On Browser, only URLencoded using Service Version 'sv' 2019-02-02 or above are valid regenerated Container Service SAS.\n";
                         break;
                     case "b":
-                        s += " - On Azure Storage Explorer, Blob Service SAS is not supported.\n";
+                        s += " - On Azure Storage Explorer, Blob Service SAS is not supported (single blob).\n";
                         s += " - On Browser, Blob Service SAS need at least r permissions.\n";
                         break;
                     case "s":
@@ -83,11 +82,11 @@ namespace Storage_Helper_SAS_Tool
                         s += " - On Browser, Share Service SAS need at least l permissions.\n";
                         break;
                     case "f":
-                        s += " - On Azure Storage Explorer, File Service SAS is not supported.\n";
+                        s += " - On Azure Storage Explorer, File Service SAS is not supported (single file).\n";
                         s += " - On Browser, File Service SAS need at least r permissions.\n";
                         break;
                     case "bs":
-                        s += " - On Azure Storage Explorer, Blob Snapshot Service SAS is not supported.\n";
+                        s += " - On Azure Storage Explorer, Blob Snapshot Service SAS is not supported (single blob).\n";
                         s += " - On Browser, Blob Snapshot Service SAS need at least rd permissions.\n";
                         s += " - On Browser, replace <DateTime> on URL by date time of the Blob Snapshot (From 'URL' property in the 'View SnapShots' blade, on Azure Portal.\n";
                         break;
