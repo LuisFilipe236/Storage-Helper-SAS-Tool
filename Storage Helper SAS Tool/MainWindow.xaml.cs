@@ -34,7 +34,7 @@ using System.Diagnostics;
 /// If an application is running from within an Azure entity such as an Azure VM, a virtual machine scale set, or an Azure Functions app,
 /// It can use a managed identity to access blobs or queues
 /// 
-/// Enable managed identities on a VM - TODO - why is working without VM ???
+/// Enable managed identities on a VM
 /// https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-msi?toc=%2fazure%2fstorage%2fblobs%2ftoc.json#enable-managed-identities-on-a-vm
 /// 
 /// Authorize access to blobs and queues with Azure Active Directory and managed identities for Azure Resources
