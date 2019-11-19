@@ -7699,7 +7699,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Storage Helper SAS Tool"
         "ProductCode" = "8:{C2ED320B-9FDF-4303-AF37-BF6D94D8EE43}"
-        "PackageCode" = "8:{B9A0BDC8-C8A7-4AE9-A205-879B3F2F6C7E}"
+        "PackageCode" = "8:{4D5F3D1A-4BCF-4CD3-A2B4-A895B9906E44}"
         "UpgradeCode" = "8:{969F440E-6AA5-4FF7-A354-8C02A48C2261}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
