@@ -71,8 +71,8 @@ namespace Storage_Helper_SAS_Tool
     public partial class MainWindow : Window
     {
         //----------------------------------------------------------------------------
-        private string StorageSDK_12_Version = "v12.0.0-preview.3";
-        private string Cosmos_Version = "v2.0.0";
+        private string StorageSDK_12_Version = "v12.0.0 (File SDK still on v12.0.0-preview.5)";
+        private string Cosmos_Version = "v3.4.1 (Cosmos.Table v2.0.0-preview)";
 
         public StorageCredentials storageCredentials;
         //----------------------------------------------------------------------------
@@ -262,7 +262,6 @@ namespace Storage_Helper_SAS_Tool
             if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
                 BoxAuthResults_Right.Text += SAS_Create_Cosmos.Limitations_Cosmos_Info(Cosmos_Version);
             else
-
                 BoxAuthResults_Right.Text += SAS_Create_v12.Limitations_v12_Info(StorageSDK_12_Version);                       
         }
 
