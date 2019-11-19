@@ -149,7 +149,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "WARNING:\n";
             BoxAuthResults.Text += "  Account SAS key is not supporting Table Service anymore on this version 12.0.0\n";
             BoxAuthResults.Text += "  Different order on parameter values (ex: ss=bfq vs ss=bqf) may generate different valid sig\n";
-            BoxAuthResults.Text = "\n";
+            BoxAuthResults.Text += "\n";
             BoxAuthResults.Text += "Regenerated Account SAS token:\n";
             BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
@@ -322,7 +322,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "WARNING:\n";
             BoxAuthResults.Text += "  Different order on parameter values (ex: ss=bfq vs ss=bqf) may generate different valid sig\n";
-            BoxAuthResults.Text = "\n";
+            BoxAuthResults.Text += "\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Container:\n";
             BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
@@ -355,7 +355,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "WARNING:\n";
             BoxAuthResults.Text += "  Different order on parameter values (ex: ss=bfq vs ss=bqf) may generate different valid sig\n";
-            BoxAuthResults.Text = "\n";
+            BoxAuthResults.Text += "\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Blob:\n";
             BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
@@ -388,7 +388,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "WARNING:\n";
             BoxAuthResults.Text += "  Different order on parameter values (ex: ss=bfq vs ss=bqf) may generate different valid sig\n";
-            BoxAuthResults.Text = "\n";
+            BoxAuthResults.Text += "\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Blob Snapshot:\n";
             BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
@@ -510,7 +510,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "WARNING:\n";
             BoxAuthResults.Text += "  Different order on parameter values (ex: ss=bfq vs ss=bqf) may generate different valid sig\n";
-            BoxAuthResults.Text = "\n";
+            BoxAuthResults.Text += "\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Share:\n";
             BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
@@ -543,7 +543,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "WARNING:\n";
             BoxAuthResults.Text += "  Different order on parameter values (ex: ss=bfq vs ss=bqf) may generate different valid sig\n";
-            BoxAuthResults.Text = "\n";
+            BoxAuthResults.Text += "\n";
             BoxAuthResults.Text += "Regenerated Service SAS - File:\n";
             BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
@@ -653,7 +653,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "WARNING:\n";
             BoxAuthResults.Text += "  Different order on parameter values (ex: ss=bfq vs ss=bqf) may generate different valid sig\n";
-            BoxAuthResults.Text = "\n";
+            BoxAuthResults.Text += "\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Queue:\n";
             BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
