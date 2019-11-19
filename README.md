@@ -4,6 +4,17 @@
 
   <tr>
     <td>
+	<b>v1.0.6</b>
+	</td>    
+    <td>
+		<a href="https://github.com/LuisFilipe236/Storage-Helper-SAS-Tool/releases/download/v1.0.6/Storage.Helper.SAS.Tool.Installer.msi">
+			<img alt="Storage Helper Tool v1.0.6" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v1.0.6/total?label=downloads_v1.0.6">
+		</a>
+    </td>
+  </tr>
+
+  <tr>
+    <td>
 	<b>v1.0.5</b>
 	</td>    
     <td>
@@ -68,6 +79,12 @@ Click on the MSI last version counter above to download the MSI installer for Wi
  <hr> 
 
 <b>VERSIONS:</b>
+
+<b>v1.0.6:</b>
+Changes:
+- Moved to Azure Blob storage client library v12.0.0 (now GA available);
+- Azure.Storge.Files deprecated - moved to Azure.Storage.Files.Shares, (currently still on v12.0.0 Preview 5);
+- Some minor corrections.
 
 <b>v1.0.5:</b>
 Changes:

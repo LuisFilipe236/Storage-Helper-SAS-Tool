@@ -2,12 +2,14 @@
 using System.Windows;
 using System.Windows.Controls;
 
-// Storage SDK v12.x.x
+// Storage SDK v12.0.0
+// Azure.Storge.Files was renamed Azure.Storage.Files.Shares, and is still on v12.0.0 Preview 5
 using Azure.Storage;
 using Azure.Storage.Sas;
 using Azure.Storage.Blobs;
-using Azure.Storage.Files;
 using Azure.Storage.Queues;
+//using Azure.Storage.Files;
+using Azure.Storage.Files.Shares;
 
 
 namespace Storage_Helper_SAS_Tool
@@ -15,7 +17,15 @@ namespace Storage_Helper_SAS_Tool
     class SAS_Create_v12
     {
         /// <summary>
-        /// SAS builder using the new version 12.0.0 (preview) 
+        /// Azure Blob storage client library v12 for .NET is now GA available.
+        /// https://docs.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-dotnet
+
+        /// ChangeLog:
+        /// https://github.com/Azure/azure-sdk-for-net/blob/master/sdk/storage/Azure.Storage.Blobs/Changelog.txt
+
+        /// GitHub source - v12 for .NET GA:
+        /// https://github.com/Azure/azure-sdk-for-net/tree/master/sdk/storage/Azure.Storage.Blobs
+        /// ------------------------------------------------------------------------------------------
         /// Azure.Storage
         /// Azure.Storage.Sas
         /// ------------------------------------------------------------------------------------------
@@ -183,6 +193,60 @@ namespace Storage_Helper_SAS_Tool
 
 
         /// <summary>
+        /// Changed on v12 to acomodate AccountSasResourceTypes - All, Container, Object, Service
+        /// https://docs.microsoft.com/en-us/dotnet/api/azure.storage.sas.accountsasresourcetypes?view=azure-dotnet
+        /// </summary>
+        /// <param name="srt"></param>
+        /// <returns></returns>
+        private static AccountSasResourceTypes Get_AccountSasResourceTypes_FromStr(string srt)
+        {
+            if ((srt.IndexOf("s") != -1) && (srt.IndexOf("o") != -1) && (srt.IndexOf("c") != -1)) // All
+                return AccountSasResourceTypes.All;
+
+            AccountSasResourceTypes result = 0;
+
+            if (srt.IndexOf("s") != -1)
+                result = AccountSasResourceTypes.Service;
+
+            if (srt.IndexOf("o") != -1)
+                result |= AccountSasResourceTypes.Object;
+
+            if (srt.IndexOf("c") != -1)
+                result |= AccountSasResourceTypes.Container;
+
+            return result;
+        }
+
+
+
+
+        /// <summary>
+        /// Changed on v12 to acomodate AccountSasServices - All, Blobs, Files, Queues
+        /// https://docs.microsoft.com/en-us/dotnet/api/azure.storage.sas.accountsasservices?view=azure-dotnet
+        /// </summary>
+        /// <param name="srt"></param>
+        /// <returns></returns>
+        private static AccountSasServices Get_AccountSasServices_FromStr(string srt)
+        {
+            if ((srt.IndexOf("b") != -1) && (srt.IndexOf("f") != -1) && (srt.IndexOf("q") != -1)) // All
+                return AccountSasServices.All;
+
+            AccountSasServices result = 0;
+
+            if (srt.IndexOf("b") != -1)
+                result = AccountSasServices.Blobs;
+
+            if (srt.IndexOf("f") != -1)
+                result |= AccountSasServices.Files;
+
+            if (srt.IndexOf("q") != -1)
+                result |= AccountSasServices.Queues;
+
+            return result;
+        }
+
+
+        /// <summary>
         /// AccountSasBuilder Struct
         /// https://docs.microsoft.com/cs-cz/dotnet/api/azure.storage.sas.accountsasbuilder?view=azure-dotnet-preview
         /// 
@@ -198,25 +262,27 @@ namespace Storage_Helper_SAS_Tool
                 accountSasBuilder = new AccountSasBuilder()
                 {
                     //IPRange = 
-                    Permissions = SAS_Utils.SAS.sp.v,        // string - Add, Create, Delete, List, Process, Read, Update, Write (account)
+                    //Permissions = SAS_Utils.SAS.sp.v,        // Changed to .SetPermissions(string) method, on v12
                     //Protocol = 
-                    ResourceTypes = SAS_Utils.SAS.srt.v,     // string - Container, Object, Service 
-                    Services = SAS_Utils.SAS.ss.v,           // String - Blobs, Files, Queues
+                    ResourceTypes = Get_AccountSasResourceTypes_FromStr(SAS_Utils.SAS.srt.v), // Changed on v12 to acomodate AccountSasResourceTypes - All, Container, Object, Service 
+                    Services = Get_AccountSasServices_FromStr(SAS_Utils.SAS.ss.v),            // Changed on v12 to acomodate AccountSasResourceTypes - All, Blobs, Files, Queues
                     //StartTime =                                               - DateTimeOffset.UtcNow                 // OK
-                    ExpiryTime = SAS_Utils.SAS.seDateTime,   // DateTimeOffset  - DateTimeOffset.UtcNow.AddMinutes(60)  // OK
+                    ExpiresOn = SAS_Utils.SAS.seDateTime,   // DateTimeOffset  - DateTimeOffset.UtcNow.AddMinutes(60)  // OK
                     Version = SAS_Utils.SAS.sv.v             // String - sv
                 };
+
+                accountSasBuilder.SetPermissions(SAS_Utils.SAS.sp.v);   // string - Add, Create, Delete, List, Process, Read, Update, Write (account)
 
                 // Adding the optional fields commented out above
                 //-----------------------------------------------------------
                 if (!String.IsNullOrEmpty(SAS_Utils.SAS.st.v))
-                    accountSasBuilder.StartTime = SAS_Utils.SAS.stDateTime;
+                    accountSasBuilder.StartsOn = SAS_Utils.SAS.stDateTime;
 
                 if (!String.IsNullOrEmpty(SAS_Utils.SAS.spr.v))
                     accountSasBuilder.Protocol = Get_SasProtocol(SAS_Utils.SAS.spr.v);     // SasProtocol - Https, HttpsAndHttp, None
 
                 if (!String.IsNullOrEmpty(SAS_Utils.SAS.sip.v))
-                    accountSasBuilder.IPRange = new IPRange(new System.Net.IPAddress(SAS_Utils.fromIP), (SAS_Utils.toIP[0]==0 ? null : new System.Net.IPAddress(SAS_Utils.toIP))); // IPRange - StartIP, optional EndIP
+                    accountSasBuilder.IPRange = new SasIPRange(new System.Net.IPAddress(SAS_Utils.fromIP), (SAS_Utils.toIP[0]==0 ? null : new System.Net.IPAddress(SAS_Utils.toIP))); // IPRange - StartIP, optional EndIP
             }
             catch(Exception ex)
             {
@@ -349,7 +415,7 @@ namespace Storage_Helper_SAS_Tool
                     // ContentEncoding
                     // ContentLanguage
                     // ContentType
-                    ContainerName = containerName,  // string
+                    BlobContainerName = containerName,  // string
                     // BlobName = 
                     // Snapshot =                 // String - Name of Snapshot (if Resource = "bs")
                     //Identifier =                // string - access policy specified for the container
@@ -357,18 +423,20 @@ namespace Storage_Helper_SAS_Tool
                     //Permissions = "drw",        // string - Delete, Read, Write (Blob Snapshot)       
                     //Permissions = "acdrw",      // string - Delete, Read, Write, Add, Create (Blob)
                     //Permissions = "acdlrw",     // string - Delete, Read, List, Write, Add, Create (container)
-                    Permissions = SAS_Utils.SAS.sp.v,        // Permissions validated on ComboBox_sr_DropDownClosed()
+                    //Permissions = SAS_Utils.SAS.sp.v,      // Changed to .SetPermissions(string) method, on v12 
                     // Protocol =                            // SasProtocol - Https, HttpsAndHttp, None
                     Resource = SAS_Utils.SAS.sr.v,           // string - Blob, Container, BlobSnapshot (sv 2018-11-09 and later)
                     //StartTime =                                               - DateTimeOffset.UtcNow                 // OK
                     //ExpiryTime = SAS_Utils.SAS.seDateTime,   // DateTimeOffset  - DateTimeOffset.UtcNow.AddMinutes(60)  // OK
-                    ExpiryTime = SAS_Utils.SAS.seDateTime,
+                    ExpiresOn = SAS_Utils.SAS.seDateTime,
                     Version = SAS_Utils.SAS.sv.v             // String - sv
                 };
 
+                blobSasBuilder.SetPermissions(SAS_Utils.SAS.sp.v);   // Permissions validated on ComboBox_sr_DropDownClosed()
+
                 // Adding the optional fields commented out above
                 //-----------------------------------------------------------
-                if(SAS_Utils.SAS.sr.v == "b")
+                if (SAS_Utils.SAS.sr.v == "b")
                     blobSasBuilder.BlobName = blobName;
 
                 if (SAS_Utils.SAS.sr.v == "bs")     // BlobSnapshot (sv 2018-11-09 and later)
@@ -387,14 +455,14 @@ namespace Storage_Helper_SAS_Tool
                 if (!String.IsNullOrEmpty(SAS_Utils.SAS.st.v))
                 { 
                     //blobSasBuilder.StartTime = SAS_Utils.SAS.stDateTime;
-                    blobSasBuilder.StartTime = SAS_Utils.SAS.stDateTime;
+                    blobSasBuilder.StartsOn = SAS_Utils.SAS.stDateTime;
                 }
 
                 if (!String.IsNullOrEmpty(SAS_Utils.SAS.spr.v))
                     blobSasBuilder.Protocol = Get_SasProtocol(SAS_Utils.SAS.spr.v);     // SasProtocol - Https, HttpsAndHttp, None
 
                 if (!String.IsNullOrEmpty(SAS_Utils.SAS.sip.v))
-                    blobSasBuilder.IPRange = new IPRange(new System.Net.IPAddress(SAS_Utils.fromIP), (SAS_Utils.toIP[0] == 0 ? null : new System.Net.IPAddress(SAS_Utils.toIP))); // IPRange - StartIP, optional EndIP
+                    blobSasBuilder.IPRange = new SasIPRange(new System.Net.IPAddress(SAS_Utils.fromIP), (SAS_Utils.toIP[0] == 0 ? null : new System.Net.IPAddress(SAS_Utils.toIP))); // IPRange - StartIP, optional EndIP
             }
             catch(Exception ex)
             {
@@ -479,7 +547,9 @@ namespace Storage_Helper_SAS_Tool
         /// <summary>
         /// File SAS Builder
         /// https://docs.microsoft.com/en-us/dotnet/api/azure.storage.sas.filesasbuilder?view=azure-dotnet-preview
-        /// 
+        /// Azure.Storge.Files was renamed Azure.Storage.Files.Shares, and is still on v12.0.0 Preview 5
+        ///             FileSasBuilder replaced by ShareSasBuilder
+        ///             https://github.com/Azure/azure-sdk-for-net/issues/8477
         /// </summary>
         /// <returns></returns>
         public static string FileSasBuilder(string accountName, string accountKey, string shareName, string filePath = "", string PolicyName = "")
@@ -487,10 +557,10 @@ namespace Storage_Helper_SAS_Tool
             // TODO - ExpiryTime must be omitted if Identifier is specified.
             // TODO - Header fields
             // Create a SAS token that's valid a short interval.
-            FileSasBuilder fileSasBuilder;
+            ShareSasBuilder shareSasBuilder;     // FileSasBuilder
             try
             {
-                fileSasBuilder = new FileSasBuilder()
+                shareSasBuilder = new ShareSasBuilder()
                 {
                     // CacheControl
                     // ContentDisposition
@@ -503,30 +573,32 @@ namespace Storage_Helper_SAS_Tool
                     // IPRange = 
                     //Permissions = "cdrw",       // string - Create, Delete, Read, Write (File SAS)
                     //Permissions = "cdrw",       // string - Create, Delete, List, Read, Write (Share SAS)
-                    Permissions = SAS_Utils.SAS.sp.v,        // Permissions validated on ComboBox_sr_DropDownClosed()
+                    //Permissions = SAS_Utils.SAS.sp.v,        // Changed to .SetPermissions(string) method, on v12.0.0 Preview 5 (Azure.Storage.Files.Shares)
                     // Protocol =                            // SasProtocol - Https, HttpsAndHttp, None
                     // StartTime =                                              - DateTimeOffset.UtcNow                 // OK
-                    ExpiryTime = SAS_Utils.SAS.seDateTime,   // DateTimeOffset  - DateTimeOffset.UtcNow.AddMinutes(60)  // OK
+                    ExpiresOn = SAS_Utils.SAS.seDateTime,   // DateTimeOffset  - DateTimeOffset.UtcNow.AddMinutes(60)  // OK
                     Version = SAS_Utils.SAS.sv.v             // String - sv
                 };
+
+                shareSasBuilder.SetPermissions(SAS_Utils.SAS.sp.v);   // Permissions validated on ComboBox_sr_DropDownClosed()
 
                 // Adding the optional fields commented out above
                 //-----------------------------------------------------------
                 if (filePath != "")
-                    fileSasBuilder.FilePath = filePath;
+                    shareSasBuilder.FilePath = filePath;
 
                 // ExpiryTime must be omitted if it has been specified in an associated stored access policy.
                 if (PolicyName != "")
-                    fileSasBuilder.Identifier = PolicyName;
+                    shareSasBuilder.Identifier = PolicyName;
 
                 if (!String.IsNullOrEmpty(SAS_Utils.SAS.st.v))
-                    fileSasBuilder.StartTime = SAS_Utils.SAS.stDateTime;
+                    shareSasBuilder.StartsOn = SAS_Utils.SAS.stDateTime;
 
                 if (!String.IsNullOrEmpty(SAS_Utils.SAS.spr.v))
-                    fileSasBuilder.Protocol = Get_SasProtocol(SAS_Utils.SAS.spr.v);     // SasProtocol - Https, HttpsAndHttp, None
+                    shareSasBuilder.Protocol = Get_SasProtocol(SAS_Utils.SAS.spr.v);     // SasProtocol - Https, HttpsAndHttp, None
 
                 if (!String.IsNullOrEmpty(SAS_Utils.SAS.sip.v))
-                    fileSasBuilder.IPRange = new IPRange(new System.Net.IPAddress(SAS_Utils.fromIP), (SAS_Utils.toIP[0] == 0 ? null : new System.Net.IPAddress(SAS_Utils.toIP))); // IPRange - StartIP, optional EndIP
+                    shareSasBuilder.IPRange = new SasIPRange(new System.Net.IPAddress(SAS_Utils.fromIP), (SAS_Utils.toIP[0] == 0 ? null : new System.Net.IPAddress(SAS_Utils.toIP))); // IPRange - StartIP, optional EndIP
             }
             catch (Exception ex)
             {
@@ -536,11 +608,10 @@ namespace Storage_Helper_SAS_Tool
             //-----------------------------------------------------------
 
 
-
             StorageSharedKeyCredential Credential = new StorageSharedKeyCredential(accountName, accountKey);
 
             // Use the key to get the SAS token.
-            string sasToken = fileSasBuilder.ToSasQueryParameters(Credential).ToString();
+            string sasToken = shareSasBuilder.ToSasQueryParameters(Credential).ToString();
             return sasToken;
         }
 
@@ -599,11 +670,11 @@ namespace Storage_Helper_SAS_Tool
                     // IPRange = 
                     //Permissions = "adlpruw",          // string - Add, Delete, List, Process, Read, Update, Write (Queue Account SAS)
                     //Permissions = "apru",             // string - Add, Process, Read, Update (Queue SAS)
-                    Permissions = SAS_Utils.SAS.sp.v,
+                    //Permissions = SAS_Utils.SAS.sp.v,
                     // Protocol =                        // SasProtocol - Https, HttpsAndHttp, None, Value
                     // StartTime =                                              - DateTimeOffset.UtcNow                 // OK
                     // QueueName = 
-                    ExpiryTime = SAS_Utils.SAS.seDateTime,   // DateTimeOffset  - DateTimeOffset.UtcNow.AddMinutes(60)  // OK
+                    ExpiresOn = SAS_Utils.SAS.seDateTime,   // DateTimeOffset  - DateTimeOffset.UtcNow.AddMinutes(60)  // OK
                     Version = SAS_Utils.SAS.sv.v             // String - sv
                 };
 
@@ -614,13 +685,13 @@ namespace Storage_Helper_SAS_Tool
                     queueSasBuilder.Identifier = PolicyName;
 
                 if (!String.IsNullOrEmpty(SAS_Utils.SAS.st.v))
-                    queueSasBuilder.StartTime = SAS_Utils.SAS.stDateTime;
+                    queueSasBuilder.StartsOn = SAS_Utils.SAS.stDateTime;
 
                 if (!String.IsNullOrEmpty(SAS_Utils.SAS.spr.v))
                     queueSasBuilder.Protocol = Get_SasProtocol(SAS_Utils.SAS.spr.v);     // SasProtocol - Https, HttpsAndHttp, None
 
                 if (!String.IsNullOrEmpty(SAS_Utils.SAS.sip.v))
-                    queueSasBuilder.IPRange = new IPRange(new System.Net.IPAddress(SAS_Utils.fromIP), (SAS_Utils.toIP[0] == 0 ? null : new System.Net.IPAddress(SAS_Utils.toIP))); // IPRange - StartIP, optional EndIP
+                    queueSasBuilder.IPRange = new SasIPRange(new System.Net.IPAddress(SAS_Utils.fromIP), (SAS_Utils.toIP[0] == 0 ? null : new System.Net.IPAddress(SAS_Utils.toIP))); // IPRange - StartIP, optional EndIP
 
                 if (!String.IsNullOrEmpty(SAS_Utils.SAS.queueName.v))
                     queueSasBuilder.QueueName = SAS_Utils.SAS.queueName.v;
@@ -632,6 +703,7 @@ namespace Storage_Helper_SAS_Tool
             }
             //-----------------------------------------------------------
 
+            queueSasBuilder.SetPermissions(SAS_Utils.SAS.sp.v);   // Permissions validated on ComboBox_sr_DropDownClosed()
 
             StorageSharedKeyCredential Credential = new StorageSharedKeyCredential(accountName, accountKey);
 
