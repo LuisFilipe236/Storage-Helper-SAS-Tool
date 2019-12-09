@@ -67,18 +67,23 @@ Developed by Azure Storage Support Team to test proposes only.
 <hr>
 
 <b>API:</b>
+
 Storage Helper SAS Tool have an public API to Check SAS parameters only.
 Regenerating SAS not supported on API for security reasons, as one Storage Key is needed to Regenerate SAS.
 The public API endpoint is: 
+
 https://helpertool.azurewebsites.net/SAS
 
 API Usage:
+
 GET https://helpertool.azurewebsites.net/SAS/check
 
 Query parameters:
+
 All SAS parameters are stpported.
 
 Ex:
+
 https://helpertool.azurewebsites.net/SAS/check?sv=2019-02-02&ss=bfqt&srt=sco&sp=rwdlacup&se=2019-12-09T18:35:48Z&st=2019-12-09T10:35:48Z&spr=https&sig=XXXX
 
 <hr>
