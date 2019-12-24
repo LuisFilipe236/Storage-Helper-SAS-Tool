@@ -35,8 +35,6 @@
             <Label x:Name="labelAccountName" Content="Account Name:" HorizontalAlignment="Right" VerticalAlignment="Top" Height="26" FontWeight="Bold" Margin="0,5,128,0"/>
             <Label x:Name="labelBlobSnapshotName" Content="Snapshot Name:" VerticalAlignment="Top" FontSize="10" FontWeight="Bold" HorizontalAlignment="Right" Width="86" Margin="0,78,130,0"/>
             <TextBox x:Name="textBoxBlobSnapshotName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,81,5,0" LostFocus="TextBoxBlobSnapshotName_LostFocus"/>
-            <Label x:Name="labelBlobSnapshotTime" Content="Snapshot Name:" VerticalAlignment="Top" FontSize="10" FontWeight="Bold" HorizontalAlignment="Right" Width="86" Margin="-134,78,277,0"/>
-            <TextBox x:Name="textBoxBlobSnapshotTime" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="-42,81,151,0" LostFocus="TextBoxBlobSnapshotName_LostFocus"/>
         </Grid>
         <Grid Margin="32,84,166.8,259" HorizontalAlignment="Center" Width="310">
             <Label x:Name="labelAccountSAS" Content="Account SAS" HorizontalAlignment="Left" Margin="98,-1,0,0" VerticalAlignment="Top" Height="26" FontWeight="Bold" Width="81"/>
@@ -46,7 +44,7 @@
             <ComboBox  x:Name="ComboBox_spr"  ToolTip="spr" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" IsEditable="True" IsReadOnly="True" Height="18" FontSize="10" MaxDropDownHeight="380" Margin="119,144,0,0">
                 <ComboBoxItem x:Name="spr_empty" Content="" HorizontalAlignment="Left" Width="88"/>
                 <ComboBoxItem x:Name="spr_https" Content="https" HorizontalAlignment="Left" Width="88"/>
-                <ComboBoxItem x:Name="spr_http_https" Content="https,http" HorizontalAlignment="Left" Width="88"/>
+                <ComboBoxItem x:Name="spr_http_https" Content="http,https" HorizontalAlignment="Left" Width="88"/>
             </ComboBox>
             <Label x:Name="label_sp" Content="Signed Permissions:" ToolTip="sp" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,80,191,0"/>
             <Label x:Name="label_srt" Content="Signed Resource Types:" ToolTip="srt" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Width="121" Margin="-2,60,191,0"/>
@@ -120,16 +118,6 @@
         </Grid>
         <Grid Margin="0.2,2,-0.4,-2" Grid.Column="1">
             <TextBox x:Name="textBox_sig_right" ToolTip="sig" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" Height="16" Margin="5,273,0,0" HorizontalAlignment="Left" Width="311" Background="#FFE2E2E2"/>
-            <TextBox x:Name="textBox_rscc" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,3,237,0" LostFocus="TextBoxBlobName_LostFocus"/>
-            <TextBox x:Name="textBox_rsce" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,43,237,0" LostFocus="TextBoxShareName_LostFocus"/>
-            <TextBox x:Name="textBox_rscl" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,63,237,0" LostFocus="TextBoxFileName_LostFocus"/>
-            <TextBox x:Name="textBox_rsct" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,83,237,0" LostFocus="TextBoxQueueName_LostFocus"/>
-            <Label x:Name="label_rscc" Content="Cache-Control:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="66" Margin="0,1,358,0"/>
-            <Label x:Name="label_rsce" Content="Content-Encoding:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="71" Margin="0,41,358,0"/>
-            <Label x:Name="label_rscl" Content="Content-Language:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="59" Margin="0,61,359,0"/>
-            <Label x:Name="label_rsct" Content="Content-Type:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="74" Margin="0,81,358,0"/>
-            <Label x:Name="label_rscd" Content="Content-Disposition:" VerticalAlignment="Top" FontSize="10" FontWeight="Bold" HorizontalAlignment="Right" Width="86" Margin="0,21,362,0"/>
-            <TextBox x:Name="textBox_rscd" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,23,237,0" LostFocus="TextBoxBlobSnapshotName_LostFocus"/>
         </Grid>
         <Label x:Name="labelMessages"  Content=" "  Margin="10,0,4.6,0" VerticalAlignment="Bottom" Height="22" FontSize="10" Grid.ColumnSpan="2" HorizontalAlignment="Center" Foreground="#FF0003FF"/>
     </Grid>

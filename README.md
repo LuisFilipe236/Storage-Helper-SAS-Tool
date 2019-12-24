@@ -4,6 +4,18 @@
 
   <tr>
     <td>
+	<b>v2.0.0</b>
+	</td>    
+    <td>
+		<a href="https://github.com/LuisFilipe236/Storage-Helper-SAS-Tool/releases/download/v2.0.0/Storage.Helper.SAS.Tool.Installer.msi">
+			<img alt="Storage Helper Tool v2.0.0" src="https://img.shields.io/github/downloads/LuisFilipe236/Storage-Helper-SAS-Tool/v2.0.0/total?label=downloads_v2.0.0">
+		</a>
+    </td>
+  </tr>
+
+
+  <tr>
+    <td>
 	<b>v1.0.6</b>
 	</td>    
     <td>
@@ -97,6 +109,11 @@ Click on the MSI last version counter above to download the MSI installer for Wi
  <hr> 
 
 <b>VERSIONS:</b>
+
+<b>v2.0.0:</b>
+Changes:
+- Removing Storage and Cosmos SDK's - Generating SAS and Sig manualy;
+- Some minor corrections.
 
 <b>v1.0.6:</b>
 Changes:

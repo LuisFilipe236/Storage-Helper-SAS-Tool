@@ -7,7 +7,7 @@ using System.Windows;
 
 namespace Storage_Helper_SAS_Tool
 {
-    /// <summary>   
+    /// <summary>
     /// ---------------------------------------------------------------------------------------------------------
     /// Constructing the Account SAS URI
     /// https://docs.microsoft.com/pt-pt/rest/api/storageservices/create-account-sas?redirectedfrom=MSDN#constructing-the-account-sas-uri
@@ -55,7 +55,7 @@ namespace Storage_Helper_SAS_Tool
         }
 
         public static byte[] fromIP = { 0, 0, 0, 0 };       // Signed IP - used on v12.0.0.0_preview
-        public static byte[] toIP   = { 0, 0, 0, 0 };
+        public static byte[] toIP = { 0, 0, 0, 0 };
 
         /// <summary>
         /// Struct to save all individual values from analized SAS, used to regenerate new SAS
@@ -71,6 +71,7 @@ namespace Storage_Helper_SAS_Tool
             public string queueEndpoint;
 
             public StrParameter storageAccountName;   // storage Account Name, if provided on any Endpoint
+            public StrParameter storageAccountKey;    // storage Account Key
 
             public StrParameter containerName;    // Container name, if provided on blobEndpoint
             public StrParameter blobName;         // Blob name, if provided on blobEndpoint
@@ -90,15 +91,24 @@ namespace Storage_Helper_SAS_Tool
             public StrParameter sip;    // Signed IP 
             public StrParameter spr;    // Signed Protocol 
             public string sig;          // Encripted signature
-            
+
             public StrParameter sr;     // 
             public StrParameter tn;     // Table Name, if is Service SAS
-            public StrParameter blobSnapshotName;  // Blob Snapshot Name if is Service SAS and using v12.0.0_preview
+            public StrParameter blobSnapshotName;  // Blob Snapshot Name if is Service SAS and using 
+            public StrParameter blobSnapshotTime;  // Blob Snapshot Time - Service SAS only
+
             public string spk;          //   startpk;
             public string epk;          //   endpk;
             public string srk;          //   startrk;
             public string erk;          //   endrk;
             public StrParameter si;           // Policy Name
+
+            // query parameters to override response headers (Blob and File services only)
+            public string rscc;    // Cache-Control
+            public string rscd;    // Content-Disposition
+            public string rsce;    // Content-Encoding
+            public string rscl;    // Content-Language
+            public string rsct;    // Content-Type
 
             public DateTime stDateTime; // used to test the valid Date format
             public DateTime seDateTime;
@@ -179,7 +189,7 @@ namespace Storage_Helper_SAS_Tool
 
                 if (Found(SAS.sharedAccessSignature.v, "not found="))
                 {
-                    SAS.sharedAccessSignature.s = false; 
+                    SAS.sharedAccessSignature.s = false;
                     return Utils.WithMessage("Missing the '?' at the begin of SAS token, or the term 'SharedAccessSignature=' on a Connection String", "Invalid SAS");
                 }
                 else
@@ -196,16 +206,16 @@ namespace Storage_Helper_SAS_Tool
             // Service SAS: https://docs.microsoft.com/en-us/rest/api/storageservices/constructing-a-service-sas
             //---------------------------------------------------------------------
             //---------------------------------------------------------------------
-            SAS.sv.v =          Get_SASValue(SAS.sharedAccessSignature.v, "sv=", "&");                  // Required (>=2015-04-05)
-            SAS.ss.v =          Get_SASValue(SAS.sharedAccessSignature.v, "ss=", "&");
-            SAS.srt.v =         Get_SASValue(SAS.sharedAccessSignature.v, "srt=", "&");
-            SAS.sp.v =          Get_SASValue(SAS.sharedAccessSignature.v, "sp=", "&");
-            SAS.se.v =          Get_SASValue(SAS.sharedAccessSignature.v, "se=", "&");
-            SAS.st.v =          Get_SASValue(SAS.sharedAccessSignature.v, "st=", "&");
-            SAS.sip.v =         Get_SASValue(SAS.sharedAccessSignature.v, "sip=", "&");
-            SAS.spr.v =         Get_SASValue(SAS.sharedAccessSignature.v, "spr=", "&");
+            SAS.sv.v = Get_SASValue(SAS.sharedAccessSignature.v, "sv=", "&");                  // Required (>=2015-04-05)
+            SAS.ss.v = Get_SASValue(SAS.sharedAccessSignature.v, "ss=", "&");
+            SAS.srt.v = Get_SASValue(SAS.sharedAccessSignature.v, "srt=", "&");
+            SAS.sp.v = Get_SASValue(SAS.sharedAccessSignature.v, "sp=", "&");
+            SAS.se.v = Get_SASValue(SAS.sharedAccessSignature.v, "se=", "&");
+            SAS.st.v = Get_SASValue(SAS.sharedAccessSignature.v, "st=", "&");
+            SAS.sip.v = Get_SASValue(SAS.sharedAccessSignature.v, "sip=", "&");
+            SAS.spr.v = Get_SASValue(SAS.sharedAccessSignature.v, "spr=", "&");
 
-            SAS.sig =           Get_SASValue(SAS.sharedAccessSignature.v, "sig=", "&");
+            SAS.sig = Get_SASValue(SAS.sharedAccessSignature.v, "sig=", "&");
 
 
 
@@ -252,6 +262,18 @@ namespace Storage_Helper_SAS_Tool
             SAS.epk = Get_SASValue(SAS.sharedAccessSignature.v, "epk=", "&");
             SAS.srk = Get_SASValue(SAS.sharedAccessSignature.v, "srk=", "&");
             SAS.erk = Get_SASValue(SAS.sharedAccessSignature.v, "erk=", "&");
+
+
+            //---------------------------------------------------------------------
+            // override response headers
+            // Service SAS only - (Blob and File services only)
+            // https://docs.microsoft.com/en-us/rest/api/storageservices/create-service-sas#specifying-query-parameters-to-override-response-headers-blob-and-file-services-only
+            //---------------------------------------------------------------------
+            SAS.rscc = Get_SASValue(SAS.sharedAccessSignature.v, "rscc=", "&");
+            SAS.rscd = Get_SASValue(SAS.sharedAccessSignature.v, "rscd=", "&");
+            SAS.rsce = Get_SASValue(SAS.sharedAccessSignature.v, "rsce=", "&");
+            SAS.rscl = Get_SASValue(SAS.sharedAccessSignature.v, "rscl=", "&");
+            SAS.rsct = Get_SASValue(SAS.sharedAccessSignature.v, "rsct=", "&");
 
             //---------------------------------------------------------------------
             // si: signedidentifier - Optional.
@@ -379,6 +401,17 @@ namespace Storage_Helper_SAS_Tool
             //              Key values are inclusive. If omitted, there is no upper bound on the table entities that can be accessed.
             //---------------------------------------------------------------------
             BoxAuthResults.Text += Show_pk_rk(SAS.tn.v, SAS.spk, SAS.epk, SAS.srk, SAS.erk);
+
+
+
+            //---------------------------------------------------------------------
+            // override response headers (Blob and File services only)
+            // Service SAS only - (Blob and File services only)
+            // https://docs.microsoft.com/en-us/rest/api/storageservices/create-service-sas#specifying-query-parameters-to-override-response-headers-blob-and-file-services-only
+            //---------------------------------------------------------------------
+            BoxAuthResults.Text += Show_rscX(SAS.rscc, SAS.rscd, SAS.rsce, SAS.rscl, SAS.rsct);
+
+
 
             //---------------------------------------------------------------------
             // si: signedidentifier - Optional.
@@ -563,7 +596,7 @@ namespace Storage_Helper_SAS_Tool
                         // remove subfolders
                         int i = s2.LastIndexOf('/');
                         if (i == s2.Length - 1 && s2 != "")    // blob name ends with '/'
-                        { 
+                        {
                             SAS.blobName.v = "<invalid blob on endpoint>";
                             SAS.blobName.s = false;
                         }
@@ -592,7 +625,7 @@ namespace Storage_Helper_SAS_Tool
                         // remove subfolders
                         int i = s2.LastIndexOf('/');
                         if (i == s2.Length - 1 && s2 != "")    // file name ends with '/'
-                        { 
+                        {
                             SAS.fileName.v = "<invalid file on endpoint>";
                             SAS.fileName.s = false;
                         }
@@ -643,9 +676,9 @@ namespace Storage_Helper_SAS_Tool
             {
                 string service = "";
                 if (SAS.tn.v != "not found")
-                    service = "Table";         
+                    service = "Table";
                 else
-                    switch(SAS.sr.v)
+                    switch (SAS.sr.v)
                     {
                         case "b":
                             service = "Blob";
@@ -663,7 +696,7 @@ namespace Storage_Helper_SAS_Tool
                             service = "Blob Snapshot";
                             break;
                     }
-                return service + " Service SAS detected\n---------------------------- -\n";         
+                return service + " Service SAS detected\n---------------------------- -\n";
             }
             else
                 return "Queue Service SAS detected\n-----------------------------\n";         // Queue
@@ -744,7 +777,7 @@ namespace Storage_Helper_SAS_Tool
             // Queue Service
             if ((SAS.sr.v == "???") && SAS.queueEndpoint == "not found")
                 return "  --> Queue was provided on 'sr' SAS parameter, but a different service was provided on URI.\n\n";
-            
+
             return "";
         }
 
@@ -880,7 +913,7 @@ namespace Storage_Helper_SAS_Tool
                 return s + "  --> " + res + "\n\n";
         }
 
-        
+
 
         /// <summary>
         /// Format the output string for srt parameter 
@@ -939,7 +972,7 @@ namespace Storage_Helper_SAS_Tool
 
             string res = SAS_ValidateParam.Sr(sr, sv);
 
-            if(SAS.sr.s == true)            // value validated
+            if (SAS.sr.s == true)            // value validated
                 return s + "  " + res + "\n\n";
             else                            // error on value 
                 return s + "  --> " + res + "\n\n";
@@ -1022,13 +1055,13 @@ namespace Storage_Helper_SAS_Tool
 
 
             if (startpk != "not found" && endpk != "not found")
-            { 
-                if(startpk.Length == 0)
+            {
+                if (startpk.Length == 0)
                     return s += "  --> Empty Start Partition Key value (startpk=" + startpk + ")\n\n";
                 if (endpk.Length == 0)
                     return s += "  --> Empty End Partition Key value (endpk=" + endpk + ")\n\n";
 
-                s += "  Allowing Table access from Partition '"+ startpk + "' to '"+ endpk + "'\n";
+                s += "  Allowing Table access from Partition '" + startpk + "' to '" + endpk + "'\n";
             }
 
             if (startrk != "not found" && endrk != "not found")
@@ -1044,6 +1077,23 @@ namespace Storage_Helper_SAS_Tool
             return s + "\n";
         }
 
+
+
+        public static string Show_rscX(string rscc, string rscd, string rsce, string rscl, string rsct)
+        {
+            string s = "";
+
+            if (rscc != "not found") s += "  Cache-Control: " + rscc;
+            if (rscd != "not found") s += "  Content-Disposition: " + rscd;
+            if (rsce != "not found") s += "  Content-Encoding: " + rsce;
+            if (rscl != "not found") s += "  Content-Language: " + rscl;
+            if (rsct != "not found") s += "  Content-Type: " + rsct;
+
+            if (s != "")
+                s += "'rscc', 'rscd', 'rsce', 'rscl', 'rsct' parameters - Override response headers (Blob and File services only):\n" + s;
+
+            return s + "\n";
+        }
 
 
         /// <summary>
@@ -1305,9 +1355,9 @@ namespace Storage_Helper_SAS_Tool
             if (comboBox_sr_txt != "" || TextBox_tn_txt != "")
                 PopulateComboBox(comboBox1, comboBox_sr_txt, validSV_ServiceSas_ARR_addon);
 
-            
+
             // Validate the old value of the combo box are in the new list, otherwise clean the value
-            if(ComboItemFound(comboBox1, s))
+            if (ComboItemFound(comboBox1, s))
                 comboBox1.Text = s;
             else
                 comboBox1.Text = "";
@@ -1329,13 +1379,13 @@ namespace Storage_Helper_SAS_Tool
                         comboBox1.Items.Add(arr[i]);
                 }
                 else
-                    if(sr == "f" || sr == "s")
-                    {
-                        if (arr[i].CompareTo("2015-02-21") > 0)    // Service SAS File and Share suported on Service version 2015-02-21 and later
-                            comboBox1.Items.Add(arr[i]);            // (from Storage Explorer, seems 2015-02-21 not suported - removing the '=')
+                    if (sr == "f" || sr == "s")
+                {
+                    if (arr[i].CompareTo("2015-02-21") > 0)    // Service SAS File and Share suported on Service version 2015-02-21 and later
+                        comboBox1.Items.Add(arr[i]);            // (from Storage Explorer, seems 2015-02-21 not suported - removing the '=')
                 }
-                    else
-                        comboBox1.Items.Add(arr[i]);
+                else
+                    comboBox1.Items.Add(arr[i]);
             }
         }
 
@@ -1425,7 +1475,7 @@ namespace Storage_Helper_SAS_Tool
         //--------------------------------------------------------------------------------------------------------
 
 
-        public static void init_SASstruct() 
+        public static void init_SASstruct()
         {
             SAS.sharedAccessSignature.v = ""; SAS.sharedAccessSignature.s = true;
 
@@ -1434,35 +1484,43 @@ namespace Storage_Helper_SAS_Tool
             SAS.tableEndpoint = "";
             SAS.queueEndpoint = "";
 
-            SAS.storageAccountName.v = "";  SAS.storageAccountName.s = true;
+            SAS.storageAccountName.v = ""; SAS.storageAccountName.s = true;
+            SAS.storageAccountKey.v = ""; SAS.storageAccountKey.s = true;
 
-            SAS.containerName.v = "";       SAS.containerName.s = true;
-            SAS.blobName.v = "";            SAS.blobName.s = true;
-            SAS.shareName.v = "";           SAS.shareName.s = true;
-            SAS.fileName.v = "";            SAS.fileName.s = true;
-            SAS.queueName.v = "";           SAS.queueName.s = true;
+            SAS.containerName.v = ""; SAS.containerName.s = true;
+            SAS.blobName.v = ""; SAS.blobName.s = true;
+            SAS.shareName.v = ""; SAS.shareName.s = true;
+            SAS.fileName.v = ""; SAS.fileName.s = true;
+            SAS.queueName.v = ""; SAS.queueName.s = true;
             // table name in SAS.tn,v
 
             //SAS.onlySASprovided = true;
 
-            SAS.sv.v = "";          SAS.sv.s = true;
-            SAS.ss.v = "";          SAS.ss.s = true;
-            SAS.srt.v = "";         SAS.srt.s = true;
-            SAS.sp.v = "";          SAS.sp.s = true;
-            SAS.se.v = "";          SAS.se.s = true;
-            SAS.st.v = "";          SAS.st.s = true;
-            SAS.sip.v = "";         SAS.sip.s = true;
-            SAS.spr.v = "";         SAS.spr.s = true;
+            SAS.sv.v = ""; SAS.sv.s = true;
+            SAS.ss.v = ""; SAS.ss.s = true;
+            SAS.srt.v = ""; SAS.srt.s = true;
+            SAS.sp.v = ""; SAS.sp.s = true;
+            SAS.se.v = ""; SAS.se.s = true;
+            SAS.st.v = ""; SAS.st.s = true;
+            SAS.sip.v = ""; SAS.sip.s = true;
+            SAS.spr.v = ""; SAS.spr.s = true;
             SAS.sig = "";
 
-            SAS.sr.v = "";          SAS.sr.s = true;
-            SAS.tn.v = "";          SAS.tn.s = true;
-            SAS.blobSnapshotName.v = ""; SAS.blobSnapshotName.s = true; // v12.0.0.0_preview
+            SAS.sr.v = ""; SAS.sr.s = true;
+            SAS.tn.v = ""; SAS.tn.s = true;
+            SAS.blobSnapshotName.v = ""; SAS.blobSnapshotName.s = true;
+            SAS.blobSnapshotTime.v = ""; SAS.blobSnapshotTime.s = true;      // Service SAS only
             SAS.spk = "";           // The bellow are disable by default on UI
             SAS.epk = "";
             SAS.srk = "";
             SAS.erk = "";
-            SAS.si.v = "";          SAS.si.s = true;
+            SAS.si.v = ""; SAS.si.s = true;
+
+            SAS.rscc = "";
+            SAS.rscd = "";
+            SAS.rsce = "";
+            SAS.rscl = "";
+            SAS.rsct = "";
         }
 
     }

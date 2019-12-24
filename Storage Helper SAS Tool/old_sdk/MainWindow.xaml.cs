@@ -71,6 +71,9 @@ namespace Storage_Helper_SAS_Tool
     public partial class MainWindow : Window
     {
         //----------------------------------------------------------------------------
+        private string StorageSDK_12_Version = "v12.0.0 (File SDK still on v12.0.0-preview.5)";
+        private string Cosmos_Version = "v3.4.1 (Cosmos.Table v2.0.0-preview)";
+
         public StorageCredentials storageCredentials;
         //----------------------------------------------------------------------------
 
@@ -197,11 +200,8 @@ namespace Storage_Helper_SAS_Tool
 
             // Using SDK v12_preview
             //------------------------------------------------
-            //RegenerateSAS_SDKv12_preview();
+            RegenerateSAS_SDKv12_preview();
 
-            // Without SDK - Manual SAS creation
-            //------------------------------------------------
-            RegenerateSAS();
 
             textBox_sig_right.Text = SAS_Utils.SAS.sig;
 
@@ -212,7 +212,7 @@ namespace Storage_Helper_SAS_Tool
 
         
 
-        /*
+
         /// <summary>
         /// Regenerate SAS using Storage SDK v12.0.0_Preview
         /// </summary>
@@ -237,7 +237,7 @@ namespace Storage_Helper_SAS_Tool
                         ret = SAS_Create_v12.Regenerate_ServiceSAS_Container(labelContainerName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBox_si, BoxAuthResults_Right);
                         break;
                     case "bs":  // Blob Shapshot
-                        ret = SAS_Create_v12.Regenerate_ServiceSAS_BlobSnapshot(labelContainerName, labelBlobSnapshotName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBoxBlobSnapshotName, textBox_si, BoxAuthResults_Right, labelBlobSnapshotTime, textBoxBlobSnapshotTime);
+                        ret = SAS_Create_v12.Regenerate_ServiceSAS_BlobSnapshot(labelContainerName, labelBlobSnapshotName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBoxBlobSnapshotName, textBox_si, BoxAuthResults_Right);
                         break;
                     case "f":   // file
                         ret = SAS_Create_v12.Regenerate_ServiceSAS_File(labelShareName, labelFileName, textBoxAccountName, textBoxAccountKey1, textBoxShareName, textBoxFileName, textBox_si, BoxAuthResults_Right);
@@ -264,94 +264,8 @@ namespace Storage_Helper_SAS_Tool
             else
                 BoxAuthResults_Right.Text += SAS_Create_v12.Limitations_v12_Info(StorageSDK_12_Version);                       
         }
-        */
 
 
-        /// <summary>
-        /// Regenerate SAS without SDK - Manual SAS regenration
-        /// </summary>
-        private void RegenerateSAS()
-        {
-            // Save IP Bytes on structs fromIP[] and toIP[]
-            SAS_ValidateParam.Validate_Sip(textBox_sip.Text);
-
-            bool debug = true;
-
-            // Regenerate Account SAS (srt) from SAS structure values
-            if (SAS_Utils.SAS.srt.v != "not found" && SAS_Utils.SAS.srt.v != "")
-                 Account.Regenerate_AccountSAS(BoxAuthResults_Right, SAS_Utils.SAS.sv.v, debug); 
-
-            // Regenerate Service SAS (sr) from SAS structure values (blob, container, file, share, blob Snapshot, Queue ??)
-            if (SAS_Utils.SAS.sr.v != "not found" && SAS_Utils.SAS.sr.v != "")
-                switch (SAS_Utils.SAS.sr.v)   // service SAS
-                {
-                    case "b":   // blob
-                        if (Utils.StringEmpty(labelContainerName, textBoxContainerName.Text, "Missing Container Name", "Error"))
-                            { SAS_Utils.SAS.containerName.s = false; return; }
-                        if (Utils.StringEmpty(labelBlobName, textBoxBlobName.Text, "Missing Blob Name", "Error"))
-                            { SAS_Utils.SAS.blobName.s = false; return; }
-
-                        Service.Regenerate_ServiceSAS_Blob(BoxAuthResults_Right, SAS_Utils.SAS.sv.v, debug);
-                        break;
-                    case "c":   // container
-                        if (Utils.StringEmpty(labelContainerName, textBoxContainerName.Text, "Missing Container Name", "Error"))
-                            { SAS_Utils.SAS.storageAccountName.s = false; return; }
-
-                        Service.Regenerate_ServiceSAS_Container(BoxAuthResults_Right, SAS_Utils.SAS.sv.v, debug);
-                        break;
-                    case "bs":  // Blob Shapshot
-                        if (Utils.StringEmpty(labelContainerName, textBoxContainerName.Text, "Missing Container Name", "Error"))
-                            { SAS_Utils.SAS.containerName.s = false; return; }
-                        if (Utils.StringEmpty(labelBlobSnapshotName, textBoxBlobSnapshotName.Text, "Missing Blob Snapshot Name", "Error"))
-                            { SAS_Utils.SAS.blobSnapshotName.s = false; return; }
-                        if (Utils.StringEmpty(labelBlobSnapshotTime, textBoxBlobSnapshotTime.Text, "Missing Blob Snapshot Time", "Error"))
-                            { SAS_Utils.SAS.blobSnapshotTime.s = false; return; }
-
-                        Service.Regenerate_ServiceSAS_BlobSnapshot(BoxAuthResults_Right, SAS_Utils.SAS.sv.v, debug);
-                        break;
-                    case "f":   // file
-                        if (Utils.StringEmpty(labelShareName, textBoxShareName.Text, "Missing Share Name", "Error"))
-                            { SAS_Utils.SAS.shareName.s = false; return; }
-                        if (Utils.StringEmpty(labelFileName, textBoxFileName.Text, "Missing File Name", "Error"))
-                            { SAS_Utils.SAS.fileName.s = false; return; }
-
-                        Service.Regenerate_ServiceSAS_File(BoxAuthResults_Right, SAS_Utils.SAS.sv.v, debug);
-                        break;
-                    case "s":   // share
-                        if (Utils.StringEmpty(labelShareName, textBoxShareName.Text, "Missing Share Name", "Error"))
-                            { SAS_Utils.SAS.shareName.s = false; return; }
-
-                        Service.Regenerate_ServiceSAS_Share(BoxAuthResults_Right, SAS_Utils.SAS.sv.v, debug);
-                        break;
-                }
-            else
-                    if ((SAS_Utils.SAS.srt.v == "not found" || SAS_Utils.SAS.srt.v == "") && (SAS_Utils.SAS.tn.v == "not found" || SAS_Utils.SAS.tn.v == ""))
-                    {
-                        if (Utils.StringEmpty(labelQueueName, textBoxQueueName.Text, "Missing Queue Name", "Error"))
-                            { SAS_Utils.SAS.queueName.s = false; return; }
-
-                        Service.Regenerate_ServiceSAS_Queue(BoxAuthResults_Right, SAS_Utils.SAS.sv.v, debug);
-                    }
-
-
-            // Regenerate Table Service SAS uses CosmoDB - Microsoft.Azure.Cosmos.Table library
-            if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
-            {
-                if (Utils.StringEmpty(label_tn, textBox_tn.Text, "Missing Table Name", "Error"))
-                    { SAS_Utils.SAS.tn.s = false; return; }
-
-                Service.Regenerate_ServiceSAS_Table(BoxAuthResults_Right, SAS_Utils.SAS.sv.v, debug);
-            }
-
-
-            /*
-            // Regenerated Service SAS Table (tn)
-            if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
-                BoxAuthResults_Right.Text += SAS_Create_Cosmos.Limitations_Cosmos_Info(Cosmos_Version);
-            else
-                BoxAuthResults_Right.Text += SAS_Create_v12.Limitations_v12_Info(StorageSDK_12_Version);
-            */
-        }
 
 
 
@@ -395,31 +309,6 @@ namespace Storage_Helper_SAS_Tool
         }
 
 
-        // (Blob and File services only)
-        private void SetStatus_OverrideHeadersBoxes(bool status)
-        {
-            if (status == false)
-            {
-                textBox_rscc.Text = "";         // clear rscc
-                textBox_rscd.Text = "";         // clear rscd
-                textBox_rsce.Text = "";         // clear rsce
-                textBox_rscl.Text = "";         // clear rscl
-                textBox_rsct.Text = "";         // clear rsct
-            }
-
-            textBox_rscc.IsEnabled = status;
-            textBox_rscd.IsEnabled = status;
-            textBox_rsce.IsEnabled = status;
-            textBox_rscl.IsEnabled = status;
-            textBox_rsct.IsEnabled = status;
-
-            label_rscc.IsEnabled = status;
-            label_rscd.IsEnabled = status;
-            label_rsce.IsEnabled = status;
-            label_rscl.IsEnabled = status;
-            label_rsct.IsEnabled = status;
-        }
-
 
         /// <summary>
         /// Show error message on MessageBox and set label red
@@ -454,6 +343,7 @@ namespace Storage_Helper_SAS_Tool
 
             return true;
         }
+
 
 
         /// <summary>
@@ -589,15 +479,6 @@ namespace Storage_Helper_SAS_Tool
             if (!Check_Space_Upercase(textBox_epk, label_epk, "End Table Partition")) return false;
 
 
-            // rscc, rscd, rsce, rscl, rsct - Check for spaces only - upercases allowed
-            //------------------------------------------------------------------------------
-            if (!Check_Space_Upercase(textBox_rscc, label_rscc, "Cache-Control", false)) return false;
-            if (!Check_Space_Upercase(textBox_rscd, label_rscd, "Content-Disposition", false)) return false;
-            if (!Check_Space_Upercase(textBox_rsce, label_rsce, "Content-Encoding", false)) return false;
-            if (!Check_Space_Upercase(textBox_rscl, label_rscl, "Content-Language", false)) return false;
-            if (!Check_Space_Upercase(textBox_rsct, label_rsct, "Content-Type", false)) return false;
-
-
             // All parameters Ok
             return true;
         }
@@ -617,12 +498,10 @@ namespace Storage_Helper_SAS_Tool
             labelInsertSAS.Foreground = (SAS_Utils.SAS.sharedAccessSignature.s ? Brushes.Black : Brushes.Red);
 
             labelAccountName.Foreground = (SAS_Utils.SAS.storageAccountName.s ? Brushes.Black : Brushes.Red);
-            labelAccountKey.Foreground = (SAS_Utils.SAS.storageAccountKey.s ? Brushes.Black : Brushes.Red);
 
             labelContainerName.Foreground = (SAS_Utils.SAS.containerName.s ? Brushes.Black : Brushes.Red);
             labelBlobName.Foreground = (SAS_Utils.SAS.blobName.s ? Brushes.Black : Brushes.Red);
             labelBlobSnapshotName.Foreground = (SAS_Utils.SAS.blobSnapshotName.s ? Brushes.Black : Brushes.Red);
-            labelBlobSnapshotTime.Foreground = (SAS_Utils.SAS.blobSnapshotTime.s ? Brushes.Black : Brushes.Red);
             labelShareName.Foreground = (SAS_Utils.SAS.shareName.s ? Brushes.Black : Brushes.Red);
             labelFileName.Foreground = (SAS_Utils.SAS.fileName.s ? Brushes.Black : Brushes.Red);
             labelQueueName.Foreground = (SAS_Utils.SAS.queueName.s ? Brushes.Black : Brushes.Red);
@@ -699,8 +578,6 @@ namespace Storage_Helper_SAS_Tool
             if(SAS_Utils.SAS.storageAccountName.v != "not found")
                 textBoxAccountName.Text = SAS_Utils.SAS.storageAccountName.v;   // storage Account Name, if provided on any Endpoint
 
-            // storageAccountKey
-
             textBoxContainerName.Text = SAS_Utils.SAS.containerName.v;
             textBoxBlobName.Text = SAS_Utils.SAS.blobName.v;
             textBoxShareName.Text = SAS_Utils.SAS.shareName.v;
@@ -729,12 +606,6 @@ namespace Storage_Helper_SAS_Tool
             textBox_epk.Text = (SAS_Utils.SAS.epk == "not found" ? "" : SAS_Utils.SAS.epk);
             textBox_spk.Text = (SAS_Utils.SAS.spk == "not found" ? "" : SAS_Utils.SAS.spk);
             textBox_si.Text = (SAS_Utils.SAS.si.v == "not found" ? "" : SAS_Utils.SAS.si.v);        // Policy Name
-
-            textBox_spk.Text = (SAS_Utils.SAS.rscc == "not found" ? "" : SAS_Utils.SAS.rscc);
-            textBox_spk.Text = (SAS_Utils.SAS.rscd == "not found" ? "" : SAS_Utils.SAS.rscd);
-            textBox_spk.Text = (SAS_Utils.SAS.rsce == "not found" ? "" : SAS_Utils.SAS.rsce);
-            textBox_spk.Text = (SAS_Utils.SAS.rscl == "not found" ? "" : SAS_Utils.SAS.rscl);
-            textBox_spk.Text = (SAS_Utils.SAS.rsct == "not found" ? "" : SAS_Utils.SAS.rsct);
 
             SAS_Utils.PopulateComboBox_sv(ComboBox_sv, ComboBox_sr.Text, textBox_tn.Text);
             ComboBox_sv.SelectedIndex = ComboBox_sv.Items.IndexOf((SAS_Utils.SAS.sv.v == "not found" ? "" : SAS_Utils.SAS.sv.v));
@@ -775,7 +646,6 @@ namespace Storage_Helper_SAS_Tool
             // queueEndpoint;
 
             SAS_Utils.SAS.storageAccountName.v = textBoxAccountName.Text;
-            SAS_Utils.SAS.storageAccountKey.v  = textBoxAccountKey1.Text;
 
             SAS_Utils.SAS.containerName.v = textBoxContainerName.Text;
             SAS_Utils.SAS.blobName.v = textBoxBlobName.Text;
@@ -797,19 +667,13 @@ namespace Storage_Helper_SAS_Tool
 
             SAS_Utils.SAS.sr.v = ComboBox_sr.Text;
             SAS_Utils.SAS.tn.v = textBox_tn.Text;
-            SAS_Utils.SAS.blobSnapshotName.v = textBoxBlobSnapshotName.Text;
-            SAS_Utils.SAS.blobSnapshotTime.v = textBoxBlobSnapshotTime.Text;
+            SAS_Utils.SAS.blobSnapshotName.v = textBoxBlobSnapshotName.Text;    // v12.0.0.0_preview
             SAS_Utils.SAS.erk = textBox_erk.Text;
             SAS_Utils.SAS.srk = textBox_srk.Text;
             SAS_Utils.SAS.epk = textBox_epk.Text;
             SAS_Utils.SAS.spk = textBox_spk.Text;
             SAS_Utils.SAS.si.v = textBox_si.Text;
 
-            SAS_Utils.SAS.rscc = textBox_rscc.Text;
-            SAS_Utils.SAS.rscd = textBox_rscd.Text;
-            SAS_Utils.SAS.rsce = textBox_rsce.Text;
-            SAS_Utils.SAS.rscl = textBox_rscl.Text;
-            SAS_Utils.SAS.rsct = textBox_rsct.Text;
 
             // used by v12.0.0.0_preview
             SAS_Utils.fromIP[0] = 0;
@@ -945,9 +809,6 @@ namespace Storage_Helper_SAS_Tool
             // Table defined on the TexBox 'tn' and not on ComboBox sr
 
             ComboBox_sr.Text = s;
-
-            // Service SAS only - (Blob and File services only)
-            SetStatus_OverrideHeadersBoxes((s == "b" || s == "c" || s == "s" || s == "f" || s == "bs"));
 
             if (s != "") 
             {
