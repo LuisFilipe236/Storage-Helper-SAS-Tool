@@ -36,67 +36,8 @@ using System.Windows.Controls;
 
 namespace Storage_Helper_SAS_Tool
 {
-    class Params
-    {
-        /*
-        public static string storageAccountName = "storage236";
-        public static string azureStorageSharedKey = "Ygb5RDbxQHKTe/PV6dk1XMRPtYq3WD6/v+HQOUILCaZL3x0l877VLfZ94VKeHlFeXDgt3Rv/iQndPUxsFbqfhw==";
 
-        public static string serviceVersion = "2019-02-02";   // sv (2019-02-02)
-        public static string permissions = "rl";        // sp - (racwudpl)
-
-        public static string signedresourcetypes = "sco";     // srt - (sco)  Account SAS only
-        public static string signedservices = "bqft";         // ss  - (bqft) Account SAS only
-
-        public static string signedresource = "b";            // sr - (b,c,bs,f,s,q,t) Service SAS only
-        public static string policyIdentifer = "";            // si - Service SAS only - Policy name cannot contain Upercases
-
-
-        public static string signedip = "";                   // sip - Optional
-        public static string signedprotocol = "";             // spr - Optional
-
-        public static string startTime = "2019-12-20T00:00:00Z";
-        public static string expiryTime = "2019-12-31T23:59:00Z";
-
-        // Container Service only
-        public static string containerName = "container";
-
-        // Blob Service only
-        public static string blobName = "blob.txt";
-
-        // Snapshot Service only
-        public static string signedSnapshotTime = "";
-        public static string snapshotName = "";
-
-        // Share Service only
-        public static string shareName = "";
-
-        // File Service only
-        public static string fileName = "";
-
-        // Queue Service only
-        public static string queueName = "";
-
-        // Table Service only
-        public static string tableName = "";             // tn  
-        public static string startingPartitionKey = "";
-        public static string startingRowKey = "";
-        public static string endingPartitionKey = "";
-        public static string endingRowKey = "";
-
-        // query parameters to override response headers (Blob and File services only)
-        public static string rscc = "";    // Cache-Control
-        public static string rscd = "";    // Content-Disposition
-        public static string rsce = "";    // Content-Encoding
-        public static string rscl = "";    // Content-Language
-        public static string rsct = "";    // Content-Type
-        */
-    }
-    //----------------------------------------------------------------------------------
-
-
-
-    class RestAPI : Params
+    class RestAPI
     {
 
         /// <summary>
@@ -165,7 +106,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "  Different order on parameter values (ex: ss=bfq vs ss=bqf) may generate different valid signature (sig)\n";
             BoxAuthResults.Text += "\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Container:\n";
-            //BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
             BoxAuthResults.Text += "-------------------------------------------------\n";
@@ -177,8 +118,6 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Test your SAS on Browser (list blobs):\n";
             //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/" + SAS_Utils.SAS.containerName.v + "?restype=container&comp=list" + Uri.UnescapeDataString(sas).Replace("?", "&") + "\n";
             BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/" + SAS_Utils.SAS.containerName.v + "?restype=container&comp=list" + sas.Replace("?", "&") + "\n\n";
-
-            SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
 
             return true;
         }
@@ -197,7 +136,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "  Different order on parameter values (ex: ss=bfq vs ss=bqf) may generate different valid signature (sig)\n";
             BoxAuthResults.Text += "\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Blob:\n";
-            //BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
             BoxAuthResults.Text += "-------------------------------------------------\n";
@@ -209,8 +148,6 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Test your SAS on Browser (get blob):\n";
             //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/" + SAS_Utils.SAS.containerName.v + "/" + SAS_Utils.SAS.blobName.v + Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/" + SAS_Utils.SAS.containerName.v + "/" + SAS_Utils.SAS.blobName.v + sas + "\n\n";
-
-            SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
 
             return true;
         }
@@ -230,7 +167,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "  Different order on parameter values (ex: ss=bfq vs ss=bqf) may generate different valid signature (sig)\n";
             BoxAuthResults.Text += "\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Blob Snapshot:\n";
-            //BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
             BoxAuthResults.Text += "-------------------------------------------------\n";
@@ -242,8 +179,6 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Test your SAS on Browser (get snapshot) (repalce <DateTime> by snapshot datetime):\n";
             //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/" + SAS_Utils.SAS.containerName.v + "/" + SAS_Utils.SAS.blobSnapshotName.v + "?snapshot=<DateTime>" + Uri.UnescapeDataString(sas).Replace("?", "&") + "\n";
             BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/" + SAS_Utils.SAS.containerName.v + "/" + SAS_Utils.SAS.blobSnapshotName.v + "?snapshot=<DateTime>" + sas.Replace("?", "&") + "\n\n";
-
-            SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
 
             return true;
         }
@@ -262,7 +197,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "  Different order on parameter values (ex: ss=bfq vs ss=bqf) may generate different valid signature (sig)\n";
             BoxAuthResults.Text += "\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Share:\n";
-            //BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
             BoxAuthResults.Text += "-------------------------------------------------\n";
@@ -274,8 +209,6 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Test your SAS on Browser (list files):\n";
             //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".file.core.windows.net/" + SAS_Utils.SAS.shareName.v + "?restype=directory&comp=list" + Uri.UnescapeDataString(sas).Replace("?", "&") + "\n";
             BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".file.core.windows.net/" + SAS_Utils.SAS.shareName.v + "?restype=directory&comp=list" + sas.Replace("?", "&") + "\n\n";
-
-            SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
 
             return true;
         }
@@ -294,7 +227,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "  Different order on parameter values (ex: ss=bfq vs ss=bqf) may generate different valid signature (sig)\n";
             BoxAuthResults.Text += "\n";
             BoxAuthResults.Text += "Regenerated Service SAS - File:\n";
-            //BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
             BoxAuthResults.Text += "-------------------------------------------------\n";
@@ -306,8 +239,6 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Test your SAS on Browser (get file):\n";
             //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".file.core.windows.net/" + SAS_Utils.SAS.shareName.v + "/" + SAS_Utils.SAS.fileName.v + Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".file.core.windows.net/" + SAS_Utils.SAS.shareName.v + "/" + SAS_Utils.SAS.fileName.v + sas + "\n\n";
-
-            SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
 
             return true;
         }
@@ -325,7 +256,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "  Different order on parameter values (ex: ss=bfq vs ss=bqf) may generate different valid signature (sig)\n";
             BoxAuthResults.Text += "\n";
             BoxAuthResults.Text += "Regenerated Service SAS - Queue:\n";
-            //BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
             BoxAuthResults.Text += "-------------------------------------------------\n";
@@ -337,8 +268,6 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Test your SAS on Browser (list messages):\n";
             //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".queue.core.windows.net/" + SAS_Utils.SAS.queueName.v + "/messages" + Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".queue.core.windows.net/" + SAS_Utils.SAS.queueName.v + "/messages" + sas + "\n\n";
-
-            SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
 
             return true;
         }
@@ -366,7 +295,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "  Different order on parameter values (ex: ss=bfq vs ss=bqf) may generate different valid signature (sig)\n";
             BoxAuthResults.Text += "\n";
             BoxAuthResults.Text = "Regenerated Service SAS - Table:\n";
-            //BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
             BoxAuthResults.Text += "-------------------------------------------------\n";
@@ -378,8 +307,6 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Test your SAS on Browser (list entities):\n";
             //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".table.core.windows.net/" + SAS_Utils.SAS.tableName.v + Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".table.core.windows.net/" + SAS_Utils.SAS.tableName.v + sas + "\n\n";
-
-            SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
 
             return true;
         }
@@ -478,13 +405,16 @@ namespace Storage_Helper_SAS_Tool
             // Remove the first "&"
             sharedAccessSignature = sharedAccessSignature.TrimStart('&');
 
+            SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sharedAccessSignature, "sig=", "&"));
+
             //-------------------------------------------------------------------------------------
             if (debug)
             {
                 s += "\n";
                 s += "------ Debug Info ----------" + "\n";
                 s += "Canonical-Path-to-Resource: " + canonicalPathToResource + "\n";
-                s += "String-to-Sign: \n" + stringtosign + "\n";
+                s += "---------------------------" + "\n";
+                s += "String-to-Sign: \n" + stringtosign;
                 s += "---------------------------" + "\n";
             }
 
@@ -728,45 +658,45 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "  Different order on parameter values (ex: ss=bfq vs ss=bqf) may generate different valid signature (sig)\n";
             BoxAuthResults.Text += "\n";
             BoxAuthResults.Text += "Regenerated Account SAS token:\n";
-            //BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
+            BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
             BoxAuthResults.Text += "-------------------------------------------------\n";
             if (SAS_Utils.SAS.ss.v.IndexOf("b") != -1)
             {
                 BoxAuthResults.Text += "Blob URI:\n";
-                BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n";
+                //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n";
                 BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/" + sas + "\n\n";
             }
 
             if (SAS_Utils.SAS.ss.v.IndexOf("f") != -1)
             {
                 BoxAuthResults.Text += "File URI:\n";
-                BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".file.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n";
+                //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".file.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n";
                 BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".file.core.windows.net/" + sas + "\n\n";
             }
 
             if (SAS_Utils.SAS.ss.v.IndexOf("q") != -1)
             {
                 BoxAuthResults.Text += "Queue URI:\n";
-                BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".queue.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n";
+                //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".queue.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n";
                 BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".queue.core.windows.net/" + sas + "\n\n";
             }
 
             if (SAS_Utils.SAS.ss.v.IndexOf("t") != -1)
             {
                 BoxAuthResults.Text += "Table URI:\n";
-                BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".table.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n";
+                //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".table.core.windows.net/" + Uri.UnescapeDataString(sas) + "\n";
                 BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".table.core.windows.net/" + sas + "\n\n";
             }
 
             BoxAuthResults.Text += "-------------------------------------------------\n";
             BoxAuthResults.Text += "Test your SAS on Browser (get blob) (replace <container> and <blob>):\n";
-            BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/<container>/<blob>" + Uri.UnescapeDataString(sas) + "\n";
+            //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/<container>/<blob>" + Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/<container>/<blob>" + sas + "\n\n";
 
 
-            SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sas, "sig=", "&"));
+            
 
             return true;
         }
@@ -803,14 +733,14 @@ namespace Storage_Helper_SAS_Tool
                             signedversion + "\n" 
              */
             string stringtosign = SAS_Utils.SAS.storageAccountName.v.Trim() + "\n" +
-                    SAS_Utils.SAS.sp.v + "\n" +
-                    SAS_Utils.SAS.ss.v + "\n" +
-                    SAS_Utils.SAS.srt.v + "\n" +
-                    SAS_Utils.SAS.st.v + "\n" +
-                    SAS_Utils.SAS.se.v + "\n" +
-                    SAS_Utils.SAS.sip.v + "\n" +
-                    SAS_Utils.SAS.spr.v + "\n" +
-                    SAS_Utils.SAS.sv.v + "\n";
+                                    SAS_Utils.SAS.sp.v + "\n" +
+                                    SAS_Utils.SAS.ss.v + "\n" +
+                                    SAS_Utils.SAS.srt.v + "\n" +
+                                    SAS_Utils.SAS.st.v + "\n" +
+                                    SAS_Utils.SAS.se.v + "\n" +
+                                    SAS_Utils.SAS.sip.v + "\n" +
+                                    SAS_Utils.SAS.spr.v + "\n" +
+                                    SAS_Utils.SAS.sv.v + "\n";
 
             //-------------------------------------------------------------------------------------
             byte[] keyForSigning = System.Convert.FromBase64String(SAS_Utils.SAS.storageAccountKey.v.Trim());
@@ -837,12 +767,14 @@ namespace Storage_Helper_SAS_Tool
             // Remove the first "&"
             sharedAccessSignature = sharedAccessSignature.TrimStart('&');
 
+            SAS_Utils.SAS.sig = Uri.UnescapeDataString(SAS_Utils.Get_SASValue(sharedAccessSignature, "sig=", "&"));
+
             //-------------------------------------------------------------------------------------
             if (debug)
             {
                 s += "\n";
                 s += "------ Debug Info ----------" + "\n";
-                s += "String-to-Sign: \n" + stringtosign + "\n";
+                s += "String-to-Sign: \n" + stringtosign;
                 s += "---------------------------" + "\n";
             }
 

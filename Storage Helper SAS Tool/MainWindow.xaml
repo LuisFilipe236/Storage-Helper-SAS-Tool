@@ -130,6 +130,7 @@
             <Label x:Name="label_rsct" Content="Content-Type:" VerticalAlignment="Top" FontSize="10" Height="27" FontWeight="Bold" HorizontalAlignment="Right" Width="74" Margin="0,81,358,0"/>
             <Label x:Name="label_rscd" Content="Content-Disposition:" VerticalAlignment="Top" FontSize="10" FontWeight="Bold" HorizontalAlignment="Right" Width="86" Margin="0,21,362,0"/>
             <TextBox x:Name="textBox_rscd" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,23,237,0" LostFocus="TextBoxBlobSnapshotName_LostFocus"/>
+            <CheckBox x:Name="checkBox_Debug" Content="Debug" HorizontalAlignment="Left" Margin="226,204,0,0" VerticalAlignment="Top"/>
         </Grid>
         <Label x:Name="labelMessages"  Content=" "  Margin="10,0,4.6,0" VerticalAlignment="Bottom" Height="22" FontSize="10" Grid.ColumnSpan="2" HorizontalAlignment="Center" Foreground="#FF0003FF"/>
     </Grid>

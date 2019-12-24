@@ -371,10 +371,10 @@ namespace Storage_Helper_SAS_Tool
             switch (sr)
             {
                 case "b":
-                    v = "Valid permissions for Blobs are 'rwdac'";
+                    v = "Valid permissions for Blobs are 'racwdl'";
 
                     // found chars not supported by sp paramenter
-                    if (!Utils.ValidateString(sp, "rwdac") || sp.Length > 5)
+                    if (!Utils.ValidateString(sp, "racwdl") || sp.Length > 5)
                         return SAS_Utils.andSetState("sp", false, "Invalid Signed Permissions for Blobs (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v);
 
                     //----------------------------------------------
@@ -408,10 +408,10 @@ namespace Storage_Helper_SAS_Tool
                     break;
 
                 case "c":
-                    v = "Valid permissions for Containers are 'rwdacl'";
+                    v = "Valid permissions for Containers are 'racwdl'";
 
                     // found chars not supported by sp paramenter
-                    if (!Utils.ValidateString(sp, "rwdacl") || sp.Length > 6)
+                    if (!Utils.ValidateString(sp, "racwdl") || sp.Length > 6)
                         return SAS_Utils.andSetState("sp", false, "Invalid Signed Permissions for Containers (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v);
 
                     //----------------------------------------------
@@ -447,10 +447,10 @@ namespace Storage_Helper_SAS_Tool
                     break;
 
                 case "s":
-                    v = "Valid permissions for File Shares are 'rwdlc'";
+                    v = "Valid permissions for File Shares are 'rcwdl'";
 
                     // found chars not supported by sp paramenter
-                    if (!Utils.ValidateString(sp, "rwdlc") || sp.Length > 5)
+                    if (!Utils.ValidateString(sp, "rcwdl") || sp.Length > 5)
                         return SAS_Utils.andSetState("sp", false, "Invalid Signed Permissions to File Share (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v);
 
                     if (sv.CompareTo("2015-02-21") < 0)
@@ -483,10 +483,10 @@ namespace Storage_Helper_SAS_Tool
                     break;
 
                 case "f":
-                    v = "Valid permissions for Files are 'rwdc'";
+                    v = "Valid permissions for Files are 'rcwdl'";
 
                     // found chars not supported by sp paramenter
-                    if (!Utils.ValidateString(sp, "rwdc") || sp.Length > 4)
+                    if (!Utils.ValidateString(sp, "rcwdl") || sp.Length > 4)
                         return SAS_Utils.andSetState("sp", false, "Invalid Signed Permissions for File (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v);
 
                     if (sv.CompareTo("2015-02-21") < 0)
@@ -516,9 +516,13 @@ namespace Storage_Helper_SAS_Tool
                     break;
 
                 case "bs":
-                    // Valid permissions ??? - TODO
+                    // Valid permissions ??? - racwdl - same as Blob ???
                     //----------------------------------------------
-                    v = "Valid permissions for Blob Shapshots are 'rwdlacup' - TODO ???? ";
+                    v = "Valid permissions for Blob Shapshots are 'racwdl' - TODO ???? - assuming the same as Blob";
+
+                    // found chars not supported by sp paramenter
+                    if (!Utils.ValidateString(sp, "racwdl") || sp.Length > 5)
+                        return SAS_Utils.andSetState("sp", false, "Invalid Signed Permissions for Blob Snapshots (TODO - Same as Blobs ???) (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v);
 
                     s += "  Permissions for Blob Shapshots (Service SAS) ('sr'=bs):\n";
 

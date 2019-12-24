@@ -212,60 +212,6 @@ namespace Storage_Helper_SAS_Tool
 
         
 
-        /*
-        /// <summary>
-        /// Regenerate SAS using Storage SDK v12.0.0_Preview
-        /// </summary>
-        private void RegenerateSAS_SDKv12_preview()
-        {
-            // Save IP Bytes on structs fromIP[] and toIP[]
-            SAS_ValidateParam.Validate_Sip(textBox_sip.Text);
-
-            bool ret = true;
-            // Regenerate Account SAS (srt) from SAS structure values
-            if (SAS_Utils.SAS.srt.v != "not found" && SAS_Utils.SAS.srt.v != "")
-                ret = SAS_Create_v12.Regenerate_AccountSAS(textBoxAccountName, textBoxAccountKey1, BoxAuthResults_Right, ComboBox_ss.Text);
-
-            // Regenerate Service SAS (sr) from SAS structure values (blob, container, file, share, blob Snapshot, Queue ??)
-            if (SAS_Utils.SAS.sr.v != "not found" && SAS_Utils.SAS.sr.v != "")
-                switch (SAS_Utils.SAS.sr.v)   // service SAS
-                {
-                    case "b":   // blob
-                        ret = SAS_Create_v12.Regenerate_ServiceSAS_Blob(labelContainerName, labelBlobName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBoxBlobName, textBox_si, BoxAuthResults_Right);
-                        break;
-                    case "c":   // container
-                        ret = SAS_Create_v12.Regenerate_ServiceSAS_Container(labelContainerName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBox_si, BoxAuthResults_Right);
-                        break;
-                    case "bs":  // Blob Shapshot
-                        ret = SAS_Create_v12.Regenerate_ServiceSAS_BlobSnapshot(labelContainerName, labelBlobSnapshotName, textBoxAccountName, textBoxAccountKey1, textBoxContainerName, textBoxBlobSnapshotName, textBox_si, BoxAuthResults_Right, labelBlobSnapshotTime, textBoxBlobSnapshotTime);
-                        break;
-                    case "f":   // file
-                        ret = SAS_Create_v12.Regenerate_ServiceSAS_File(labelShareName, labelFileName, textBoxAccountName, textBoxAccountKey1, textBoxShareName, textBoxFileName, textBox_si, BoxAuthResults_Right);
-                        break;
-                    case "s":   // share
-                        ret = SAS_Create_v12.Regenerate_ServiceSAS_Share(labelShareName, textBoxAccountName, textBoxAccountKey1, textBoxShareName, textBox_si, BoxAuthResults_Right);
-                        break;
-                }
-                else
-                    if ((SAS_Utils.SAS.srt.v == "not found" || SAS_Utils.SAS.srt.v == "") && (SAS_Utils.SAS.tn.v == "not found" || SAS_Utils.SAS.tn.v == ""))
-                        ret = SAS_Create_v12.Regenerate_ServiceSAS_Queue(labelQueueName, textBoxAccountName, textBoxAccountKey1, textBoxQueueName, textBox_si, BoxAuthResults_Right);
-
-
-
-            // Regenerate Table Service SAS uses CosmoDB - Microsoft.Azure.Cosmos.Table library
-            if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
-                ret = SAS_Create_Cosmos.Regenerate_ServiceSAS_Table(label_tn, textBoxAccountName, textBoxAccountKey1, textBox_tn, textBox_si, BoxAuthResults_Right);
-
-            if (!ret) return;
-
-            // Regenerated Service SAS Table (tn)
-            if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
-                BoxAuthResults_Right.Text += SAS_Create_Cosmos.Limitations_Cosmos_Info(Cosmos_Version);
-            else
-                BoxAuthResults_Right.Text += SAS_Create_v12.Limitations_v12_Info(StorageSDK_12_Version);                       
-        }
-        */
-
 
         /// <summary>
         /// Regenerate SAS without SDK - Manual SAS regenration
@@ -275,7 +221,7 @@ namespace Storage_Helper_SAS_Tool
             // Save IP Bytes on structs fromIP[] and toIP[]
             SAS_ValidateParam.Validate_Sip(textBox_sip.Text);
 
-            bool debug = true;
+            bool debug = (bool)checkBox_Debug.IsChecked;
 
             // Regenerate Account SAS (srt) from SAS structure values
             if (SAS_Utils.SAS.srt.v != "not found" && SAS_Utils.SAS.srt.v != "")
@@ -344,13 +290,6 @@ namespace Storage_Helper_SAS_Tool
             }
 
 
-            /*
-            // Regenerated Service SAS Table (tn)
-            if (SAS_Utils.SAS.tn.v != "not found" && SAS_Utils.SAS.tn.v != "")
-                BoxAuthResults_Right.Text += SAS_Create_Cosmos.Limitations_Cosmos_Info(Cosmos_Version);
-            else
-                BoxAuthResults_Right.Text += SAS_Create_v12.Limitations_v12_Info(StorageSDK_12_Version);
-            */
         }
 
 
