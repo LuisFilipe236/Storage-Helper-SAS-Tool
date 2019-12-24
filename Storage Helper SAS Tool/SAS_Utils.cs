@@ -7,7 +7,7 @@ using System.Windows;
 
 namespace Storage_Helper_SAS_Tool
 {
-    /// <summary>
+    /// <summary>   
     /// ---------------------------------------------------------------------------------------------------------
     /// Constructing the Account SAS URI
     /// https://docs.microsoft.com/pt-pt/rest/api/storageservices/create-account-sas?redirectedfrom=MSDN#constructing-the-account-sas-uri
