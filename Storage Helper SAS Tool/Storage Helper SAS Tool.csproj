@@ -219,8 +219,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="SAS_Create.cs" />
-    <Compile Include="SAS_Create_Cosmos.cs" />
-    <Compile Include="SAS_Create_v12.cs" />
     <Compile Include="SAS_Utils.cs" />
     <Compile Include="SAS_ValidateParam.cs" />
     <Compile Include="Utils.cs" />
