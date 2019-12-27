@@ -136,7 +136,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults_Right.Text += "API Usage: GET https://helpertool.azurewebsites.net/SAS/check\n";
             BoxAuthResults_Right.Text += "\n";
             BoxAuthResults_Right.Text += "Query parameters:\n";
-            BoxAuthResults_Right.Text += "All SAS parameters are stpported.\n";
+            BoxAuthResults_Right.Text += "All SAS parameters are supported.\n";
             BoxAuthResults_Right.Text += "Ex: https://helpertool.azurewebsites.net/SAS/check?sv=2019-02-02&ss=bfqt&srt=sco&sp=rwdlacup&se=2019-12-09T18:35:48Z&st=2019-12-09T10:35:48Z&spr=https&sig=XXXX.\n";
 
             BoxAuthResults_Right.Text += "-------------------------------------------------------------------------------------------------\n";
@@ -201,18 +201,21 @@ namespace Storage_Helper_SAS_Tool
             Get_ValuesFromBoxes_ToStruct();
 
 
-            // Using SDK v12_preview
-            //------------------------------------------------
-            //RegenerateSAS_SDKv12_preview();
+            if (labelAccountKey.Foreground != Brushes.Red)
+            {
+                // Without SDK - Manual SAS creation
+                //------------------------------------------------
+                RegenerateSAS();
 
-            // Without SDK - Manual SAS creation
-            //------------------------------------------------
-            RegenerateSAS();
+                // Change the textBox_signature_right according to the value of the textBox_signature_left
+                textBox_sig_right.Text = SAS_Utils.SAS.sig;
+                Set_Color_Signature();
+            }
+            else
+                MessageBox.Show("Please correct the Storage Account Key", "Storage Account Key", MessageBoxButton.OK, MessageBoxImage.Error);
 
-            textBox_sig_right.Text = SAS_Utils.SAS.sig;
-
-            // Change the textBox_signature_right according to the value of the textBox_signature_left
-            Set_Color_Signature();
+            if (SAS_Utils.SAS.si.v != "")
+                MessageBox.Show("Providing Policy will not validate Permissions ('sp'), Start ('st') and Expiry ('se') datetime, as these values can be redefined on Policy.","Policy Provided",MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
 
@@ -277,13 +280,13 @@ namespace Storage_Helper_SAS_Tool
                         break;
                 }
             else
-                    if ((SAS_Utils.SAS.srt.v == "not found" || SAS_Utils.SAS.srt.v == "") && (SAS_Utils.SAS.tn.v == "not found" || SAS_Utils.SAS.tn.v == ""))
-                    {
-                        if (Utils.StringEmpty(labelQueueName, textBoxQueueName.Text, "Missing Queue Name", "Error"))
-                            { SAS_Utils.SAS.queueName.s = false; return; }
+                if ((SAS_Utils.SAS.srt.v == "not found" || SAS_Utils.SAS.srt.v == "") && (SAS_Utils.SAS.tn.v == "not found" || SAS_Utils.SAS.tn.v == ""))
+                {
+                    if (Utils.StringEmpty(labelQueueName, textBoxQueueName.Text, "Missing Queue Name", "Error"))
+                        { SAS_Utils.SAS.queueName.s = false; return; }
 
-                        Service.Regenerate_ServiceSAS_Queue(BoxAuthResults_Right, SAS_Utils.SAS.sv.v, debug);
-                    }
+                    Service.Regenerate_ServiceSAS_Queue(BoxAuthResults_Right, SAS_Utils.SAS.sv.v, debug);
+                }
 
 
             // Regenerate Table Service SAS uses CosmoDB - Microsoft.Azure.Cosmos.Table library
@@ -459,46 +462,62 @@ namespace Storage_Helper_SAS_Tool
             if (String.IsNullOrEmpty(ComboBox_sv.Text))              // Check is null
                 return ErrorMsg(label_sv, "Please provide the Service Version to regenerate a SAS", "Error");
 
-
-            // sp - signed permissions
-            //------------------------------------------------------------------------------
-            if (String.IsNullOrEmpty(ComboBox_sp.Text))              // Check is null
-                return ErrorMsg(label_sp, "Please provide at least " + (ComboBox_sr.Text == "c" || ComboBox_sr.Text == "s" ? "'l'" : "'r'") + " Signed Permissions to regenerate a SAS", "Error");
-
-            if ((ComboBox_sr.Text == "s" || ComboBox_sr.Text == "c") && ComboBox_sp.Text.IndexOf("l") == -1)        // 'l' needed for Container or share
-                return ErrorMsg(label_sp, "Please provide at least 'l' on Signed Permissions", "Error");
-
-
-            // st, se - Check Start and Expiry Date format
-            //------------------------------------------------------------------------------
-            if (String.IsNullOrEmpty(textBox_se.Text))              // Check is null
-                return ErrorMsg(label_se, "Please provide the Signed Expiry Date/Time to regenerate a SAS", "Error");
-
-            if (textBox_se.Text.Length != 20 && textBox_se.Text.Length != 17 && textBox_se.Text.Length != 10)
-                return ErrorMsg(label_se, "Incorrect format on Signed Expiry Date/Time", "Error");
-
-            if (!String.IsNullOrEmpty(textBox_st.Text) && textBox_st.Text.Length != 20 && textBox_st.Text.Length != 17 && textBox_st.Text.Length != 10)
-                return ErrorMsg(label_st, "Incorrect format on Signed Start Date/Time", "Error");
-
-            // Service SAS - In versions before 2012-02-12, the duration between signedstart and signedexpiry cannot exceed one hour unless a container policy is used.
-            if (String.IsNullOrEmpty(textBox_si.Text) && (!String.IsNullOrEmpty(ComboBox_sr.Text) || !String.IsNullOrEmpty(textBox_tn.Text)) && String.Compare(ComboBox_sv.Text, "2012-02-12") < 0)
+            // 'si' Policy may define Permissions and Start and Expiry datetime
+            // If Policy provided, no validate Permissions and Start and Expiry datetime
+            if (String.IsNullOrEmpty(textBox_si.Text))
             {
-                DateTime st;
-                if (String.IsNullOrEmpty(textBox_st.Text))
-                    st = DateTime.Now.ToUniversalTime();
-                else
-                    st = Convert.ToDateTime(textBox_st.Text).ToUniversalTime();
+                // sp - signed permissions
+                //------------------------------------------------------------------------------
+                if (String.IsNullOrEmpty(ComboBox_sp.Text))              // Check is null
+                    return ErrorMsg(label_sp, "Please provide at least " + (ComboBox_sr.Text == "c" || ComboBox_sr.Text == "s" ? "'l'" : "'r'") + " Signed Permissions to regenerate a SAS", "Error");
 
-                DateTime se = Convert.ToDateTime(textBox_se.Text).ToUniversalTime();
-                TimeSpan ts = (se - st);
+                if ((ComboBox_sr.Text == "s" || ComboBox_sr.Text == "c") && ComboBox_sp.Text.IndexOf("l") == -1)        // 'l' needed for Container or share
+                    return ErrorMsg(label_sp, "Please provide at least 'l' on Signed Permissions", "Error");
 
-                if (ts.Hours > 1 || (ts.Hours == 1 && (ts.Minutes > 0 || ts.Seconds > 0)))        // difference beetween se and st with more than 1 hour
-                    return ErrorMsg(label_st, "Generating Service SAS on Service Versions before 2012-02-12, the duration between signedstart and signedexpiry cannot exceed one hour, unless a container policy is used.", "Error");
+                if (ComboBox_sp.Text == "l")        // only 'l' not supported for Blob, snapshot or File
+                {
+                    switch (ComboBox_sr.Text)
+                    {
+                        case "f":
+                            return ErrorMsg(label_sp, "Only 'l' on Signed Permission is not supported for File Service SAS", "Error");
+                        case "b":
+                            return ErrorMsg(label_sp, "Only 'l' on Signed Permission is not supported for Blob Service SAS", "Error");
+                        case "bs":
+                            return ErrorMsg(label_sp, "Only 'l' on Signed Permission is not supported for Blob Snapshot Service SAS", "Error");
+                    }
+                }
+
+                // st, se - Check Start and Expiry Date format
+                //------------------------------------------------------------------------------
+                if (String.IsNullOrEmpty(textBox_se.Text))              // Check is null
+                    return ErrorMsg(label_se, "Please provide the Signed Expiry Date/Time to regenerate a SAS", "Error");
+
+                if (textBox_se.Text.Length != 20 && textBox_se.Text.Length != 17 && textBox_se.Text.Length != 10)
+                    return ErrorMsg(label_se, "Incorrect format on Signed Expiry Date/Time", "Error");
+
+                if (!String.IsNullOrEmpty(textBox_st.Text) && textBox_st.Text.Length != 20 && textBox_st.Text.Length != 17 && textBox_st.Text.Length != 10)
+                    return ErrorMsg(label_st, "Incorrect format on Signed Start Date/Time", "Error");
+
+                // Service SAS - In versions before 2012-02-12, the duration between signedstart and signedexpiry cannot exceed one hour unless a container policy is used.
+                if (String.IsNullOrEmpty(textBox_si.Text) && (!String.IsNullOrEmpty(ComboBox_sr.Text) || !String.IsNullOrEmpty(textBox_tn.Text)) && String.Compare(ComboBox_sv.Text, "2012-02-12") < 0)
+                {
+                    DateTime st;
+                    if (String.IsNullOrEmpty(textBox_st.Text))
+                        st = DateTime.Now.ToUniversalTime();
+                    else
+                        st = Convert.ToDateTime(textBox_st.Text).ToUniversalTime();
+
+                    DateTime se = Convert.ToDateTime(textBox_se.Text).ToUniversalTime();
+                    TimeSpan ts = (se - st);
+
+                    if (ts.Hours > 1 || (ts.Hours == 1 && (ts.Minutes > 0 || ts.Seconds > 0)))        // difference beetween se and st with more than 1 hour
+                        return ErrorMsg(label_st, "Generating Service SAS on Service Versions before 2012-02-12, the duration between signedstart and signedexpiry cannot exceed one hour, unless a container policy is used.", "Error");
+                }
+
+                // Validate dates
+                if (!DateTimeUtils.Validate_DateTimes(label_st, label_se, textBox_st.Text, textBox_se.Text))
+                    return false;
             }
-
-            // Validate dates
-            if (!DateTimeUtils.Validate_DateTimes(label_st, label_se, textBox_st.Text, textBox_se.Text))
-                return false;
             // ------------------------------------------------------------------------------
 
 
@@ -675,11 +694,11 @@ namespace Storage_Helper_SAS_Tool
             textBox_spk.Text = (SAS_Utils.SAS.spk == "not found" ? "" : SAS_Utils.SAS.spk);
             textBox_si.Text = (SAS_Utils.SAS.si.v == "not found" ? "" : SAS_Utils.SAS.si.v);        // Policy Name
 
-            textBox_spk.Text = (SAS_Utils.SAS.rscc == "not found" ? "" : SAS_Utils.SAS.rscc);
-            textBox_spk.Text = (SAS_Utils.SAS.rscd == "not found" ? "" : SAS_Utils.SAS.rscd);
-            textBox_spk.Text = (SAS_Utils.SAS.rsce == "not found" ? "" : SAS_Utils.SAS.rsce);
-            textBox_spk.Text = (SAS_Utils.SAS.rscl == "not found" ? "" : SAS_Utils.SAS.rscl);
-            textBox_spk.Text = (SAS_Utils.SAS.rsct == "not found" ? "" : SAS_Utils.SAS.rsct);
+            textBox_rscc.Text = (SAS_Utils.SAS.rscc == "not found" ? "" : SAS_Utils.SAS.rscc);
+            textBox_rscd.Text = (SAS_Utils.SAS.rscd == "not found" ? "" : SAS_Utils.SAS.rscd);
+            textBox_rsce.Text = (SAS_Utils.SAS.rsce == "not found" ? "" : SAS_Utils.SAS.rsce);
+            textBox_rscl.Text = (SAS_Utils.SAS.rscl == "not found" ? "" : SAS_Utils.SAS.rscl);
+            textBox_rsct.Text = (SAS_Utils.SAS.rsct == "not found" ? "" : SAS_Utils.SAS.rsct);
 
             SAS_Utils.PopulateComboBox_sv(ComboBox_sv, ComboBox_sr.Text, textBox_tn.Text);
             ComboBox_sv.SelectedIndex = ComboBox_sv.Items.IndexOf((SAS_Utils.SAS.sv.v == "not found" ? "" : SAS_Utils.SAS.sv.v));
@@ -936,7 +955,7 @@ namespace Storage_Helper_SAS_Tool
                     sp_read.IsEnabled = true;
                     sp_write.IsEnabled = true;
                     sp_delete.IsEnabled = true;  // Uncheck the disable checkboxes
-                    sp_list.IsEnabled = false; sp_list.IsChecked = false;
+                    sp_list.IsEnabled = true; //false; sp_list.IsChecked = false;
                     sp_add.IsEnabled = true;
                     sp_create.IsEnabled = true;
                     sp_update.IsEnabled = false; sp_update.IsChecked = false;
@@ -960,7 +979,7 @@ namespace Storage_Helper_SAS_Tool
                     sp_read.IsEnabled = true;
                     sp_write.IsEnabled = true;
                     sp_delete.IsEnabled = true;  // Uncheck the disable checkboxes
-                    sp_list.IsEnabled = false; sp_list.IsChecked = false;
+                    sp_list.IsEnabled = true; // false; sp_list.IsChecked = false;
                     sp_add.IsEnabled = false; sp_add.IsChecked = false;
                     sp_create.IsEnabled = true;
                     sp_update.IsEnabled = false; sp_update.IsChecked = false;
@@ -1278,7 +1297,15 @@ namespace Storage_Helper_SAS_Tool
         private void TextBoxAccountKey1_LostFocus(object sender, RoutedEventArgs e)
         {
             if (textBoxAccountKey1.Text != "")
-                labelAccountKey.Foreground = Brushes.Black;
+            {
+                int s = textBoxAccountKey1.Text.Length;
+                if (textBoxAccountKey1.Text[s-1] != '=' || textBoxAccountKey1.Text[s-2] != '=')
+                { 
+                    labelAccountKey.Foreground = Brushes.Red;
+                }
+                else
+                    labelAccountKey.Foreground = Brushes.Black;
+            }
         }
 
 
@@ -1363,5 +1390,10 @@ namespace Storage_Helper_SAS_Tool
             SplashInfo();
         }
 
+        private void textBoxBlobSnapshotTime_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (textBoxBlobSnapshotTime.Text != "")
+                labelBlobSnapshotTime.Foreground = Brushes.Black;
+        }
     }
 }

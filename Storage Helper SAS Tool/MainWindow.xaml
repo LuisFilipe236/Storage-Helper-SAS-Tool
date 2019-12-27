@@ -35,8 +35,8 @@
             <Label x:Name="labelAccountName" Content="Account Name:" HorizontalAlignment="Right" VerticalAlignment="Top" Height="26" FontWeight="Bold" Margin="0,5,128,0"/>
             <Label x:Name="labelBlobSnapshotName" Content="Snapshot Name:" VerticalAlignment="Top" FontSize="10" FontWeight="Bold" HorizontalAlignment="Right" Width="86" Margin="0,78,130,0"/>
             <TextBox x:Name="textBoxBlobSnapshotName" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,81,5,0" LostFocus="TextBoxBlobSnapshotName_LostFocus"/>
-            <Label x:Name="labelBlobSnapshotTime" Content="Snapshot Name:" VerticalAlignment="Top" FontSize="10" FontWeight="Bold" HorizontalAlignment="Right" Width="86" Margin="-134,78,277,0"/>
-            <TextBox x:Name="textBoxBlobSnapshotTime" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="-42,81,151,0" LostFocus="TextBoxBlobSnapshotName_LostFocus"/>
+            <Label x:Name="labelBlobSnapshotTime" Content="Snapshot Time:" VerticalAlignment="Top" FontSize="10" FontWeight="Bold" HorizontalAlignment="Right" Width="86" Margin="-134,78,277,0"/>
+            <TextBox x:Name="textBoxBlobSnapshotTime" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="-42,81,151,0" LostFocus="textBoxBlobSnapshotTime_LostFocus"/>
         </Grid>
         <Grid Margin="32,84,166.8,259" HorizontalAlignment="Center" Width="310">
             <Label x:Name="labelAccountSAS" Content="Account SAS" HorizontalAlignment="Left" Margin="98,-1,0,0" VerticalAlignment="Top" Height="26" FontWeight="Bold" Width="81"/>

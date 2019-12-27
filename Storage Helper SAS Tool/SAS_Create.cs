@@ -15,25 +15,6 @@ using System.Windows.Controls;
 // https://docs.microsoft.com/en-us/rest/api/storageservices/service-sas-examples
 //------------------------------------------------
 
-/*
- //------------------------------------------------
- Main()
- {
-        // Test method - OK
-        // Console.WriteLine("Generated SAS - tested OK: " + RestAPI.RestAPI.GetContainerSASToken_OK("container", "blob.txt");
-
-        // OK - IP/Protocol/Service Version
-        // Console.WriteLine("Generated Account SAS: " + Account.GenerateAccountSas(Account.serviceVersion, Account.startTime, Account.expiryTime, true));
-
-        // OK blob
-        Console.WriteLine("Generated Service SAS: " + Service.GenerateServiceSas(Account.serviceVersion, Account.startTime, Account.expiryTime, true));
-        Console.WriteLine("--- FINISH ---");
-
-        Console.ReadLine();
- }
- //------------------------------------------------
- */
-
 namespace Storage_Helper_SAS_Tool
 {
 
@@ -62,6 +43,8 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Regenerated Service SAS - Container:\n";
             BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
+
+            BoxAuthResults.Text += SAS_Utils.SAS.DebugInfo + "\n";
 
             BoxAuthResults.Text += "-------------------------------------------------\n";
             BoxAuthResults.Text += "Container URI:\n";
@@ -92,6 +75,8 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Regenerated Service SAS - Blob:\n";
             BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
+
+            BoxAuthResults.Text += SAS_Utils.SAS.DebugInfo + "\n";
 
             BoxAuthResults.Text += "-------------------------------------------------\n";
             BoxAuthResults.Text += "Blob URI:\n";
@@ -124,6 +109,8 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
+            BoxAuthResults.Text += SAS_Utils.SAS.DebugInfo + "\n";
+
             BoxAuthResults.Text += "-------------------------------------------------\n";
             BoxAuthResults.Text += "Blob Snapshot URI:\n";
             //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/" + SAS_Utils.SAS.containerName.v + "/" + SAS_Utils.SAS.blobSnapshotName.v + Uri.UnescapeDataString(sas) + "\n";
@@ -132,7 +119,7 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "-------------------------------------------------\n";
             BoxAuthResults.Text += "Test your SAS on Browser (get snapshot) (repalce <DateTime> by snapshot datetime):\n";
             //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/" + SAS_Utils.SAS.containerName.v + "/" + SAS_Utils.SAS.blobSnapshotName.v + "?snapshot=<DateTime>" + Uri.UnescapeDataString(sas).Replace("?", "&") + "\n";
-            BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/" + SAS_Utils.SAS.containerName.v + "/" + SAS_Utils.SAS.blobSnapshotName.v + "?snapshot=<DateTime>" + sas.Replace("?", "&") + "\n\n";
+            BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".blob.core.windows.net/" + SAS_Utils.SAS.containerName.v + "/" + SAS_Utils.SAS.blobSnapshotName.v /* + "?snapshot=<DateTime>" */ + sas + "\n\n";
 
             return true;
         }
@@ -153,6 +140,8 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Regenerated Service SAS - Share:\n";
             BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
+
+            BoxAuthResults.Text += SAS_Utils.SAS.DebugInfo + "\n";
 
             BoxAuthResults.Text += "-------------------------------------------------\n";
             BoxAuthResults.Text += "Share URI:\n";
@@ -184,6 +173,8 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
+            BoxAuthResults.Text += SAS_Utils.SAS.DebugInfo + "\n";
+
             BoxAuthResults.Text += "-------------------------------------------------\n";
             BoxAuthResults.Text += "File URI:\n";
             //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".file.core.windows.net/" + SAS_Utils.SAS.shareName.v + "/" + SAS_Utils.SAS.fileName.v + Uri.UnescapeDataString(sas) + "\n";
@@ -212,6 +203,8 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Regenerated Service SAS - Queue:\n";
             BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
+
+            BoxAuthResults.Text += SAS_Utils.SAS.DebugInfo + "\n";
 
             BoxAuthResults.Text += "-------------------------------------------------\n";
             BoxAuthResults.Text += "Queue URI:\n";
@@ -242,7 +235,8 @@ namespace Storage_Helper_SAS_Tool
         /// <returns></returns>
         public static bool Regenerate_ServiceSAS_Table(TextBox BoxAuthResults, string VersionControl, bool debug = false)
         {
-            string sas = Manual_ServiceSas(VersionControl, debug);
+            string sas = "?" + Manual_ServiceSas(VersionControl, debug);
+            if (sas == "?") return false;
 
             BoxAuthResults.Text = "\n\n";
             BoxAuthResults.Text += "WARNING:\n";
@@ -252,15 +246,17 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
 
+            BoxAuthResults.Text += SAS_Utils.SAS.DebugInfo + "\n";
+
             BoxAuthResults.Text += "-------------------------------------------------\n";
             BoxAuthResults.Text += "Table URI:\n";
             //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".table.core.windows.net/" + SAS_Utils.SAS.tableName.v + Uri.UnescapeDataString(sas) + "\n";
-            BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".table.core.windows.net/" + SAS_Utils.SAS.tableName.v + sas + "\n\n";
+            BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".table.core.windows.net/" + SAS_Utils.SAS.tn.v + sas + "\n\n";
 
             BoxAuthResults.Text += "-------------------------------------------------\n";
             BoxAuthResults.Text += "Test your SAS on Browser (list entities):\n";
             //BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".table.core.windows.net/" + SAS_Utils.SAS.tableName.v + Uri.UnescapeDataString(sas) + "\n";
-            BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".table.core.windows.net/" + SAS_Utils.SAS.tableName.v + sas + "\n\n";
+            BoxAuthResults.Text += "https://" + SAS_Utils.SAS.storageAccountName.v + ".table.core.windows.net/" + SAS_Utils.SAS.tn.v + sas + "\n\n";
 
             return true;
         }
@@ -295,40 +291,40 @@ namespace Storage_Helper_SAS_Tool
             switch (SAS_Utils.SAS.sr.v)
             {
                 case "b":   // blob
-                    canonicalPathToResource = Get_Service_canonicalPathToResource(VersionControl);
-                    stringtosign = Get_Service_stringtosign(VersionControl, "b", SAS_Utils.SAS.st.v, SAS_Utils.SAS.se.v, canonicalPathToResource);
+                    canonicalPathToResource = Get_Service_canonicalPathToResource(VersionControl, SAS_Utils.SAS.sr.v);
+                    stringtosign = Get_Service_stringtosign(VersionControl, SAS_Utils.SAS.sr.v, canonicalPathToResource);
                     break;
 
                 case "bs":   // blob snapshot
-                    canonicalPathToResource = Get_Service_canonicalPathToResource(VersionControl);
-                    stringtosign = Get_Service_stringtosign(VersionControl, "bs", SAS_Utils.SAS.st.v, SAS_Utils.SAS.se.v, canonicalPathToResource);
+                    canonicalPathToResource = Get_Service_canonicalPathToResource(VersionControl, SAS_Utils.SAS.sr.v);
+                    stringtosign = Get_Service_stringtosign(VersionControl, SAS_Utils.SAS.sr.v, canonicalPathToResource);
                     break;
 
                 case "c":   // container
-                    canonicalPathToResource = Get_Service_canonicalPathToResource(VersionControl);
-                    stringtosign = Get_Service_stringtosign(VersionControl, "c", SAS_Utils.SAS.st.v, SAS_Utils.SAS.se.v, canonicalPathToResource);
+                    canonicalPathToResource = Get_Service_canonicalPathToResource(VersionControl, SAS_Utils.SAS.sr.v);
+                    stringtosign = Get_Service_stringtosign(VersionControl, SAS_Utils.SAS.sr.v, canonicalPathToResource);
                     break;
 
                 case "f":   // file
-                    canonicalPathToResource = Get_Service_canonicalPathToResource(VersionControl);
-                    stringtosign = Get_Service_stringtosign(VersionControl, "f", SAS_Utils.SAS.st.v, SAS_Utils.SAS.se.v, canonicalPathToResource);
+                    canonicalPathToResource = Get_Service_canonicalPathToResource(VersionControl, SAS_Utils.SAS.sr.v);
+                    stringtosign = Get_Service_stringtosign(VersionControl, SAS_Utils.SAS.sr.v, canonicalPathToResource);
                     break;
 
                 case "s":   // share
-                    canonicalPathToResource = Get_Service_canonicalPathToResource(VersionControl);
-                    stringtosign = Get_Service_stringtosign(VersionControl, "s", SAS_Utils.SAS.st.v, SAS_Utils.SAS.se.v, canonicalPathToResource);
+                    canonicalPathToResource = Get_Service_canonicalPathToResource(VersionControl, SAS_Utils.SAS.sr.v);
+                    stringtosign = Get_Service_stringtosign(VersionControl, SAS_Utils.SAS.sr.v, canonicalPathToResource);
                     break;
 
                 default:
-                    if (String.IsNullOrEmpty(SAS_Utils.SAS.tableName.v))     // table
+                    if (!String.IsNullOrEmpty(SAS_Utils.SAS.tn.v))     // table
                     {
-                        canonicalPathToResource = Get_Service_canonicalPathToResource(VersionControl);
-                        stringtosign = Get_Service_stringtosign(VersionControl, "t", SAS_Utils.SAS.st.v, SAS_Utils.SAS.se.v, canonicalPathToResource);
+                        canonicalPathToResource = Get_Service_canonicalPathToResource(VersionControl, "t");
+                        stringtosign = Get_Service_stringtosign(VersionControl, "t", canonicalPathToResource);   // queue dont have 'sr', but table name on 'tn' 
                     }
                     else                                    // queue
                     {
-                        canonicalPathToResource = Get_Service_canonicalPathToResource(VersionControl);
-                        stringtosign = Get_Service_stringtosign(VersionControl, "q", SAS_Utils.SAS.st.v, SAS_Utils.SAS.se.v, canonicalPathToResource);
+                        canonicalPathToResource = Get_Service_canonicalPathToResource(VersionControl, "q");
+                        stringtosign = Get_Service_stringtosign(VersionControl, "q", canonicalPathToResource);  // queue dont have 'sr'
                     }
                     break;
             }
@@ -364,13 +360,15 @@ namespace Storage_Helper_SAS_Tool
             //-------------------------------------------------------------------------------------
             if (debug)
             {
-                s += "\n";
-                s += "------ Debug Info ----------" + "\n";
-                s += "Canonical-Path-to-Resource: " + canonicalPathToResource + "\n";
-                s += "---------------------------" + "\n";
-                s += "String-to-Sign: \n" + stringtosign;
-                s += "---------------------------" + "\n";
+                SAS_Utils.SAS.DebugInfo = "\n";
+                SAS_Utils.SAS.DebugInfo += "------ Debug Info ----------" + "\n";
+                SAS_Utils.SAS.DebugInfo += "Canonical-Path-to-Resource: " + canonicalPathToResource + "\n";
+                SAS_Utils.SAS.DebugInfo += "---------------------------" + "\n";
+                SAS_Utils.SAS.DebugInfo += "String-to-Sign: \n" + stringtosign;
+                SAS_Utils.SAS.DebugInfo += "---------------------------" + "\n";
             }
+            else
+                SAS_Utils.SAS.DebugInfo = "";
 
             return string.Format(sharedAccessSignature + s);
         }
@@ -382,12 +380,14 @@ namespace Storage_Helper_SAS_Tool
         /// </summary>
         /// <param name="VersionControl"></param>
         /// <returns></returns>
-        private static string Get_Service_canonicalPathToResource(string VersionControl)
+        private static string Get_Service_canonicalPathToResource(string VersionControl, string signedresource)
         {
             if (String.Compare(VersionControl, "2015-02-21") >= 0)
-                switch (SAS_Utils.SAS.sr.v)
+                switch (signedresource)
                 {
                     case "b":           // blob
+                        return ("/blob/" + SAS_Utils.SAS.storageAccountName.v.Trim() + "/" + SAS_Utils.SAS.containerName.v.Trim() + "/" + SAS_Utils.SAS.blobName.v.Trim()).Trim();
+                    case "bs":          // blob Snapshot - canonicalizedresource not documented
                         return ("/blob/" + SAS_Utils.SAS.storageAccountName.v.Trim() + "/" + SAS_Utils.SAS.containerName.v.Trim() + "/" + SAS_Utils.SAS.blobName.v.Trim()).Trim();
                     case "c":           // container 
                         return ("/blob/" + SAS_Utils.SAS.storageAccountName.v.Trim() + "/" + SAS_Utils.SAS.containerName.v.Trim()).Trim();
@@ -396,12 +396,12 @@ namespace Storage_Helper_SAS_Tool
                     case "s":           // share     
                         return ("/file/" + SAS_Utils.SAS.storageAccountName.v.Trim() + "/" + SAS_Utils.SAS.shareName.v.Trim()).Trim();
                     case "t":           // table
-                        return ("/table/" + SAS_Utils.SAS.storageAccountName.v.Trim() + "/" + SAS_Utils.SAS.tableName.v.Trim()).Trim();
+                        return ("/table/" + SAS_Utils.SAS.storageAccountName.v.Trim() + "/" + SAS_Utils.SAS.tn.v.Trim()).Trim();
                     case "q":           // queue
                         return ("/queue/" + SAS_Utils.SAS.storageAccountName.v.Trim() + "/" + SAS_Utils.SAS.queueName.v.Trim()).Trim();
                 }
             else
-                switch (SAS_Utils.SAS.sr.v)
+                switch (signedresource)
                 {
                     case "b":           // blob
                         return ("/" + SAS_Utils.SAS.storageAccountName.v.Trim() + "/" + SAS_Utils.SAS.containerName.v.Trim() + "/" + SAS_Utils.SAS.blobName.v.Trim()).Trim();
@@ -412,12 +412,12 @@ namespace Storage_Helper_SAS_Tool
                     case "s":           // share     
                         return ("/file/" + SAS_Utils.SAS.storageAccountName.v.Trim() + "/" + SAS_Utils.SAS.shareName.v.Trim()).Trim();
                     case "t":           // table
-                        return ("/" + SAS_Utils.SAS.storageAccountName.v.Trim() + "/" + SAS_Utils.SAS.tableName.v.Trim()).Trim();
+                        return ("/" + SAS_Utils.SAS.storageAccountName.v.Trim() + "/" + SAS_Utils.SAS.tn.v.Trim()).Trim();
                     case "q":           // queue
                         return ("/" + SAS_Utils.SAS.storageAccountName.v.Trim() + "/" + SAS_Utils.SAS.queueName.v.Trim()).Trim();
                 }
 
-            return ""; // something else not supported
+            return "CanonicalPathToResource NOT SUPPORTED FOR THIS RESOURCE ON THIS SERVICE VERSION. signedresource: " + signedresource + "   VersionControl: " + VersionControl; // something else not supported
         }
 
 
@@ -430,14 +430,14 @@ namespace Storage_Helper_SAS_Tool
         /// <param name="sExpiryTime"></param>
         /// <param name="canonicalPathToResource"></param>
         /// <returns></returns>
-        private static string Get_Service_stringtosign(string VersionControl, string signedresource, string sStartTime, string sExpiryTime, string canonicalPathToResource)
+        private static string Get_Service_stringtosign(string VersionControl, string signedresource, string canonicalPathToResource)
         {
             // adds support for the signed resource and signed blob snapshot time fields
             // for Blob service resources, use the following format:
             if (String.Compare(VersionControl, "2018-11-09") >= 0)
                 return SAS_Utils.SAS.sp.v + "\n" +
-                       sStartTime + "\n" +
-                       sExpiryTime + "\n" +
+                       SAS_Utils.SAS.st.v + "\n" +
+                       SAS_Utils.SAS.se.v + "\n" +
                        canonicalPathToResource + "\n" +
                        SAS_Utils.SAS.si.v + "\n" +
                        SAS_Utils.SAS.sip.v + "\n" +
@@ -462,8 +462,8 @@ namespace Storage_Helper_SAS_Tool
                     case "c":   // container - same stringtosign ???
                     case "s":   // share     - same stringtosign ???
                         return SAS_Utils.SAS.sp.v + "\n" +
-                               sStartTime + "\n" +
-                               sExpiryTime + "\n" +
+                               SAS_Utils.SAS.st.v + "\n" +
+                               SAS_Utils.SAS.se.v + "\n" +
                                canonicalPathToResource + "\n" +
                                SAS_Utils.SAS.si.v + "\n" +
                                SAS_Utils.SAS.sip.v + "\n" +
@@ -478,8 +478,8 @@ namespace Storage_Helper_SAS_Tool
                     // for Table service resources, use the following format:
                     case "t":   // table
                         return SAS_Utils.SAS.sp.v + "\n" +
-                               sStartTime + "\n" +
-                               sExpiryTime + "\n" +
+                               SAS_Utils.SAS.st.v + "\n" +
+                               SAS_Utils.SAS.se.v + "\n" +
                                canonicalPathToResource + "\n" +
                                SAS_Utils.SAS.si.v + "\n" +
                                SAS_Utils.SAS.sip.v + "\n" +
@@ -493,8 +493,8 @@ namespace Storage_Helper_SAS_Tool
                     // for Queue service resources, use the following format:
                     case "q":   // queue
                         return SAS_Utils.SAS.sp.v + "\n" +
-                               sStartTime + "\n" +
-                               sExpiryTime + "\n" +
+                               SAS_Utils.SAS.st.v + "\n" +
+                               SAS_Utils.SAS.se.v + "\n" +
                                canonicalPathToResource + "\n" +
                                SAS_Utils.SAS.si.v + "\n" +
                                SAS_Utils.SAS.sip.v + "\n" +
@@ -517,8 +517,8 @@ namespace Storage_Helper_SAS_Tool
                             return "";  // File service, SAS is supported beginning with version 2015-02-21
                         else
                             return SAS_Utils.SAS.sp.v + "\n" +
-                                   sStartTime + "\n" +
-                                   sExpiryTime + "\n" +
+                                   SAS_Utils.SAS.st.v + "\n" +
+                                   SAS_Utils.SAS.se.v + "\n" +
                                    canonicalPathToResource + "\n" +
                                    SAS_Utils.SAS.si.v + "\n" +
                                    SAS_Utils.SAS.sv.v + "\n" +
@@ -531,8 +531,8 @@ namespace Storage_Helper_SAS_Tool
                     // for Table service resources, use the following format:
                     case "t":   // table
                         return SAS_Utils.SAS.sp.v + "\n" +
-                               sStartTime + "\n" +
-                               sExpiryTime + "\n" +
+                               SAS_Utils.SAS.st.v + "\n" +
+                               SAS_Utils.SAS.se.v + "\n" +
                                canonicalPathToResource + "\n" +
                                SAS_Utils.SAS.si.v + "\n" +
                                SAS_Utils.SAS.sv.v + "\n" +
@@ -544,8 +544,8 @@ namespace Storage_Helper_SAS_Tool
                     // for Queue service resources, use the following format:
                     case "q":   // queue
                         return SAS_Utils.SAS.sp.v + "\n" +
-                               sStartTime + "\n" +
-                               sExpiryTime + "\n" +
+                               SAS_Utils.SAS.st.v + "\n" +
+                               SAS_Utils.SAS.se.v + "\n" +
                                canonicalPathToResource + "\n" +
                                SAS_Utils.SAS.si.v + "\n" +
                                SAS_Utils.SAS.sv.v;
@@ -559,8 +559,8 @@ namespace Storage_Helper_SAS_Tool
                     case "b":   // blob
                     case "c":   // container - same stringtosign ???
                         return SAS_Utils.SAS.sp.v + "\n" +
-                               sStartTime + "\n" +
-                               sExpiryTime + "\n" +
+                               SAS_Utils.SAS.st.v + "\n" +
+                               SAS_Utils.SAS.se.v + "\n" +
                                canonicalPathToResource + "\n" +
                                SAS_Utils.SAS.si.v + "\n" +
                                SAS_Utils.SAS.sv.v;
@@ -574,13 +574,13 @@ namespace Storage_Helper_SAS_Tool
                     case "b":   // blob
                     case "c":   // container - same stringtosign ???
                         return SAS_Utils.SAS.sp.v + "\n" +
-                               sStartTime + "\n" +
-                               sExpiryTime + "\n" +
+                               SAS_Utils.SAS.st.v + "\n" +
+                               SAS_Utils.SAS.se.v + "\n" +
                                canonicalPathToResource + "\n" +
                                SAS_Utils.SAS.si.v;
                 }
 
-            return ""; // something else not supported
+            return "String-To-Sign NOT SUPPORTED FOR THIS RESOURCE ON THIS SERVICE VERSION. signedresource: " + signedresource + "   VersionControl: " + VersionControl; // something else not supported
         }
 
     }
@@ -614,6 +614,8 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults.Text += "Regenerated Account SAS token:\n";
             BoxAuthResults.Text += Uri.UnescapeDataString(sas) + "\n";
             BoxAuthResults.Text += sas + "\n\n";
+
+            BoxAuthResults.Text += SAS_Utils.SAS.DebugInfo + "\n";
 
             BoxAuthResults.Text += "-------------------------------------------------\n";
             if (SAS_Utils.SAS.ss.v.IndexOf("b") != -1)
@@ -673,19 +675,7 @@ namespace Storage_Helper_SAS_Tool
             //-------------------------------------------------------------------------------------
             // Ordering permissions only on Service SAS - Account SAS uses the same order as on ComboBox
             // SAS_Utils.SAS.sp.v = RestAPI.Order_permissions(SAS_Utils.SAS.sp.v);
-
             //-------------------------------------------------------------------------------------
-            /*
-             StringToSign = accountname + "\n" +  
-                            signedpermissions + "\n" +  
-                            signedservice + "\n" +  
-                            signedresourcetype + "\n" +  
-                            signedstart + "\n" +  
-                            signedexpiry + "\n" +  
-                            signedIP + "\n" +  
-                            signedProtocol + "\n" +  
-                            signedversion + "\n" 
-             */
             string stringtosign = SAS_Utils.SAS.storageAccountName.v.Trim() + "\n" +
                                     SAS_Utils.SAS.sp.v + "\n" +
                                     SAS_Utils.SAS.ss.v + "\n" +
@@ -726,11 +716,13 @@ namespace Storage_Helper_SAS_Tool
             //-------------------------------------------------------------------------------------
             if (debug)
             {
-                s += "\n";
-                s += "------ Debug Info ----------" + "\n";
-                s += "String-to-Sign: \n" + stringtosign;
-                s += "---------------------------" + "\n";
+                SAS_Utils.SAS.DebugInfo = "\n";
+                SAS_Utils.SAS.DebugInfo += "------ Debug Info ----------" + "\n";
+                SAS_Utils.SAS.DebugInfo += "String-to-Sign: \n" + stringtosign;
+                SAS_Utils.SAS.DebugInfo += "---------------------------" + "\n";
             }
+            else
+                SAS_Utils.SAS.DebugInfo = "";
 
 
             return string.Format(sharedAccessSignature + s);

@@ -212,7 +212,7 @@ namespace Storage_Helper_SAS_Tool
                 return SAS_Utils.andSetState("si", false, "Policy Name ('si') not supported on Account SAS (srt=" + srt + ", si=" + si + ")");
 
             // value validated
-            return SAS_Utils.andSetState("si", true, "Access Policy Name used: '" + si + "'\n" + "  Policy Permissions: TODO ");
+            return SAS_Utils.andSetState("si", true, "Access Policy Name used: '" + si + "'\n  Providing Policy will not validate Permissions ('sp'), Start ('st') and Expiry ('se') datetime, as these values can be redefined on Policy." + "\n  Policy Permissions: TODO ");
         }
 
 
@@ -374,8 +374,11 @@ namespace Storage_Helper_SAS_Tool
                     v = "Valid permissions for Blobs are 'racwdl'";
 
                     // found chars not supported by sp paramenter
-                    if (!Utils.ValidateString(sp, "racwdl") || sp.Length > 5)
-                        return SAS_Utils.andSetState("sp", false, "Invalid Signed Permissions for Blobs (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v);
+                    if (!Utils.ValidateString(sp, "racwdl") || sp.Length > 6)
+                        return SAS_Utils.andSetState("sp", false, "Invalid Signed Permissions for Blob (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v);
+
+                    if (sp == "l")
+                        return SAS_Utils.andSetState("sp", false, "Only 'l' permission not allowed for Blob (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v);
 
                     //----------------------------------------------
                     s += "  Permissions for Blob (Service SAS) ('sr'=b):\n";
@@ -398,7 +401,7 @@ namespace Storage_Helper_SAS_Tool
                         s += "      Write a new blob, snapshot a blob, or copy a blob to a new blob\n";
 
 
-                    if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("a") == -1 && sp.IndexOf("c") == -1)
+                    if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("a") == -1 && sp.IndexOf("c") == -1 && sp.IndexOf("l") == -1)
                     {
                         s += "    --> No Permissions for Blobs (sp=" + sp + ")\n";
                         SAS_Utils.SAS.sp.s = false;
@@ -412,8 +415,10 @@ namespace Storage_Helper_SAS_Tool
 
                     // found chars not supported by sp paramenter
                     if (!Utils.ValidateString(sp, "racwdl") || sp.Length > 6)
-                        return SAS_Utils.andSetState("sp", false, "Invalid Signed Permissions for Containers (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v);
+                        return SAS_Utils.andSetState("sp", false, "Invalid Signed Permissions for Container (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v);
 
+                    if (sp == "r")
+                        return SAS_Utils.andSetState("sp", false, "Only 'r' permission not allowed for Container (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v);
                     //----------------------------------------------
                     s += "  Permissions for Containers (Service SAS) ('sr'=c):\n";
                     if (sp.IndexOf("r") != -1)
@@ -456,6 +461,8 @@ namespace Storage_Helper_SAS_Tool
                     if (sv.CompareTo("2015-02-21") < 0)
                         return SAS_Utils.andSetState("sp", false, "Invalid Service Version to use File Share permissions on SAS. Needed sv=2015-02-21 or later (sr=" + sr + ", sv=" + sv + ")");
 
+                    if (sp == "r")
+                        return SAS_Utils.andSetState("sp", false, "Only 'r' permission not allowed for File Share (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v);
                     //----------------------------------------------
                     s += "  Permissions for File Share (Service SAS) ('sr'=s):\n";
                     if (sp.IndexOf("r") != -1)
@@ -486,12 +493,15 @@ namespace Storage_Helper_SAS_Tool
                     v = "Valid permissions for Files are 'rcwdl'";
 
                     // found chars not supported by sp paramenter
-                    if (!Utils.ValidateString(sp, "rcwdl") || sp.Length > 4)
+                    if (!Utils.ValidateString(sp, "rcwdl") || sp.Length > 5)
                         return SAS_Utils.andSetState("sp", false, "Invalid Signed Permissions for File (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v);
 
                     if (sv.CompareTo("2015-02-21") < 0)
                         return SAS_Utils.andSetState("sp", false, "Invalid Service Version to File permissions on SAS. Needed sv=2015-02-21 or later (sr=" + sr + ", sv=" + sv + ")");
 
+                    if (sp == "l")
+                        return SAS_Utils.andSetState("sp", false, "Only 'l' permission not allowed for File (Service SAS) (sp=" + sp + ", sr=" + sr + "). " + v);
+                 
                     //----------------------------------------------
                     s += "  Permissions for File (Service SAS) ('sr'=f):\n";
                     if (sp.IndexOf("r") != -1)
@@ -506,7 +516,7 @@ namespace Storage_Helper_SAS_Tool
                     if (sp.IndexOf("c") != -1)
                         s += "      Create a new file or copy a file to a new file.\n";
 
-                    if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("c") == -1)
+                    if (sp.IndexOf("r") == -1 && sp.IndexOf("w") == -1 && sp.IndexOf("d") == -1 && sp.IndexOf("c") == -1 && sp.IndexOf("l") == -1)
                     {
                         s += "    --> No Permissions for Files (sp=" + sp + ")\n";
                         SAS_Utils.SAS.sp.s = false;

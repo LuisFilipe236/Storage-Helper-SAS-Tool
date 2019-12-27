@@ -82,7 +82,7 @@ namespace Storage_Helper_SAS_Tool
             public StrParameter shareName;        // Share name, if provided on fileEndpoint
             public StrParameter fileName;         // File name, if provided on fileEndpoint
             public StrParameter queueName;        // Queue name, if provided on queueEndpoint
-            public StrParameter tableName;        // Table name, if provided on tableEndpoint, and if is an account SAS
+            //public StrParameter tableName;        // Table name, if provided on tableEndpoint, and if is an account SAS
 
             public bool onlySASprovided;        // true if the endpoints not provided
 
@@ -116,6 +116,8 @@ namespace Storage_Helper_SAS_Tool
 
             public DateTime stDateTime; // used to test the valid Date format
             public DateTime seDateTime;
+
+            public string DebugInfo;
         };
         public static SasParameters SAS;
 
@@ -412,14 +414,18 @@ namespace Storage_Helper_SAS_Tool
             }
             //---------------------------------------------------------------------
 
+            // 'si' Policy may define Permissions and Start and Expiry datetime
+            // If Policy provided, no validate Permissions and Start and Expiry datetime
+            if (String.IsNullOrEmpty(SAS.si.v))
+            {
+                // sp: SignedPermissions {r,w,d,l,a,c,u,p}  - Required
+                // This field must be omitted if it has been specified in an associated stored access policy.  - TODO (Service SAS)
+                BoxAuthResults.Text += Show_sp(SAS.sp.v, SAS.srt.v, SAS.sr.v, SAS.tn.v, SAS.sv.v);
 
-            // sp: SignedPermissions {r,w,d,l,a,c,u,p}  - Required
-            // This field must be omitted if it has been specified in an associated stored access policy.  - TODO (Service SAS)
-            BoxAuthResults.Text += Show_sp(SAS.sp.v, SAS.srt.v, SAS.sr.v, SAS.tn.v, SAS.sv.v);
-
-            // st (SignedStart) - optional
-            // se (SignedExpiry) - Required
-            BoxAuthResults.Text += Show_st_se(SAS.st.v, SAS.se.v);
+                // st (SignedStart) - optional
+                // se (SignedExpiry) - Required
+                BoxAuthResults.Text += Show_st_se(SAS.st.v, SAS.se.v);
+            }
 
             // sip: Allowed IP's (optional)
             BoxAuthResults.Text += Show_sip(SAS.sip.v);
@@ -773,8 +779,8 @@ namespace Storage_Helper_SAS_Tool
                 if (SAS.tableEndpoint == "not found")
                     return "  --> Table name 'tn' provided on SAS parameter, but a different or no URI was provided to the service.\n\n";
 
-                if (!(SAS.tableEndpoint.EndsWith(".net") || SAS.tableEndpoint.EndsWith(".net/")))
-                    return "  --> Incorrect Table Endpoint format.\nTable Endpoint should not mention the table name on URI.\n\n";
+                //if (!(SAS.tableEndpoint.EndsWith(".net") || SAS.tableEndpoint.EndsWith(".net/")))
+                //    return "  --> Incorrect Table Endpoint format.\nTable Endpoint should not mention the table name on URI.\n\n";
             }
 
             // Blob Service
