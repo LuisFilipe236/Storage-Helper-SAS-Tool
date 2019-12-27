@@ -37,59 +37,13 @@ using System.Windows.Controls;
 namespace Storage_Helper_SAS_Tool
 {
 
-    class RestAPI
-    {
-
-        /// <summary>
-        /// Contruct generic parameter on URI Escaped format, if exists
-        /// ex: &si=sco
-        /// </summary>
-        /// <param name="param"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public static string Get_Parameter(string param, string value)
-        {
-            if (String.IsNullOrEmpty(value))
-                return "";
-
-            return "&" + param + "=" + Uri.EscapeDataString(value);
-        }
-
-
-
-        /// <summary>
-        /// Ordering permissions - racwudpl
-        /// </summary>
-        /// <param name="permissions"></param>
-        /// <returns></returns>
-        public static string Order_permissions(string permissions)
-        {
-            string aux = "";
-
-            if (permissions.IndexOf("r") != -1) aux += "r";
-            if (permissions.IndexOf("a") != -1) aux += "a";
-            if (permissions.IndexOf("c") != -1) aux += "c";
-            if (permissions.IndexOf("w") != -1) aux += "w";
-            if (permissions.IndexOf("u") != -1) aux += "u";
-            if (permissions.IndexOf("d") != -1) aux += "d";
-            if (permissions.IndexOf("p") != -1) aux += "p";
-            if (permissions.IndexOf("l") != -1) aux += "l";
-
-            return aux;
-        }
-
-    }
-
-
-
-
 
     //-------------------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------------------
     //          Service SAS
     //-------------------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------------------
-    class Service : RestAPI
+    class Service
     {
 
 
@@ -335,7 +289,7 @@ namespace Storage_Helper_SAS_Tool
 
             //-------------------------------------------------------------------------------------
             // Ordering permissions - racwudpl
-            SAS_Utils.SAS.sp.v = RestAPI.Order_permissions(SAS_Utils.SAS.sp.v);
+            SAS_Utils.SAS.sp.v = SAS_Utils.Order_permissions(SAS_Utils.SAS.sp.v);
 
             //-------------------------------------------------------------------------------------
             switch (SAS_Utils.SAS.sr.v)
@@ -392,15 +346,15 @@ namespace Storage_Helper_SAS_Tool
 
             //-------------------------------------------------------------------------------------
             string sharedAccessSignature = "";
-            sharedAccessSignature += RestAPI.Get_Parameter("sv", VersionControl);
-            sharedAccessSignature += RestAPI.Get_Parameter("sr", SAS_Utils.SAS.sr.v);
-            sharedAccessSignature += RestAPI.Get_Parameter("st", SAS_Utils.SAS.st.v);
-            sharedAccessSignature += RestAPI.Get_Parameter("se", SAS_Utils.SAS.se.v);
-            sharedAccessSignature += RestAPI.Get_Parameter("sp", SAS_Utils.SAS.sp.v);
-            sharedAccessSignature += RestAPI.Get_Parameter("sip", SAS_Utils.SAS.sip.v);
-            sharedAccessSignature += RestAPI.Get_Parameter("spr", SAS_Utils.SAS.spr.v);
-            sharedAccessSignature += RestAPI.Get_Parameter("si", SAS_Utils.SAS.si.v);
-            sharedAccessSignature += RestAPI.Get_Parameter("sig", signature);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("sv", VersionControl);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("sr", SAS_Utils.SAS.sr.v);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("st", SAS_Utils.SAS.st.v);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("se", SAS_Utils.SAS.se.v);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("sp", SAS_Utils.SAS.sp.v);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("sip", SAS_Utils.SAS.sip.v);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("spr", SAS_Utils.SAS.spr.v);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("si", SAS_Utils.SAS.si.v);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("sig", signature);
 
             // Remove the first "&"
             sharedAccessSignature = sharedAccessSignature.TrimStart('&');
@@ -638,7 +592,7 @@ namespace Storage_Helper_SAS_Tool
     //          Account SAS
     //-------------------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------------------
-    class Account : RestAPI
+    class Account
     {
 
         /// <summary>
@@ -754,15 +708,15 @@ namespace Storage_Helper_SAS_Tool
 
             //-------------------------------------------------------------------------------------
             string sharedAccessSignature = "";
-            sharedAccessSignature += RestAPI.Get_Parameter("sv", SAS_Utils.SAS.sv.v);
-            sharedAccessSignature += RestAPI.Get_Parameter("ss", SAS_Utils.SAS.ss.v);
-            sharedAccessSignature += RestAPI.Get_Parameter("srt", SAS_Utils.SAS.srt.v);
-            sharedAccessSignature += RestAPI.Get_Parameter("st", SAS_Utils.SAS.st.v);
-            sharedAccessSignature += RestAPI.Get_Parameter("se", SAS_Utils.SAS.se.v);
-            sharedAccessSignature += RestAPI.Get_Parameter("sp", SAS_Utils.SAS.sp.v);
-            sharedAccessSignature += RestAPI.Get_Parameter("sip", SAS_Utils.SAS.sip.v);
-            sharedAccessSignature += RestAPI.Get_Parameter("spr", SAS_Utils.SAS.spr.v);
-            sharedAccessSignature += RestAPI.Get_Parameter("sig", signature);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("sv", SAS_Utils.SAS.sv.v);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("ss", SAS_Utils.SAS.ss.v);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("srt", SAS_Utils.SAS.srt.v);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("st", SAS_Utils.SAS.st.v);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("se", SAS_Utils.SAS.se.v);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("sp", SAS_Utils.SAS.sp.v);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("sip", SAS_Utils.SAS.sip.v);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("spr", SAS_Utils.SAS.spr.v);
+            sharedAccessSignature += SAS_Utils.Get_Parameter("sig", signature);
 
             // Remove the first "&"
             sharedAccessSignature = sharedAccessSignature.TrimStart('&');

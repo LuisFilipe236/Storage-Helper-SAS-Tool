@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows;
-using Microsoft.Azure.Storage.Auth;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Reflection;
@@ -70,11 +69,6 @@ namespace Storage_Helper_SAS_Tool
     /// </summary>
     public partial class MainWindow : Window
     {
-        //----------------------------------------------------------------------------
-        public StorageCredentials storageCredentials;
-        //----------------------------------------------------------------------------
-
-
 
         /// <summary>
         /// 
@@ -132,6 +126,18 @@ namespace Storage_Helper_SAS_Tool
             BoxAuthResults_Right.Text += "The source code are public available on GitHub at:  https://github.com/LuisFilipe236/Storage-Helper-SAS-Tool\n";
             BoxAuthResults_Right.Text += "The .msi installer package is available on 'Download' button on the URL above.\n";
             BoxAuthResults_Right.Text += "\n";
+
+            BoxAuthResults_Right.Text += "-------------------------------------------------------------------------------------------------\n";
+            BoxAuthResults_Right.Text += "API:\n";
+            BoxAuthResults_Right.Text += "Storage Helper SAS Tool have an public API to Check SAS parameters only.\n";
+            BoxAuthResults_Right.Text += "Regenerating SAS not supported on API for security reasons, as one Storage Key is needed to Regenerate SAS.\n";
+            BoxAuthResults_Right.Text += "\n";
+            BoxAuthResults_Right.Text += "The public API endpoint is: https://helpertool.azurewebsites.net/SAS\n";
+            BoxAuthResults_Right.Text += "API Usage: GET https://helpertool.azurewebsites.net/SAS/check\n";
+            BoxAuthResults_Right.Text += "\n";
+            BoxAuthResults_Right.Text += "Query parameters:\n";
+            BoxAuthResults_Right.Text += "All SAS parameters are stpported.\n";
+            BoxAuthResults_Right.Text += "Ex: https://helpertool.azurewebsites.net/SAS/check?sv=2019-02-02&ss=bfqt&srt=sco&sp=rwdlacup&se=2019-12-09T18:35:48Z&st=2019-12-09T10:35:48Z&spr=https&sig=XXXX.\n";
 
             BoxAuthResults_Right.Text += "-------------------------------------------------------------------------------------------------\n";
             //BoxAuthResults_Right.Text += "==> TODO:";

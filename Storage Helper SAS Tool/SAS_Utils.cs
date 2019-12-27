@@ -27,6 +27,10 @@ namespace Storage_Helper_SAS_Tool
     /// ---------------------------------------------------------------------------------------------------------
     /// </summary>
 
+
+
+
+
     class SAS_Utils
     {
         //----------------------------------------------------------------------------
@@ -114,6 +118,50 @@ namespace Storage_Helper_SAS_Tool
             public DateTime seDateTime;
         };
         public static SasParameters SAS;
+
+
+
+
+        /// <summary>
+        /// Contruct generic parameter on URI Escaped format, if exists
+        /// ex: &si=sco
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string Get_Parameter(string param, string value)
+        {
+            if (String.IsNullOrEmpty(value))
+                return "";
+
+            return "&" + param + "=" + Uri.EscapeDataString(value);
+        }
+
+
+
+        /// <summary>
+        /// Ordering permissions - racwudpl
+        /// </summary>
+        /// <param name="permissions"></param>
+        /// <returns></returns>
+        public static string Order_permissions(string permissions)
+        {
+            string aux = "";
+
+            if (permissions.IndexOf("r") != -1) aux += "r";
+            if (permissions.IndexOf("a") != -1) aux += "a";
+            if (permissions.IndexOf("c") != -1) aux += "c";
+            if (permissions.IndexOf("w") != -1) aux += "w";
+            if (permissions.IndexOf("u") != -1) aux += "u";
+            if (permissions.IndexOf("d") != -1) aux += "d";
+            if (permissions.IndexOf("p") != -1) aux += "p";
+            if (permissions.IndexOf("l") != -1) aux += "l";
+
+            return aux;
+        }
+
+
+
 
         /// <summary>
         /// Validate and save SAS parameter values on SAS struct

@@ -6,8 +6,6 @@ using System.Windows.Media;
 using System.Windows.Controls;
 
 
-using Microsoft.Azure.Storage.Auth;
-
 
 
 namespace Storage_Helper_SAS_Tool
@@ -146,35 +144,6 @@ namespace Storage_Helper_SAS_Tool
             return count;
         }
 
-
-
-
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="storageCredentials"></param>
-        /// <param name="AuthResults"></param>
-        public static void Show_Credentials(StorageCredentials storageCredentials, TextBox AuthResults)
-        {
-            AuthResults.Text += "\n-----------------------------------\n";
-            AuthResults.Text += storageCredentials.ToString() + "\n";
-            AuthResults.Text += "Account Name: " + storageCredentials.AccountName + "\n";
-            AuthResults.Text += "Credentials type: ";
-                if (storageCredentials.IsToken)     AuthResults.Text += "Token ";
-                if (storageCredentials.IsSharedKey) AuthResults.Text += "SharedKey ";
-                if (storageCredentials.IsSAS)       AuthResults.Text += "SAS ";
-                if (storageCredentials.IsAnonymous) AuthResults.Text += "Anonymous ";
-            AuthResults.Text += "\n";
-            AuthResults.Text += "Key Name: " + storageCredentials.KeyName + "\n";
-            //AuthResults.Text += "SAS Signature: " + storageCredentials.SASSignature + "\n";   // Exception
-            AuthResults.Text += "SAS Token: " + storageCredentials.SASToken + "\n";
-
-            AuthResults.Text += "-----------------------------------\n";
-            AuthResults.Text += "Account Key from storageCredentials:\n";
-            AuthResults.Text += storageCredentials.ExportBase64EncodedKey();
-        }
 
 
 
