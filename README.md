@@ -114,6 +114,7 @@ Click on the MSI last version counter above to download the MSI installer for Wi
 Changes:
 - Removed Storage and Cosmos SDK's dependencies - Generating SAS and Sig manualy;
 - Removed Unescaped Connection strings from the Regeneradted output
+- Added Degug Option
 - Some minor corrections.
 
 <b>v1.0.6:</b>
