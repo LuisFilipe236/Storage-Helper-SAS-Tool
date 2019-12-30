@@ -80,6 +80,11 @@ namespace Storage_Helper_SAS_Tool
             // Populate ComboBoxes with values by default for Service Version Arrays (defined on SAS_Utils)
             SAS_Utils.PopulateComboBox_sv(ComboBox_sv, "", "");
 
+            // Hidding tab headers
+            tabItem_Table.Visibility = Visibility.Collapsed;
+            tabItem_Headers.Visibility = Visibility.Collapsed;
+            tabItem_Headers.IsSelected = true;
+
             // Splash Info
             SplashInfo();
         }
@@ -1244,6 +1249,19 @@ namespace Storage_Helper_SAS_Tool
                 Set_srPermissions("");  // set permissions for  Queue Service SAS
 
             SAS_Utils.PopulateComboBox_sv(ComboBox_sv, ComboBox_sr.Text, textBox_tn.Text);
+
+
+            // Showing Headers tab, if table name not provided
+            if (textBox_tn.Text == "")
+            {
+                tabItem_Headers.IsSelected = true;
+                SetStatus_PartitionRowBoxes(false);
+            }
+            else
+            {
+                tabItem_Table.IsSelected = true;
+                SetStatus_PartitionRowBoxes(true);
+            }
         }
 
         /// <summary>
@@ -1394,6 +1412,11 @@ namespace Storage_Helper_SAS_Tool
         {
             if (textBoxBlobSnapshotTime.Text != "")
                 labelBlobSnapshotTime.Foreground = Brushes.Black;
+        }
+
+        private void textBox_tn_GotFocus(object sender, RoutedEventArgs e)
+        {
+            tabItem_Table.IsSelected = true;
         }
     }
 }

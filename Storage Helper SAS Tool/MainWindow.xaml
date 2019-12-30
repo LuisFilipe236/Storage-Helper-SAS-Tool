@@ -11,16 +11,14 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <TextBox x:Name="BoxAuthResults_left" Margin="5,273,3,21" TextWrapping="Wrap" Text=" " GotFocus="BoxAuthResults_Right_GotFocus" Background="#FFF4F3F3"/>
+        <TextBox x:Name="BoxAuthResults_left" Margin="5,293,3,21" TextWrapping="Wrap" Text=" " GotFocus="BoxAuthResults_Right_GotFocus" Background="#FFF4F3F3"/>
         <Label x:Name="labelInsertSAS" Content="Insert SAS or Connection String:" HorizontalAlignment="Left" Margin="13,-1,0,0" VerticalAlignment="Top" Height="26" Width="210" FontWeight="Bold" Background="{x:Null}" Foreground="Black"/>
-        <TextBox x:Name="InputBoxSAS" Height="46" Margin="5,24,4.6,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Grid.ColumnSpan="2" FontSize="11" GotFocus="BoxAuthResults_Right_GotFocus"/>
-        <Button x:Name="ButtonTestAccountSAS" Content="Check SAS parameters" HorizontalAlignment="Center" Height="31" Margin="276,95,112.8,0" VerticalAlignment="Top" FontSize="10" Click="ButtonTestAccountSAS_Click" Width="120"/>
-        <Button x:Name="ButtonRegenerateSAS" Content="Regenerate SAS" HorizontalAlignment="Center" Height="31" Margin="120,95,268,0" VerticalAlignment="Top" FontSize="10" Click="ButtonRegenerateSAS_Click" Grid.Column="1" Width="120"/>
-        <TextBox x:Name="textBoxAccountKey1" Margin="77.2,253,5,0" TextWrapping="Wrap" Text="" FontSize="10" Height="17" Grid.Column="1" VerticalAlignment="Top" LostFocus="TextBoxAccountKey1_LostFocus"/>
-        <Label x:Name="labelAccountKey" Content="Account Key:" Margin="3.2,249,0,0" FontSize="10" Height="27" HorizontalAlignment="Left" VerticalAlignment="Top" Width="104" Grid.Column="1" FontWeight="Bold"/>
+        <TextBox x:Name="InputBoxSAS" Height="63" Margin="5,24,4.6,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Grid.ColumnSpan="2" FontSize="11" GotFocus="BoxAuthResults_Right_GotFocus"/>
+        <Button x:Name="ButtonTestAccountSAS" Content="Check SAS parameters" HorizontalAlignment="Center" Height="31" Margin="276,115,112.8,0" VerticalAlignment="Top" FontSize="10" Click="ButtonTestAccountSAS_Click" Width="120"/>
+        <Button x:Name="ButtonRegenerateSAS" Content="Regenerate SAS" HorizontalAlignment="Center" Height="31" Margin="120,115,268,0" VerticalAlignment="Top" FontSize="10" Click="ButtonRegenerateSAS_Click" Grid.Column="1" Width="120"/>
         <Label x:Name="labelHelp" Content="?" HorizontalAlignment="Right" Margin="0,0,9.6,506" VerticalAlignment="Top" Grid.Column="1" Height="26" Width="21" FontWeight="Bold" RenderTransformOrigin="0.51,0.515" MouseLeftButtonUp="LabelHelp_MouseLeftButtonUp"/>
-        <TextBox x:Name="BoxAuthResults_Right" Margin="3,273,5,21" TextWrapping="Wrap" Text=" " Grid.Column="1" GotFocus="BoxAuthResults_Right_GotFocus" Background="#FFF4F3F3"/>
-        <Grid Grid.Column="1" Margin="270.2,86,9.6,0" HorizontalAlignment="Center" Width="229" Height="170" VerticalAlignment="Top">
+        <TextBox x:Name="BoxAuthResults_Right" Margin="3,293,5,21" TextWrapping="Wrap" Text=" " Grid.Column="1" GotFocus="BoxAuthResults_Right_GotFocus" Background="#FFF4F3F3"/>
+        <Grid Grid.Column="1" Margin="270.2,106,9.6,0" HorizontalAlignment="Center" Width="229" Height="170" VerticalAlignment="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="123*"/>
                 <ColumnDefinition Width="106*"/>
@@ -42,8 +40,8 @@
             <Label x:Name="labelBlobSnapshotTime" Content="Snapshot Time:" VerticalAlignment="Top" FontSize="10" FontWeight="Bold" HorizontalAlignment="Right" Width="86" Margin="0,81,18.2,0"/>
             <TextBox x:Name="textBoxBlobSnapshotTime" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,84,5,0" LostFocus="textBoxBlobSnapshotTime_LostFocus" Grid.ColumnSpan="2"/>
         </Grid>
-        <Grid Margin="32,84,166.8,259" HorizontalAlignment="Center" Width="310">
-            <Label x:Name="labelAccountSAS" Content="Account SAS" HorizontalAlignment="Left" Margin="98,-1,0,0" VerticalAlignment="Top" Height="26" FontWeight="Bold" Width="81"/>
+        <Grid Margin="32,90,166.8,239" HorizontalAlignment="Center" Width="310">
+            <Label x:Name="labelAccountSAS" Content="Account SAS" HorizontalAlignment="Left" Margin="98,-2,0,0" VerticalAlignment="Top" Height="26" FontWeight="Bold" Width="81"/>
             <Label x:Name="label_spr" Content="Signed Protocol:" ToolTip="spr" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,140,191,0"/>
             <Label x:Name="label_sip" Content="Signed IP:" ToolTip="sip" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,160,191,0"/>
             <TextBox x:Name="textBox_sip" ToolTip="sip" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" Width="160" Height="16" HorizontalAlignment="Left" Margin="119,164,0,0"/>
@@ -83,7 +81,7 @@
             <TextBox x:Name="textBox_st" ToolTip="st" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Left" Width="130" Height="16" Margin="120,104,0,0" LostFocus="TextBox_st_LostFocus"/>
             <TextBox x:Name="textBox_se" ToolTip="se" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Left" Width="130" Height="16" Margin="120,124,0,0" LostFocus="TextBox_se_LostFocus"/>
         </Grid>
-        <Grid Grid.ColumnSpan="2" Margin="421,88,307.6,0" HorizontalAlignment="Center" VerticalAlignment="Top" Width="289" Height="162">
+        <Grid Grid.ColumnSpan="2" Margin="421,108,307.6,0" HorizontalAlignment="Center" VerticalAlignment="Top" Width="289" Height="162">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="43*"/>
                 <ColumnDefinition Width="12*"/>
@@ -107,31 +105,35 @@
                 -->
             </ComboBox>
             <Label x:Name="label_tn" Content="Table Name:"  ToolTip="tn" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="21,40,19.6,0" Grid.ColumnSpan="2"/>
-            <TextBox x:Name="textBox_tn" ToolTip="tn" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" Width="100" Height="16" LostFocus="TextBox_tn_LostFocus" Margin="1.4,43,0,0" Padding="0" HorizontalAlignment="Left" Grid.Column="1" Grid.ColumnSpan="3"/>
+            <TextBox x:Name="textBox_tn" ToolTip="tn" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" Width="100" Height="16" LostFocus="TextBox_tn_LostFocus" Margin="1.4,43,0,0" Padding="0" HorizontalAlignment="Left" Grid.Column="1" Grid.ColumnSpan="3" GotFocus="textBox_tn_GotFocus"/>
         </Grid>
 
         <Grid Margin="0,0,0,0" Grid.Column="0">
-            <Label Content="Signature:" ToolTip="sig" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,270,316.8,0" RenderTransformOrigin="-1.545,0.536"/>
-            <TextBox x:Name="textBox_sig_left" ToolTip="sig" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" Height="16" Margin="0,275,4.8,0" HorizontalAlignment="Right" Width="311" Background="#FFE2E2E2"/>
+            <Label Content="Signature:" ToolTip="sig" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,290,316.8,0" RenderTransformOrigin="-1.545,0.536"/>
+            <TextBox x:Name="textBox_sig_left" ToolTip="sig" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" Height="16" Margin="0,295,4.8,0" HorizontalAlignment="Right" Width="311" Background="#FFE2E2E2"/>
         </Grid>
         <Grid Margin="0.2,2,-0.4,-2" Grid.Column="1">
-            <TabControl HorizontalAlignment="Left" Height="106" Margin="-170,145,0,0" VerticalAlignment="Top" Width="359" TabStripPlacement="Left" BorderBrush="#FFF4F3F3">
-                <TabItem Header="Table" BorderBrush="#FFF4F3F3">
+            <TextBox x:Name="textBox_sig_right" ToolTip="sig" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" Height="16" Margin="5,293,0,0" HorizontalAlignment="Left" Width="311" Background="#FFE2E2E2"/>
+            <TabControl HorizontalAlignment="Left" Height="106" Margin="-131,166,0,0" VerticalAlignment="Top" Width="320" TabStripPlacement="Left" BorderBrush="#FFF4F3F3" Background="#FFF4F3F3">
+                <TabItem x:Name="tabItem_Table" Header="T" BorderBrush="#FFF4F3F3">
                     <Grid Background="#FFF4F3F3">
-                        <Label x:Name="label_srk" Content="Start Row:"  ToolTip="srk" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="52,39,184.8,0" IsEnabled="False" Foreground="Black" Width="60"/>
-                        <Label x:Name="label_epk" Content="End Partition:"  ToolTip="epk" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="38,19,185.8,0" IsEnabled="False" Foreground="Black" Width="73"/>
-                        <Label x:Name="label_spk" Content="Start Partition:"  ToolTip="spk" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="30,-1,185.8,0" IsEnabled="False" Foreground="Black" Width="81"/>
-                        <Label x:Name="label_erk" Content="End Row:"  ToolTip="erk" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="60,59,185.8,0" IsEnabled="False" Foreground="Black" Width="51"/>
-                        <TextBox x:Name="textBox_erk" ToolTip="erk" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Left" Width="187" Height="16" IsEnabled="False" Margin="109,62,0,0" Padding="0"/>
-                        <TextBox x:Name="textBox_srk" ToolTip="srk" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Left" Width="187" Height="16" IsEnabled="False" Margin="109,42,0,0" Padding="0"/>
-                        <TextBox x:Name="textBox_epk" ToolTip="epk" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Left" Width="187" Height="16" IsEnabled="False" Margin="109,22,0,0" Padding="0"/>
-                        <TextBox x:Name="textBox_spk" ToolTip="spk" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Left" Width="187" Height="16" IsEnabled="False" Margin="109,2,0,0" Padding="0"/>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="41*"/>
+                            <ColumnDefinition Width="32*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label x:Name="label_srk" Content="Start Row:"  ToolTip="srk" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,39,55,0" IsEnabled="False" Foreground="Black" Width="60"/>
+                        <Label x:Name="label_epk" Content="End Partition:"  ToolTip="epk" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,19,57,0" IsEnabled="False" Foreground="Black" Width="73"/>
+                        <Label x:Name="label_spk" Content="Start Partition:"  ToolTip="spk" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,-1,55,0" IsEnabled="False" Foreground="Black" Width="81"/>
+                        <Label x:Name="label_erk" Content="End Row:"  ToolTip="erk" HorizontalAlignment="Right" VerticalAlignment="Top" FontSize="10" Height="25" FontWeight="Bold" Margin="0,59,57,0" IsEnabled="False" Foreground="Black" Width="51"/>
+                        <TextBox x:Name="textBox_erk" ToolTip="erk" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="187" Height="16" Margin="0,62,0,0" Padding="0" Grid.ColumnSpan="2" IsEnabled="False"/>
+                        <TextBox x:Name="textBox_srk" ToolTip="srk" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="187" Height="16" Margin="0,42,0,0" Padding="0" Grid.ColumnSpan="2" IsEnabled="False"/>
+                        <TextBox x:Name="textBox_epk" ToolTip="epk" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="187" Height="16" Margin="0,22,0,0" Padding="0" Grid.ColumnSpan="2" IsEnabled="False"/>
+                        <TextBox x:Name="textBox_spk" ToolTip="spk" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="187" Height="16" Margin="0,2,0,0" Padding="0" Grid.ColumnSpan="2" IsEnabled="False"/>
 
                     </Grid>
                 </TabItem>
-                <TabItem Header="Headers" BorderBrush="#FFF4F3F3">
+                <TabItem x:Name="tabItem_Headers" Header="H" BorderBrush="#FFF4F3F3">
                     <Grid Background="#FFF4F3F3">
-                        <TextBox x:Name="textBox_sig_right" ToolTip="sig" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" Height="16" Margin="5,273,0,0" HorizontalAlignment="Left" Width="311" Background="#FFE2E2E2"/>
                         <TextBox x:Name="textBox_rscc" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,3,67.6,0" LostFocus="TextBoxBlobName_LostFocus"/>
                         <TextBox x:Name="textBox_rsce" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,43,67.6,0" LostFocus="TextBoxShareName_LostFocus"/>
                         <TextBox x:Name="textBox_rscl" TextWrapping="Wrap" Text="" FontSize="10" VerticalAlignment="Top" HorizontalAlignment="Right" Width="120" Height="16" Margin="0,63,67.6,0" LostFocus="TextBoxFileName_LostFocus"/>
@@ -147,6 +149,8 @@
             </TabControl>
         </Grid>
         <Label x:Name="labelMessages"  Content=" "  Margin="10,0,4.6,0" VerticalAlignment="Bottom" Height="22" FontSize="10" Grid.ColumnSpan="2" HorizontalAlignment="Center" Foreground="#FF0003FF"/>
-        <CheckBox x:Name="checkBox_Debug" Content="Debug" HorizontalAlignment="Center" Margin="147.2,139,307.6,0" VerticalAlignment="Top" Grid.Column="1"/>
+        <CheckBox x:Name="checkBox_Debug" Content="Debug" HorizontalAlignment="Center" Margin="150.2,159,297.6,0" VerticalAlignment="Top" Grid.Column="1" Width="61"/>
+        <TextBox x:Name="textBoxAccountKey1" Margin="77.2,273,5,0" TextWrapping="Wrap" Text="" FontSize="10" Height="17" Grid.Column="1" VerticalAlignment="Top" LostFocus="TextBoxAccountKey1_LostFocus"/>
+        <Label x:Name="labelAccountKey" Content="Account Key:" Margin="3.2,269,0,0" FontSize="10" Height="27" HorizontalAlignment="Left" VerticalAlignment="Top" Width="104" Grid.Column="1" FontWeight="Bold"/>
     </Grid>
 </Window>
