@@ -542,7 +542,7 @@ namespace Storage_Helper_SAS_Tool
             if (!Check_Space_Upercase(textBox_si, label_si, "Policy Name")) return false;
             if (!Check_Space_Upercase(textBox_tn, label_tn, "Table Name")) return false;
             if (!Check_Space_Upercase(textBoxContainerName, labelContainerName, "Container Name")) return false;
-            if (!Check_Space_Upercase(textBoxBlobName, labelBlobName, "Blob Name")) return false;
+            //if (!Check_Space_Upercase(textBoxBlobName, labelBlobName, "Blob Name")) return false;     // Blob name can contain upercases
             if (!Check_Space_Upercase(textBoxBlobSnapshotName, labelBlobSnapshotName, "Blob Snapshot Name")) return false;
             if (!Check_Space_Upercase(textBoxShareName, labelShareName, "Share Name")) return false;
             if (!Check_Space_Upercase(textBoxFileName, labelFileName, "File Name")) return false;
